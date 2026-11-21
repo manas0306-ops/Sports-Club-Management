@@ -10,15 +10,28 @@ from app.models import (
     LeadEnquiry, TrialBooking, Quote, Invoice, Employee, StaffShift, LeaveRequest
 )
 
-def seed_database():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+def generate_members(today):
+    first_names = [
+        'Arjun', 'Kabir', 'Dev', 'Ishaan', 'Reyansh', 'Vivaan', 'Dhruv', 'Karan', 'Siddharth', 'Varun',
+        'Manish', 'Nikhil', 'Gaurav', 'Akash', 'Tushar', 'Harsh', 'Pranav', 'Tanmay', 'Ayush', 'Samarth',
+        'Yash', 'Rishi', 'Kartik', 'Ankit', 'Deepak', 'Suresh', 'Rahul', 'Mayank', 'Abhinav', 'Sachin',
+        'Sunil', 'Vishal', 'Alok', 'Rajesh', 'Sameer', 'Farhan', 'Zayn', 'Arman', 'Neil', 'David',
+        'Marcus', 'Liam', 'Alex', 'Lucas', 'Noah', 'Leo', 'Ethan', 'Kunal', 'Aditya', 'Madhav',
+        'Sneha', 'Ananya', 'Rhea', 'Isha', 'Tara', 'Diya', 'Meera', 'Pooja', 'Kavya', 'Sanya',
+        'Simran', 'Tanvi', 'Avani', 'Rupal', 'Kritika', 'Aditi', 'Shreya', 'Disha', 'Nisha', 'Neha',
+        'Divya', 'Swati', 'Rashmi', 'Radhika', 'Bhavna', 'Pallavi', 'Smriti', 'Payal', 'Maya', 'Zara',
+        'Elena', 'Sophia', 'Chloe', 'Emma', 'Olivia', 'Mia', 'Aria', 'Mila', 'Ella', 'Anushka'
+    ]
+    last_names = [
+        'Patel', 'Kapoor', 'Iyer', 'Rao', 'Reddy', 'Banerjee', 'Chatterjee', 'Bose', 'Menon', 'Nair',
+        'Pillai', 'Chopra', 'Singhania', 'Bhatia', 'Aggarwal', 'Jain', 'Gupta', 'Mittal', 'Trivedi', 'Pandey',
+        'Mishra', 'Dubey', 'Tripathi', 'Choudhury', 'Das', 'Sengupta', 'Dutta', 'Mukherjee', 'Kulkarni', 'Deshmukh',
+        'Patil', 'Joshi', 'Bhide', 'Apte', 'Sawant', 'Khan', 'Ahmed', 'Ansari', 'Qureshi', 'Mirza',
+        'Smith', 'Taylor', 'Miller', 'Wilson', 'Anderson', 'Thomas', 'Sen', 'Vaidya', 'Bhatt', 'Nambiar'
+    ]
+    sports = ['Tennis', 'Cricket', 'Padel', 'Badminton', 'Fitness']
 
-    print("Seeding The Champions Club database...")
-
-    # 1. Seed Members (Scene 1: Gold, Silver, Junior, Expired)
-    today = date.today()
+    # 4 foundational demonstration members from original challenge scenes
     members = [
         Member(
             member_code="TC-GOLD-0001",
@@ -60,7 +73,7 @@ def seed_database():
             last_name="Mehta",
             email="aarav.junior@example.com",
             phone="+91 97654 32100",
-            date_of_birth=date(2011, 3, 10), # 15 years old -> Junior
+            date_of_birth=date(2011, 3, 10),
             is_junior=True,
             tier="junior",
             status="active",
@@ -82,15 +95,141 @@ def seed_database():
             tier="gold",
             status="expired",
             start_date=today - timedelta(days=380),
-            expiry_date=today - timedelta(days=15), # Expired 15 days ago
+            expiry_date=today - timedelta(days=15),
             emergency_contact_name="Meera Malhotra",
             emergency_contact_phone="+91 99000 11223",
             notes="Membership expired. Front desk flagged for renewal call.",
             photo_url="https://api.dicebear.com/7.x/initials/svg?seed=Vikram+Malhotra"
         )
     ]
+
+    name_idx = 0
+    def get_next_name():
+        nonlocal name_idx
+        fn = first_names[(name_idx * 7) % len(first_names)]
+        ln = last_names[(name_idx * 11 + 3) % len(last_names)]
+        name_idx += 1
+        return fn, ln
+
+    # 1. 33 more Gold members (making 35 Gold total)
+    gold_codes = [f"TC-GOLD-{i:04d}" for i in range(5, 40) if i not in (1, 4)][:33]
+    for idx, code in enumerate(gold_codes, start=5):
+        fn, ln = get_next_name()
+        is_expired = (idx % 8 == 0)
+        status = "expired" if is_expired else "active"
+        s_date = today - timedelta(days=390 if is_expired else (idx * 9 % 250 + 20))
+        e_date = today - timedelta(days=(idx % 30 + 5)) if is_expired else today + timedelta(days=(idx * 11 % 300 + 40))
+        members.append(Member(
+            member_code=code,
+            first_name=fn,
+            last_name=ln,
+            email=f"{fn.lower()}.{ln.lower()}.{idx}@champions.club",
+            phone=f"+91 98{idx:03d} {idx*137%90000 + 10000:05d}",
+            date_of_birth=date(1975 + (idx % 25), (idx % 12) + 1, (idx % 28) + 1),
+            is_junior=False,
+            tier="gold",
+            status=status,
+            start_date=s_date,
+            expiry_date=e_date,
+            emergency_contact_name=f"{ln} Family",
+            emergency_contact_phone=f"+91 97{idx:03d} {idx*211%90000 + 10000:05d}",
+            notes=f"Gold Tier Pass. Plays {sports[idx % len(sports)]} 3x weekly.",
+            photo_url=f"https://api.dicebear.com/7.x/initials/svg?seed={fn}+{ln}"
+        ))
+
+    # 2. 64 more Silver members (making 65 Silver total)
+    silv_codes = [f"TC-SILV-{i:04d}" for i in range(1, 75) if i != 2][:64]
+    for idx, code in enumerate(silv_codes, start=101):
+        fn, ln = get_next_name()
+        is_expired = (idx % 7 == 0)
+        is_pending = (idx % 19 == 0)
+        status = "expired" if is_expired else ("pending" if is_pending else "active")
+        s_date = today - timedelta(days=400 if is_expired else (idx * 5 % 200 + 10))
+        e_date = today - timedelta(days=(idx % 40 + 2)) if is_expired else today + timedelta(days=(idx * 7 % 310 + 20))
+        members.append(Member(
+            member_code=code,
+            first_name=fn,
+            last_name=ln,
+            email=f"{fn.lower()}.{ln.lower()}.{idx}@champions.club",
+            phone=f"+91 96{idx:03d} {idx*149%90000 + 10000:05d}",
+            date_of_birth=date(1980 + (idx % 24), (idx % 12) + 1, (idx % 28) + 1),
+            is_junior=False,
+            tier="silver",
+            status=status,
+            start_date=s_date,
+            expiry_date=e_date,
+            emergency_contact_name=f"{fn} Emergency Contact",
+            emergency_contact_phone=f"+91 95{idx:03d} {idx*163%90000 + 10000:05d}",
+            notes=f"Standard Silver Pass. Enjoys {sports[idx % len(sports)]}.",
+            photo_url=f"https://api.dicebear.com/7.x/initials/svg?seed={fn}+{ln}"
+        ))
+
+    # 3. 34 more Junior members (making 35 Junior total)
+    juni_codes = [f"TC-JUNI-{i:04d}" for i in range(1, 45) if i != 3][:34]
+    for idx, code in enumerate(juni_codes, start=201):
+        fn, ln = get_next_name()
+        is_expired = (idx % 9 == 0)
+        status = "expired" if is_expired else "active"
+        s_date = today - timedelta(days=375 if is_expired else (idx * 4 % 180 + 15))
+        e_date = today - timedelta(days=(idx % 25 + 1)) if is_expired else today + timedelta(days=(idx * 9 % 320 + 30))
+        dob = date(2009 + (idx % 6), (idx % 12) + 1, (idx % 28) + 1)
+        members.append(Member(
+            member_code=code,
+            first_name=fn,
+            last_name=ln,
+            email=f"{fn.lower()}.{ln.lower()}.{idx}@champions.club",
+            phone=f"+91 94{idx:03d} {idx*179%90000 + 10000:05d}",
+            date_of_birth=dob,
+            is_junior=True,
+            tier="junior",
+            status=status,
+            start_date=s_date,
+            expiry_date=e_date,
+            emergency_contact_name=f"{ln} (Parent Guardian)",
+            emergency_contact_phone=f"+91 93{idx:03d} {idx*191%90000 + 10000:05d}",
+            notes=f"Junior Athlete Academy squad ({sports[idx % len(sports)]}).",
+            photo_url=f"https://api.dicebear.com/7.x/initials/svg?seed={fn}+{ln}"
+        ))
+
+    # 4. 30 Walk-in Guests (making 30 Walk-in total)
+    walk_codes = [f"TC-WALK-{i:04d}" for i in range(1, 31)]
+    for idx, code in enumerate(walk_codes, start=301):
+        fn, ln = get_next_name()
+        s_date = today - timedelta(days=(idx * 3 % 90 + 2))
+        e_date = today + timedelta(days=365)
+        members.append(Member(
+            member_code=code,
+            first_name=fn,
+            last_name=ln,
+            email=f"{fn.lower()}.{ln.lower()}.{idx}@guest.champions.club",
+            phone=f"+91 92{idx:03d} {idx*223%90000 + 10000:05d}",
+            date_of_birth=date(1982 + (idx % 22), (idx % 12) + 1, (idx % 28) + 1),
+            is_junior=False,
+            tier="walkin",
+            status="active",
+            start_date=s_date,
+            expiry_date=e_date,
+            emergency_contact_name=f"{fn} Family",
+            emergency_contact_phone=f"+91 91{idx:03d} {idx*239%90000 + 10000:05d}",
+            notes=f"Walk-in / Pay-per-play visitor for {sports[idx % len(sports)]}. Standard rate.",
+            photo_url=f"https://api.dicebear.com/7.x/initials/svg?seed={fn}+{ln}"
+        ))
+
+    return members
+
+def seed_database():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+
+    print("Seeding The Champions Club database...")
+
+    # 1. Seed Members (165 total: 35 Gold, 65 Silver, 35 Junior, 30 Walk-in)
+    today = date.today()
+    members = generate_members(today)
     db.add_all(members)
     db.commit()
+    print(f"Successfully seeded {len(members)} realistic members (Gold, Silver, Junior, Walk-in).")
 
     # 2. Seed Courts (Scene 2: Tennis, Cricket, Padel)
     courts = [

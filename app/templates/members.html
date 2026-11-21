@@ -110,11 +110,49 @@
 
     <!-- Full Members Directory Content Table in Warm Frosted Glass -->
     <div class="glass-panel overflow-hidden shadow-2xl border border-amber-500/20">
-        <div class="p-6 border-b border-amber-500/15 flex justify-between items-center bg-stone-950/40">
-            <h2 class="text-lg font-black text-white flex items-center gap-2.5">
-                <i data-lucide="list" class="w-5 h-5 text-amber-400"></i> Active Member Directory Table ({{ members|length }})
-            </h2>
+        <div class="p-6 border-b border-amber-500/15 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-stone-950/40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                    <i data-lucide="list" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-black text-white flex items-center gap-2">
+                        Member Directory (<span id="visible-count">{{ members|length }}</span> / {{ members|length }})
+                    </h2>
+                    <p class="text-[11px] text-stone-400">Live filter by membership tier, pass status, or search keywords.</p>
+                </div>
+            </div>
+
+            <!-- Table Filter Search Input -->
+            <div class="relative w-full md:w-72">
+                <i data-lucide="search" class="w-4 h-4 text-amber-400/80 absolute left-3.5 top-3"></i>
+                <input type="text" id="dir-filter-input" oninput="filterDirectoryTable()" placeholder="Quick filter members table..." class="glass-input w-full pl-9 pr-3 py-2 text-xs">
+            </div>
         </div>
+
+        <!-- Filter Pills Row -->
+        <div class="px-6 py-3 bg-stone-950/30 border-b border-amber-500/10 flex flex-wrap items-center gap-2">
+            <span class="text-[11px] font-bold text-stone-400 uppercase tracking-wider mr-2">Filter Tier:</span>
+            <button type="button" onclick="setTierFilter('all', this)" class="tier-filter-pill active px-3 py-1 rounded-full text-xs font-bold transition glass-btn border border-amber-500/40 bg-amber-500/25 text-amber-200">
+                All ({{ members|length }})
+            </button>
+            <button type="button" onclick="setTierFilter('gold', this)" class="tier-filter-pill px-3 py-1 rounded-full text-xs font-bold transition glass-btn text-stone-300 hover:text-amber-200">
+                Gold Pass ({{ members|selectattr("tier", "equalto", "gold")|list|length }})
+            </button>
+            <button type="button" onclick="setTierFilter('silver', this)" class="tier-filter-pill px-3 py-1 rounded-full text-xs font-bold transition glass-btn text-stone-300 hover:text-stone-100">
+                Silver Pass ({{ members|selectattr("tier", "equalto", "silver")|list|length }})
+            </button>
+            <button type="button" onclick="setTierFilter('junior', this)" class="tier-filter-pill px-3 py-1 rounded-full text-xs font-bold transition glass-btn text-stone-300 hover:text-orange-200">
+                Junior ({{ members|selectattr("tier", "equalto", "junior")|list|length }})
+            </button>
+            <button type="button" onclick="setTierFilter('walkin', this)" class="tier-filter-pill px-3 py-1 rounded-full text-xs font-bold transition glass-btn text-stone-300 hover:text-amber-300">
+                Walk-in / Guest ({{ members|selectattr("tier", "equalto", "walkin")|list|length }})
+            </button>
+            <button type="button" onclick="setTierFilter('expired', this)" class="tier-filter-pill px-3 py-1 rounded-full text-xs font-bold transition glass-btn text-stone-300 hover:text-rose-300">
+                Expired ({{ members|selectattr("status", "equalto", "expired")|list|length }})
+            </button>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="glass-table text-left text-sm text-stone-200">
                 <thead>
@@ -130,7 +168,11 @@
                 </thead>
                 <tbody class="divide-y divide-amber-500/10">
                     {% for m in members %}
-                    <tr class="hover:bg-amber-500/10 transition cursor-pointer" onclick="loadMemberProfile({{ m.id }})">
+                    <tr class="member-row hover:bg-amber-500/10 transition cursor-pointer"
+                        data-tier="{{ m.tier }}"
+                        data-status="{{ m.status }}"
+                        data-search="{{ m.full_name|lower }} {{ m.member_code|lower }} {{ m.phone|lower }} {{ m.email|lower }} {{ m.tier|lower }}"
+                        onclick="loadMemberProfile({{ m.id }})">
                         <td class="px-6 py-4 font-semibold text-white flex items-center gap-3">
                             <img src="{{ m.photo_url }}" class="w-8 h-8 rounded-xl bg-stone-800 border border-amber-500/20 object-cover">
                             {{ m.full_name }}
@@ -139,8 +181,9 @@
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
                                 {% if m.tier == 'gold' %} bg-amber-400/20 text-amber-300 border border-amber-400/35
-                                {% elif m.tier == 'silver' %} bg-stone-600/40 text-stone-200 border border-stone-500/30
+                                {% elif m.tier == 'silver' %} bg-stone-500/20 text-stone-200 border border-stone-400/30
                                 {% elif m.tier == 'junior' %} bg-orange-500/20 text-orange-300 border border-orange-500/30
+                                {% elif m.tier == 'walkin' %} bg-amber-600/20 text-amber-300 border border-amber-600/35
                                 {% else %} bg-stone-700/40 text-stone-400 {% endif %}">
                                 {{ m.tier }}
                             </span>
@@ -203,6 +246,7 @@
                         <option value="gold">Gold Tier (₹5,000/mo)</option>
                         <option value="silver" selected>Silver Tier (₹2,500/mo)</option>
                         <option value="junior">Junior Tier (₹1,500/mo - Under 18)</option>
+                        <option value="walkin">Walk-in / Guest (Pay-per-play)</option>
                     </select>
                 </div>
                 <div>
@@ -224,6 +268,49 @@
 
 <script>
     let currentLoadedMemberId = null;
+    let currentTierFilter = 'all';
+
+    function setTierFilter(tier, btn) {
+        currentTierFilter = tier;
+        document.querySelectorAll('.tier-filter-pill').forEach(b => {
+            b.classList.remove('bg-amber-500/25', 'text-amber-200', 'border-amber-500/40');
+            b.classList.add('text-stone-300');
+        });
+        btn.classList.add('bg-amber-500/25', 'text-amber-200', 'border-amber-500/40');
+        btn.classList.remove('text-stone-300');
+        filterDirectoryTable();
+    }
+
+    function filterDirectoryTable() {
+        const query = (document.getElementById('dir-filter-input')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.member-row');
+        let count = 0;
+
+        rows.forEach(row => {
+            const tier = row.getAttribute('data-tier') || '';
+            const status = row.getAttribute('data-status') || '';
+            const searchTxt = row.getAttribute('data-search') || '';
+
+            let matchesTier = true;
+            if (currentTierFilter === 'expired') {
+                matchesTier = (status === 'expired');
+            } else if (currentTierFilter !== 'all') {
+                matchesTier = (tier === currentTierFilter);
+            }
+
+            const matchesQuery = !query || searchTxt.includes(query);
+
+            if (matchesTier && matchesQuery) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const visibleCountEl = document.getElementById('visible-count');
+        if (visibleCountEl) visibleCountEl.innerText = count;
+    }
 
     async function handleMemberSearch(query) {
         const dropdown = document.getElementById('search-results-dropdown');
@@ -245,9 +332,9 @@
             dropdown.innerHTML = members.map(m => `
                 <div onclick="selectSearchMember(${m.id})" class="p-3.5 hover:bg-amber-500/15 cursor-pointer flex items-center justify-between transition">
                     <div class="flex items-center gap-3">
-                        <img src="${m.photo_url}" class="w-8 h-8 rounded-xl bg-stone-800 object-cover border border-amber-500/20">
+                        <img src="${m.photo_url || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(m.name || 'Member'))}" class="w-8 h-8 rounded-xl bg-stone-800 object-cover border border-amber-500/20">
                         <div>
-                            <span class="text-sm font-bold text-white block">${m.full_name}</span>
+                            <span class="text-sm font-bold text-white block">${m.name || m.full_name}</span>
                             <span class="text-[11px] text-stone-400">${m.phone} • ${m.email}</span>
                         </div>
                     </div>
@@ -255,7 +342,8 @@
                         <span class="font-mono text-xs font-bold text-amber-300 block">${m.member_code}</span>
                         <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${
                             m.tier === 'gold' ? 'bg-amber-400/20 text-amber-300' :
-                            m.tier === 'silver' ? 'bg-stone-500/20 text-stone-300' : 'bg-orange-500/20 text-orange-300'
+                            m.tier === 'silver' ? 'bg-stone-500/20 text-stone-300' :
+                            m.tier === 'walkin' ? 'bg-amber-600/20 text-amber-300' : 'bg-orange-500/20 text-orange-300'
                         }">${m.tier}</span>
                     </div>
                 </div>
@@ -274,13 +362,13 @@
 
     async function loadMemberProfile(id) {
         try {
-            const res = await fetch(`/api/v1/members/${id}/profile`);
+            const res = await fetch(`/api/v1/members/${id}`);
             const data = await res.json();
             currentLoadedMemberId = data.id;
 
             // Fill profile data
             document.getElementById('prof-photo').src = data.photo_url;
-            document.getElementById('prof-name').innerText = data.full_name;
+            document.getElementById('prof-name').innerText = data.full_name || data.name;
             document.getElementById('prof-code').innerText = data.member_code;
             document.getElementById('prof-phone').innerText = data.phone;
             document.getElementById('prof-email').innerText = data.email;
@@ -292,6 +380,7 @@
             tierBadge.className = 'px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ' + (
                 data.tier === 'gold' ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' :
                 data.tier === 'silver' ? 'bg-stone-400/20 text-stone-200 border border-stone-400/30' :
+                data.tier === 'walkin' ? 'bg-amber-600/20 text-amber-300 border border-amber-600/35' :
                 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
             );
 
@@ -305,45 +394,52 @@
 
             // Expiry alert
             const alertEl = document.getElementById('prof-days-alert');
+            const daysRemaining = data.days_until_expiry !== undefined ? data.days_until_expiry : data.days_to_expiry;
             if (data.is_expired) {
                 alertEl.innerText = 'EXPIRED';
                 alertEl.className = 'block text-xs font-bold text-rose-400 mt-0.5';
-            } else if (data.days_until_expiry <= 30) {
-                alertEl.innerText = `Expiring soon (${data.days_until_expiry} days)`;
+            } else if (daysRemaining <= 30) {
+                alertEl.innerText = `Expiring soon (${daysRemaining} days)`;
                 alertEl.className = 'block text-xs font-bold text-amber-400 mt-0.5';
             } else {
-                alertEl.innerText = `${data.days_until_expiry} days remaining`;
+                alertEl.innerText = `${daysRemaining} days remaining`;
                 alertEl.className = 'block text-xs font-bold text-emerald-400 mt-0.5';
             }
 
             // Entitlements
-            document.getElementById('entitle-court').innerText = data.privileges.court_discount_pct === 100 ? '100% Free' : `${data.privileges.court_discount_pct}% Off`;
-            document.getElementById('entitle-shop').innerText = `${data.privileges.shop_discount_pct}% Off`;
-            document.getElementById('entitle-bar').innerText = `${data.privileges.bar_discount_pct}% Off`;
-            document.getElementById('prof-total-spend').innerText = formatINR(data.total_club_spend);
+            const courtDisc = data.privileges.court_discount_pct !== undefined ? data.privileges.court_discount_pct : Math.round(data.privileges.court_discount * 100);
+            const shopDisc = data.privileges.shop_discount_pct !== undefined ? data.privileges.shop_discount_pct : Math.round(data.privileges.shop_discount * 100);
+            const barDisc = data.privileges.bar_discount_pct !== undefined ? data.privileges.bar_discount_pct : Math.round(data.privileges.bar_discount * 100);
+
+            document.getElementById('entitle-court').innerText = courtDisc === 100 ? '100% Free' : `${courtDisc}% Off`;
+            document.getElementById('entitle-shop').innerText = `${shopDisc}% Off`;
+            document.getElementById('entitle-bar').innerText = `${barDisc}% Off`;
+            document.getElementById('prof-total-spend').innerText = formatINR(data.total_club_spend || 0);
 
             // Recent Bookings list
             const bList = document.getElementById('prof-bookings-list');
-            if (data.recent_court_bookings.length === 0) {
+            const recentBookings = data.recent_court_bookings || data.recent_bookings || [];
+            if (recentBookings.length === 0) {
                 bList.innerHTML = '<div class="py-2 text-stone-400 italic">No bookings recorded yet.</div>';
             } else {
-                bList.innerHTML = data.recent_court_bookings.map(b => `
+                bList.innerHTML = recentBookings.map(b => `
                     <div class="py-2 flex justify-between items-center">
                         <div>
-                            <span class="font-bold text-white block">${b.court_name}</span>
-                            <span class="text-stone-400">${b.date} • ${b.start_time} - ${b.end_time}</span>
+                            <span class="font-bold text-white block">${b.court_name || b.court}</span>
+                            <span class="text-stone-400">${b.date} • ${b.time || (b.start_time + ' - ' + b.end_time)}</span>
                         </div>
-                        <span class="font-bold text-emerald-400 font-mono">${formatINR(b.amount_paid)}</span>
+                        <span class="font-bold text-emerald-400 font-mono">${formatINR(b.amount_paid !== undefined ? b.amount_paid : b.amount)}</span>
                     </div>
                 `).join('');
             }
 
             // Open Tab Pill
             const tabPill = document.getElementById('prof-open-tab-pill');
-            if (data.open_bar_tab) {
+            const openTab = data.open_bar_tab || data.open_tab;
+            if (openTab) {
                 tabPill.innerHTML = `
                     <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        Running Tab: ${formatINR(data.open_bar_tab.total_bill)} (${data.open_bar_tab.table})
+                        Running Tab: ${formatINR(openTab.total_bill || openTab.amount)} (${openTab.table || ('Tab #' + openTab.tab_id)})
                     </span>
                 `;
             } else {
@@ -352,10 +448,11 @@
 
             // Purchases list
             const pList = document.getElementById('prof-shop-list');
-            if (data.recent_shop_orders.length === 0) {
+            const shopOrders = data.recent_shop_orders || [];
+            if (shopOrders.length === 0) {
                 pList.innerHTML = '<div class="py-2 text-stone-400 italic">No shop orders yet.</div>';
             } else {
-                pList.innerHTML = data.recent_shop_orders.map(o => `
+                pList.innerHTML = shopOrders.map(o => `
                     <div class="py-2 flex justify-between items-center">
                         <div>
                             <span class="font-mono text-amber-300 font-bold">${o.order_number}</span>
@@ -381,7 +478,11 @@
     async function renewCurrentMember() {
         if (!currentLoadedMemberId) return;
         try {
-            const res = await fetch(`/api/v1/members/${currentLoadedMemberId}/renew`, { method: 'POST' });
+            const res = await fetch(`/api/v1/members/${currentLoadedMemberId}/renew`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ member_id: currentLoadedMemberId, duration_months: 12 })
+            });
             const data = await res.json();
             if (res.ok) {
                 showToast(data.message);
