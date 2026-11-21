@@ -5,149 +5,152 @@
 {% block content %}
 <div class="space-y-12">
 
-    <!-- Hero Section -->
-    <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 text-white shadow-xl p-8 sm:p-12 lg:p-16">
+    <!-- Hero Section (Frosted Glass Showcase) -->
+    <div class="relative rounded-3xl overflow-hidden glass-panel border border-white/15 p-8 sm:p-12 lg:p-16 shadow-2xl relative">
+        <!-- Ambient Radial Glow Inside Card -->
+        <div class="absolute -right-20 -top-20 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-indigo-600/25 rounded-full blur-3xl pointer-events-none"></div>
+
         <div class="max-w-3xl space-y-6 relative z-10">
-            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-800 text-purple-200 border border-purple-700">
-                <i data-lucide="award" class="w-3.5 h-3.5"></i> Elite Sports Club & Digital Experience
+            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-purple-200 border border-white/15 backdrop-blur-md shadow-sm">
+                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Elite Sports Club • Glassmorphism Edition
             </span>
-            <h1 class="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight text-white drop-shadow-md">
                 Where Passion Meets the Court.
             </h1>
-            <p class="text-lg text-slate-300 leading-relaxed">
-                The Champions Club brings together world-class tennis, tournament-spec cricket nets, premium gear, and a vibrant post-match bar & cafeteria — all running on a seamless unified digital platform.
+            <p class="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                The Champions Club brings together world-class tennis, tournament-spec cricket nets, premium gear, and a vibrant post-match bar & cafeteria — all running on an ultra-modern unified digital backbone.
             </p>
-            <div class="flex flex-wrap gap-4 pt-2">
-                <a href="#trial-section" class="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition flex items-center gap-2 shadow-lg shadow-amber-500/20">
+            <div class="flex flex-wrap gap-4 pt-3">
+                <a href="#trial-section" class="px-6 py-3.5 rounded-xl glass-btn-gold text-slate-950 font-black transition flex items-center gap-2 shadow-xl shadow-amber-500/20">
                     <i data-lucide="sparkles" class="w-5 h-5"></i> Book a Free Trial Session
                 </a>
-                <a href="/courts" class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold backdrop-blur transition flex items-center gap-2 border border-white/10">
-                    <i data-lucide="calendar" class="w-5 h-5"></i> View Live Court Schedule
+                <a href="/courts" class="px-6 py-3.5 rounded-xl glass-btn flex items-center gap-2 font-semibold">
+                    <i data-lucide="calendar" class="w-5 h-5 text-emerald-400"></i> View Live Court Schedule
                 </a>
             </div>
         </div>
-        <!-- Decorative subtle pattern overlay -->
-        <div class="absolute -right-16 -bottom-16 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
     </div>
 
-    <!-- Membership Plans & Entitlements -->
+    <!-- Membership Plans & Entitlements in Glass Cards -->
     <div class="space-y-6">
         <div class="text-center max-w-2xl mx-auto space-y-2">
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Membership Plans</h2>
-            <p class="text-slate-500 text-sm">Choose the tier that fits your training routine. Enjoy zero court fees or hefty discounts across the club.</p>
+            <span class="text-xs uppercase font-extrabold tracking-widest text-purple-400">Club Tiers</span>
+            <h2 class="text-3xl font-black text-white tracking-tight">Membership Plans</h2>
+            <p class="text-slate-400 text-sm">Choose the tier that fits your training routine. Enjoy zero court fees or hefty discounts across the club.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Gold Tier -->
-            <div class="bg-white rounded-2xl border-2 border-amber-400 p-6 shadow-md hover:shadow-xl transition relative flex flex-col justify-between">
-                <div class="absolute -top-3.5 right-6 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-wider">
+            <div class="glass-card border-2 border-amber-400/40 p-7 relative flex flex-col justify-between hover:border-amber-400/80 shadow-2xl shadow-amber-500/10">
+                <div class="absolute -top-3.5 right-6 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-md">
                     Most Popular
                 </div>
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                            <i data-lucide="crown" class="w-5 h-5"></i>
+                <div class="space-y-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold border border-amber-400/30">
+                            <i data-lucide="crown" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-lg text-slate-900">Gold Tier</h3>
-                            <span class="text-xs text-amber-700 font-semibold">Premium Full Access</span>
+                            <h3 class="font-black text-xl text-white">Gold Tier</h3>
+                            <span class="text-xs text-amber-300 font-bold">Premium Full Access</span>
                         </div>
                     </div>
-                    <div class="pt-2">
-                        <span class="text-4xl font-black text-slate-900">₹5,000</span>
-                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    <div>
+                        <span class="text-4xl font-black text-white">₹5,000</span>
+                        <span class="text-xs text-slate-400 font-semibold">/ month</span>
                     </div>
-                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-2 font-semibold text-emerald-700">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 100% Free Court Access (₹0 fee)
+                    <ul class="space-y-3 text-xs sm:text-sm text-slate-300 pt-3 border-t border-white/10">
+                        <li class="flex items-center gap-2.5 font-bold text-emerald-300">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 100% Free Court Access (₹0 fee)
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 20% Off at Pro Gear Shop
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 20% Off at Pro Gear Shop
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 20% Off at Bar & Cafeteria
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 20% Off at Bar & Cafeteria
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Free Entry to Friday Social Play
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> Free Entry to Friday Social Play
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Running Tab Privileges
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> Running Tab Privileges
                         </li>
                     </ul>
                 </div>
-                <button onclick="selectTierForEnquiry('gold')" class="mt-6 w-full py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition shadow-sm">
+                <button onclick="selectTierForEnquiry('gold')" class="mt-7 w-full py-3 rounded-xl glass-btn-primary font-bold text-xs uppercase tracking-wider transition">
                     Enquire for Gold
                 </button>
             </div>
 
             <!-- Silver Tier -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
-                            <i data-lucide="shield" class="w-5 h-5"></i>
+            <div class="glass-card p-7 flex flex-col justify-between hover:border-white/30">
+                <div class="space-y-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-slate-700/40 text-slate-200 flex items-center justify-center font-bold border border-white/10">
+                            <i data-lucide="shield" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-lg text-slate-900">Silver Tier</h3>
-                            <span class="text-xs text-slate-500 font-medium">Standard Club Membership</span>
+                            <h3 class="font-black text-xl text-white">Silver Tier</h3>
+                            <span class="text-xs text-slate-400 font-bold">Standard Club Membership</span>
                         </div>
                     </div>
-                    <div class="pt-2">
-                        <span class="text-4xl font-black text-slate-900">₹2,500</span>
-                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    <div>
+                        <span class="text-4xl font-black text-white">₹2,500</span>
+                        <span class="text-xs text-slate-400 font-semibold">/ month</span>
                     </div>
-                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 50% Off Court Fees (₹400/hr)
+                    <ul class="space-y-3 text-xs sm:text-sm text-slate-300 pt-3 border-t border-white/10">
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 50% Off Court Fees (₹400/hr)
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Pro Gear Shop
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 10% Off at Pro Gear Shop
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Bar & Cafeteria
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 10% Off at Bar & Cafeteria
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Discounted Friday Social Play
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> Discounted Friday Social Play
                         </li>
                     </ul>
                 </div>
-                <button onclick="selectTierForEnquiry('silver')" class="mt-6 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition">
+                <button onclick="selectTierForEnquiry('silver')" class="mt-7 w-full py-3 rounded-xl glass-btn font-bold text-xs uppercase tracking-wider transition">
                     Enquire for Silver
                 </button>
             </div>
 
             <!-- Junior Tier -->
-            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                            <i data-lucide="user-check" class="w-5 h-5"></i>
+            <div class="glass-card p-7 flex flex-col justify-between hover:border-blue-400/30">
+                <div class="space-y-5">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center font-bold border border-blue-500/30">
+                            <i data-lucide="user-check" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-lg text-slate-900">Junior Tier</h3>
-                            <span class="text-xs text-blue-600 font-semibold">Under 18 Dedicated Youth</span>
+                            <h3 class="font-black text-xl text-white">Junior Tier</h3>
+                            <span class="text-xs text-blue-400 font-bold">Dedicated Youth (&lt;18)</span>
                         </div>
                     </div>
-                    <div class="pt-2">
-                        <span class="text-4xl font-black text-slate-900">₹1,500</span>
-                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    <div>
+                        <span class="text-4xl font-black text-white">₹1,500</span>
+                        <span class="text-xs text-slate-400 font-semibold">/ month</span>
                     </div>
-                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 60% Off Court Fees (₹320/hr)
+                    <ul class="space-y-3 text-xs sm:text-sm text-slate-300 pt-3 border-t border-white/10">
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 60% Off Court Fees (₹320/hr)
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Pro Gear Shop
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 10% Off at Pro Gear Shop
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 5% Off Bar Healthy Snacks
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> 5% Off Bar Healthy Snacks
                         </li>
-                        <li class="flex items-center gap-2">
-                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Junior Academy Clinic access
+                        <li class="flex items-center gap-2.5">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i> Junior Academy Clinic Access
                         </li>
                     </ul>
                 </div>
-                <button onclick="selectTierForEnquiry('junior')" class="mt-6 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition">
+                <button onclick="selectTierForEnquiry('junior')" class="mt-7 w-full py-3 rounded-xl glass-btn font-bold text-xs uppercase tracking-wider transition">
                     Enquire for Junior
                 </button>
             </div>
@@ -157,51 +160,51 @@
     <!-- Trial Session & Enquiries Section (Scene 5 Problem Solver) -->
     <div id="trial-section" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         
-        <!-- Book Trial Session Form -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+        <!-- Book Trial Session Form in Frosted Glass -->
+        <div class="glass-panel p-7 sm:p-9 space-y-6">
+            <div class="flex items-center gap-3.5 pb-2 border-b border-white/10">
+                <div class="w-11 h-11 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold border border-amber-400/30">
+                    <i data-lucide="calendar-check" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-extrabold text-slate-900">Book a Free Trial Session</h3>
-                    <p class="text-xs text-slate-500">Pick a court, choose your slot, and hit the court with our pro coach.</p>
+                    <h3 class="text-xl font-black text-white">Book a Free Trial Session</h3>
+                    <p class="text-xs text-slate-400">Pick your court, select a time slot, and train with Head Coach David.</p>
                 </div>
             </div>
 
             <form id="trial-form" onsubmit="submitTrial(event)" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name</label>
-                        <input type="text" name="visitor_name" required placeholder="Alex Turner" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Full Name</label>
+                        <input type="text" name="visitor_name" required placeholder="Alex Turner" class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
-                        <input type="tel" name="visitor_phone" required placeholder="+91 98765 43210" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Phone Number</label>
+                        <input type="tel" name="visitor_phone" required placeholder="+91 98765 43210" class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
-                    <input type="email" name="visitor_email" required placeholder="alex@example.com" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Email Address</label>
+                    <input type="email" name="visitor_email" required placeholder="alex@example.com" class="glass-input w-full px-3.5 py-2.5 text-sm">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sport</label>
-                        <select name="sport_type" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Sport</label>
+                        <select name="sport_type" class="glass-input w-full px-3.5 py-2.5 text-sm">
                             <option value="tennis">Tennis</option>
                             <option value="cricket">Cricket</option>
                             <option value="padel">Padel</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Preferred Date</label>
-                        <input type="date" name="trial_date" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Date</label>
+                        <input type="date" name="trial_date" required class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Time Slot</label>
-                        <select name="trial_time_slot" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Time Slot</label>
+                        <select name="trial_time_slot" class="glass-input w-full px-3.5 py-2.5 text-sm">
                             <option value="08:00 - 09:00">08:00 - 09:00 AM</option>
                             <option value="10:00 - 11:00">10:00 - 11:00 AM</option>
                             <option value="17:00 - 18:00">05:00 - 06:00 PM</option>
@@ -210,44 +213,44 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-3 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                <button type="submit" class="w-full py-3.5 rounded-xl glass-btn-primary font-bold text-sm transition flex items-center justify-center gap-2 mt-2">
                     <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm Trial Booking
                 </button>
             </form>
         </div>
 
-        <!-- General Visitor Enquiry Form -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
-                    <i data-lucide="message-square" class="w-5 h-5"></i>
+        <!-- General Visitor Enquiry Form in Frosted Glass -->
+        <div class="glass-panel p-7 sm:p-9 space-y-6">
+            <div class="flex items-center gap-3.5 pb-2 border-b border-white/10">
+                <div class="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold border border-purple-500/30">
+                    <i data-lucide="message-square" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h3 class="text-xl font-extrabold text-slate-900">Reach Out & Enquire</h3>
-                    <p class="text-xs text-slate-500">Every enquiry is captured instantly into our staff CRM so you get a quote immediately.</p>
+                    <h3 class="text-xl font-black text-white">Reach Out &amp; Enquire</h3>
+                    <p class="text-xs text-slate-400">Captured instantly into our staff CRM so you get an immediate quotation.</p>
                 </div>
             </div>
 
             <form id="enquiry-form" onsubmit="submitEnquiry(event)" class="space-y-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
-                        <input type="text" id="enq-name" name="name" required placeholder="Sam Patel" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Your Name</label>
+                        <input type="text" id="enq-name" name="name" required placeholder="Sam Patel" class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
-                        <input type="tel" id="enq-phone" name="phone" required placeholder="+91 91234 56789" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Phone Number</label>
+                        <input type="tel" id="enq-phone" name="phone" required placeholder="+91 91234 56789" class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
-                        <input type="email" id="enq-email" name="email" required placeholder="sam@example.com" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Email</label>
+                        <input type="email" id="enq-email" name="email" required placeholder="sam@example.com" class="glass-input w-full px-3.5 py-2.5 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Interested Tier</label>
-                        <select id="enq-tier" name="interested_tier" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                        <label class="block text-xs font-bold text-slate-300 mb-1.5">Interested Tier</label>
+                        <select id="enq-tier" name="interested_tier" class="glass-input w-full px-3.5 py-2.5 text-sm">
                             <option value="gold">Gold (Premium Full Access)</option>
                             <option value="silver">Silver (Standard)</option>
                             <option value="junior">Junior (Under 18)</option>
@@ -256,12 +259,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Questions or Requirements</label>
-                    <textarea name="notes" rows="3" placeholder="Tell us what you are looking for (e.g. corporate booking, weekend games)..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700"></textarea>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Questions or Requirements</label>
+                    <textarea name="notes" rows="3" placeholder="Tell us what you are looking for (e.g. corporate booking, weekend games)..." class="glass-input w-full px-3.5 py-2.5 text-sm"></textarea>
                 </div>
 
-                <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4"></i> Submit Enquiry
+                <button type="submit" class="w-full py-3.5 rounded-xl glass-btn font-bold text-sm transition flex items-center justify-center gap-2 mt-2">
+                    <i data-lucide="send" class="w-4 h-4 text-purple-400"></i> Submit Enquiry
                 </button>
             </form>
         </div>

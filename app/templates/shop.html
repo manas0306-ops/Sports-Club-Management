@@ -5,34 +5,34 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Header bar -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <!-- Header bar (Glass Header) -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 shadow-xl">
         <div>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <i data-lucide="shopping-bag" class="w-6 h-6 text-purple-900"></i> Pro Gear Shop & Unified Inventory
+            <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+                <i data-lucide="shopping-bag" class="w-6 h-6 text-amber-400"></i> Pro Gear Shop &amp; Unified Inventory
             </h1>
-            <p class="text-xs text-slate-500 mt-1">Single Shelf Inventory • Counter POS & Online Click & Collect / Delivery • Tier Auto-Discounts</p>
+            <p class="text-xs text-slate-400 mt-1">Single Shelf Inventory • Counter POS &amp; Online Click &amp; Collect / Delivery • Tier Auto-Discounts</p>
         </div>
-        <button onclick="openModal('cart-modal')" class="relative px-5 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition flex items-center gap-2 shadow-sm">
+        <button onclick="openModal('cart-modal')" class="relative px-5 py-2.5 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/25">
             <i data-lucide="shopping-cart" class="w-4 h-4"></i> Checkout Cart
             <span id="cart-badge" class="ml-1 px-2 py-0.5 rounded-full text-xs bg-amber-400 text-slate-950 font-black">0</span>
         </button>
     </div>
 
-    <!-- Mode Selector: Counter POS vs Sofa Click & Collect / Delivery -->
-    <div class="bg-purple-900 text-white p-4 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm">
+    <!-- Mode Selector: Counter POS vs Sofa Click & Collect / Delivery (Frosted Glass Panel) -->
+    <div class="glass-panel p-5 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-lg border border-purple-500/20">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-800 flex items-center justify-center font-bold">
-                <i data-lucide="layers" class="w-5 h-5 text-amber-400"></i>
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center font-bold border border-purple-500/30">
+                <i data-lucide="layers" class="w-5 h-5 text-amber-300"></i>
             </div>
             <div>
-                <span class="text-xs uppercase tracking-wider font-extrabold text-purple-200">Order Channel</span>
-                <div class="flex gap-4 text-xs font-bold mt-0.5">
+                <span class="text-[10px] uppercase tracking-wider font-extrabold text-purple-300">Order Channel</span>
+                <div class="flex flex-wrap gap-4 text-xs font-bold text-slate-200 mt-0.5">
                     <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="order_channel" value="counter_pos" checked onchange="updateChannel(this.value)"> 🏸 Counter Quick Sale (Before Match)
+                        <input type="radio" name="order_channel" value="counter_pos" checked onchange="updateChannel(this.value)"> 🏸 Counter Quick Sale (Pre-Match)
                     </label>
                     <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input type="radio" name="order_channel" value="online_click_collect" onchange="updateChannel(this.value)"> 🛋️ Sofa: Click & Collect at Club
+                        <input type="radio" name="order_channel" value="online_click_collect" onchange="updateChannel(this.value)"> 🛋️ Sofa: Click &amp; Collect
                     </label>
                     <label class="flex items-center gap-1.5 cursor-pointer">
                         <input type="radio" name="order_channel" value="online_delivery" onchange="updateChannel(this.value)"> 📦 Sofa: Home Delivery
@@ -41,10 +41,10 @@
             </div>
         </div>
 
-        <!-- Member Discount Picker -->
+        <!-- Member Discount Picker in Glass -->
         <div class="flex items-center gap-2">
-            <span class="text-xs font-semibold text-purple-200">Customer:</span>
-            <select id="shop-member-select" onchange="updateMemberDiscount()" class="px-3 py-1.5 rounded-xl bg-purple-950 border border-purple-700 text-xs font-bold text-white focus:outline-none">
+            <span class="text-xs font-semibold text-slate-300">Customer:</span>
+            <select id="shop-member-select" onchange="updateMemberDiscount()" class="glass-input px-3 py-1.5 text-xs font-bold">
                 <option value="" data-discount="0">Walk-in Guest (0% Off)</option>
                 {% for m in members %}
                 <option value="{{ m.id }}" data-tier="{{ m.tier }}" data-discount="{% if m.tier == 'gold' %}0.20{% else %}0.10{% endif %}">
@@ -55,42 +55,42 @@
         </div>
     </div>
 
-    <!-- Product Grid -->
+    <!-- Product Grid in Glass Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {% for p in products %}
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between relative">
+        <div class="glass-card p-5 flex flex-col justify-between relative hover:border-white/30 shadow-xl">
             {% if p.is_low_stock %}
-            <div class="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300 stock-badge-low">
-                ⚠️ Low Shelf Stock ({{ p.stock_quantity }} left)
+            <div class="absolute top-3.5 right-3.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                ⚠️ Low Shelf: {{ p.stock_quantity }}
             </div>
             {% else %}
-            <div class="absolute top-3 right-3 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+            <div class="absolute top-3.5 right-3.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/10 text-slate-300 border border-white/10">
                 Shelf: {{ p.stock_quantity }}
             </div>
             {% endif %}
 
-            <div class="space-y-3">
-                <div class="w-full h-36 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden border border-slate-100">
-                    <img src="{{ p.image_url }}" alt="{{ p.name }}" class="object-contain h-28 p-2">
+            <div class="space-y-3.5">
+                <div class="w-full h-36 rounded-xl bg-slate-900/60 flex items-center justify-center overflow-hidden border border-white/10 p-2">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}" class="object-contain h-28 hover:scale-105 transition-transform duration-300">
                 </div>
                 <div>
-                    <span class="text-[10px] uppercase font-bold text-purple-800 tracking-wider">{{ p.brand }} • {{ p.category.name }}</span>
-                    <h3 class="font-extrabold text-sm text-slate-900 line-clamp-1">{{ p.name }}</h3>
+                    <span class="text-[10px] uppercase font-bold text-purple-300 tracking-wider">{{ p.brand }} • {{ p.category.name }}</span>
+                    <h3 class="font-extrabold text-sm text-white line-clamp-1 mt-0.5">{{ p.name }}</h3>
                     <span class="text-xs text-slate-400 font-mono">{{ p.sku }}</span>
                 </div>
             </div>
 
-            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div class="pt-4 border-t border-white/10 flex items-center justify-between">
                 <div>
-                    <span class="text-xs text-slate-400 block font-medium">Price</span>
-                    <span class="text-lg font-black text-slate-900">₹{{ p.retail_price }}</span>
+                    <span class="text-[10px] text-slate-400 block font-medium uppercase">Price</span>
+                    <span class="text-lg font-black text-white">₹{{ p.retail_price }}</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button onclick="quickRestock({{ p.id }}, 5)" title="Restock +5 units" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs">
+                    <button onclick="quickRestock({{ p.id }}, 5)" title="Restock +5 units" class="p-2 rounded-xl glass-btn text-xs text-slate-300 hover:text-white">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     </button>
                     <button onclick="addToCart({{ p.id }}, '{{ p.name }}', {{ p.retail_price }}, {{ p.stock_quantity }})"
-                        {% if p.stock_quantity <= 0 %}disabled class="px-3 py-2 rounded-lg bg-slate-200 text-slate-400 text-xs font-bold cursor-not-allowed"{% else %}class="px-3 py-2 rounded-lg bg-purple-900 hover:bg-purple-800 text-white text-xs font-bold transition flex items-center gap-1"{% endif %}>
+                        {% if p.stock_quantity <= 0 %}disabled class="px-3 py-2 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed border border-white/5"{% else %}class="px-3.5 py-2 rounded-xl glass-btn-primary text-xs font-bold flex items-center gap-1.5"{% endif %}>
                         <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Add
                     </button>
                 </div>
@@ -101,57 +101,57 @@
 
 </div>
 
-<!-- Cart & Checkout Modal -->
+<!-- Cart & Checkout Modal in Frosted Glass -->
 <div id="cart-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+    <div class="glass-panel max-w-lg w-full p-6 sm:p-8 space-y-5 border border-white/20 shadow-2xl">
+        <div class="flex justify-between items-center pb-2 border-b border-white/10">
             <div>
-                <h3 class="text-lg font-extrabold text-slate-900">Order Checkout (Shared Shelf)</h3>
-                <span id="cart-channel-indicator" class="text-xs text-purple-700 font-semibold">Channel: Counter POS</span>
+                <h3 class="text-lg font-black text-white">Order Checkout (Shared Shelf)</h3>
+                <span id="cart-channel-indicator" class="text-xs text-purple-300 font-semibold">Channel: Counter POS</span>
             </div>
-            <button onclick="closeModal('cart-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button onclick="closeModal('cart-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
 
-        <div id="cart-items-list" class="space-y-2 max-h-60 overflow-y-auto divide-y divide-slate-100 text-sm">
+        <div id="cart-items-list" class="space-y-2 max-h-60 overflow-y-auto divide-y divide-white/5 text-sm">
             <div class="p-4 text-center text-slate-400 text-xs">Your cart is empty.</div>
         </div>
 
         <!-- Bill breakdown -->
-        <div class="space-y-1.5 pt-3 border-t border-slate-100 text-xs">
-            <div class="flex justify-between text-slate-600">
+        <div class="space-y-2 pt-3 border-t border-white/10 text-xs">
+            <div class="flex justify-between text-slate-300">
                 <span>Subtotal</span>
-                <span id="bill-subtotal" class="font-semibold">₹0</span>
+                <span id="bill-subtotal" class="font-semibold text-white">₹0</span>
             </div>
-            <div class="flex justify-between text-emerald-700 font-semibold">
+            <div class="flex justify-between text-emerald-400 font-semibold">
                 <span>Member Tier Discount</span>
                 <span id="bill-discount">-₹0</span>
             </div>
-            <div class="flex justify-between text-slate-600">
+            <div class="flex justify-between text-slate-300">
                 <span>GST (12% Sports Equipment)</span>
-                <span id="bill-tax">₹0</span>
+                <span id="bill-tax" class="text-white">₹0</span>
             </div>
-            <div class="flex justify-between text-slate-900 font-black text-base pt-1 border-t border-slate-200">
+            <div class="flex justify-between text-white font-black text-base pt-2 border-t border-white/10">
                 <span>Grand Total</span>
-                <span id="bill-total">₹0</span>
+                <span id="bill-total" class="text-amber-400">₹0</span>
             </div>
         </div>
 
         <!-- Payment Method -->
         <div class="grid grid-cols-3 gap-2 pt-2">
-            <label class="p-2 border rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-slate-50 has-[:checked]:border-purple-800 has-[:checked]:bg-purple-50">
+            <label class="p-2.5 border border-white/10 rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-white/10 has-[:checked]:border-purple-400 has-[:checked]:bg-purple-500/20 text-slate-200">
                 <input type="radio" name="pay_method" value="cash" checked class="hidden"> Cash
             </label>
-            <label class="p-2 border rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-slate-50 has-[:checked]:border-purple-800 has-[:checked]:bg-purple-50">
+            <label class="p-2.5 border border-white/10 rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-white/10 has-[:checked]:border-purple-400 has-[:checked]:bg-purple-500/20 text-slate-200">
                 <input type="radio" name="pay_method" value="card" class="hidden"> Card
             </label>
-            <label class="p-2 border rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-slate-50 has-[:checked]:border-purple-800 has-[:checked]:bg-purple-50">
+            <label class="p-2.5 border border-white/10 rounded-xl text-center text-xs font-bold cursor-pointer hover:bg-white/10 has-[:checked]:border-purple-400 has-[:checked]:bg-purple-500/20 text-slate-200">
                 <input type="radio" name="pay_method" value="upi" class="hidden"> UPI
             </label>
         </div>
 
-        <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
-            <button type="button" onclick="closeModal('cart-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Keep Shopping</button>
-            <button onclick="executeCheckout()" class="px-5 py-2 text-sm font-bold bg-purple-900 text-white rounded-lg hover:bg-purple-800 flex items-center gap-1.5">
+        <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
+            <button type="button" onclick="closeModal('cart-modal')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white rounded-lg">Keep Shopping</button>
+            <button onclick="executeCheckout()" class="px-5 py-2.5 text-sm font-bold glass-btn-primary flex items-center gap-1.5">
                 <i data-lucide="check" class="w-4 h-4"></i> Complete Order
             </button>
         </div>
@@ -206,14 +206,14 @@
             const lineGross = it.price * it.quantity;
             rawGross += lineGross;
             return `
-                <div class="py-2 flex justify-between items-center">
+                <div class="py-2.5 flex justify-between items-center">
                     <div>
-                        <div class="font-bold text-slate-800">${it.name}</div>
+                        <div class="font-bold text-white">${it.name}</div>
                         <div class="text-xs text-slate-400">₹${it.price} each • Qty: ${it.quantity}</div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-slate-900">₹${lineGross}</span>
-                        <button onclick="removeFromCart(${idx})" class="text-rose-600 hover:text-rose-800 font-bold text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <span class="font-bold text-white">₹${lineGross}</span>
+                        <button onclick="removeFromCart(${idx})" class="text-rose-400 hover:text-rose-300 font-bold text-xs"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </div>
             `;

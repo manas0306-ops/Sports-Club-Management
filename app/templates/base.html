@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,15 +8,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        odoo: {
-                            purple: '#714B67',
-                            dark: '#017E84',
-                            accent: '#F2F2F2',
-                            gold: '#D97706',
-                            emerald: '#059669'
+                        glass: {
+                            base: 'rgba(15, 23, 42, 0.65)',
+                            card: 'rgba(30, 41, 59, 0.50)',
+                            border: 'rgba(255, 255, 255, 0.10)',
+                            borderHover: 'rgba(255, 255, 255, 0.22)',
+                            purple: '#a855f7',
+                            gold: '#f59e0b',
+                            emerald: '#10b981'
                         }
                     }
                 }
@@ -25,63 +28,68 @@
     </script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom stylesheet -->
+    <!-- Custom Glassmorphism Stylesheet -->
     <link rel="stylesheet" href="/static/css/styles.css">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
+<body class="antialiased min-h-screen flex flex-col selection:bg-purple-500/30 selection:text-purple-200">
 
-    <!-- Top Navigation Bar -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+    <!-- Top Navigation Bar (Frosted Glass Header) -->
+    <header class="sticky top-0 z-50 bg-slate-950/50 backdrop-blur-2xl border-b border-white/10 shadow-lg shadow-black/20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <!-- Brand / Logo -->
+                
+                <!-- Brand / Logo with Glass Glow -->
                 <div class="flex items-center space-x-3">
-                    <a href="/" class="flex items-center space-x-2">
-                        <div class="w-10 h-10 rounded-xl bg-purple-900 text-white flex items-center justify-center font-bold text-xl shadow-md">
+                    <a href="/" class="flex items-center space-x-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center font-black text-lg shadow-lg shadow-purple-500/30 border border-white/20 group-hover:scale-105 transition-transform">
                             CC
                         </div>
                         <div>
-                            <span class="font-extrabold text-lg text-slate-900 tracking-tight">The Champions Club</span>
-                            <span class="block text-xs text-purple-700 font-semibold tracking-wide uppercase">Odoo Sports Backbone</span>
+                            <span class="font-black text-lg text-white tracking-tight flex items-center gap-1.5">
+                                The Champions Club
+                            </span>
+                            <span class="block text-[10px] text-purple-300 font-bold tracking-wider uppercase opacity-90">
+                                Odoo Sports Backbone
+                            </span>
                         </div>
                     </a>
                 </div>
 
-                <!-- Navigation Tabs (Mapping directly to the 6 Scenes) -->
-                <nav class="hidden md:flex space-x-1 lg:space-x-2 text-sm font-medium">
-                    <a href="/" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="globe" class="w-4 h-4"></i> Club Portal
+                <!-- Navigation Tabs (Frosted Glass Pills) -->
+                <nav class="hidden md:flex space-x-1 text-xs font-semibold">
+                    <a href="/" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="globe" class="w-4 h-4 text-purple-400"></i> Portal
                     </a>
-                    <a href="/members" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="users" class="w-4 h-4"></i> Members
+                    <a href="/members" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-4 h-4 text-blue-400"></i> Members
                     </a>
-                    <a href="/courts" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="calendar" class="w-4 h-4"></i> Courts
+                    <a href="/courts" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i> Courts
                     </a>
-                    <a href="/shop" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="shopping-bag" class="w-4 h-4"></i> Gear Shop
+                    <a href="/shop" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="shopping-bag" class="w-4 h-4 text-amber-400"></i> Gear Shop
                     </a>
-                    <a href="/bar" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="coffee" class="w-4 h-4"></i> Bar POS
+                    <a href="/bar" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="coffee" class="w-4 h-4 text-rose-400"></i> Bar POS
                     </a>
-                    <a href="/kitchen" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="chef-hat" class="w-4 h-4"></i> KOT Display
+                    <a href="/kitchen" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="chef-hat" class="w-4 h-4 text-orange-400"></i> KOT
                     </a>
-                    <a href="/crm" class="px-3 py-2 rounded-lg hover:bg-slate-100 text-slate-600 transition flex items-center gap-1.5">
-                        <i data-lucide="target" class="w-4 h-4"></i> CRM & Leads
+                    <a href="/crm" class="px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center gap-1.5">
+                        <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i> CRM
                     </a>
-                    <a href="/owner" class="px-3 py-2 rounded-lg bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100 transition flex items-center gap-1.5 font-semibold">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-purple-700"></i> Owner Hub
+                    <a href="/owner" class="px-3 py-2 rounded-xl bg-purple-500/20 text-purple-200 border border-purple-500/30 hover:bg-purple-500/30 transition-all flex items-center gap-1.5 font-bold shadow-sm">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-purple-300"></i> Owner Hub
                     </a>
                 </nav>
 
-                <!-- Status Badges -->
+                <!-- Status Badges & Quick Links -->
                 <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> System Live
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 backdrop-blur-md shadow-sm">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> System Live
                     </span>
-                    <a href="/api/v1/docs" target="_blank" class="text-xs text-slate-500 hover:text-purple-700 font-medium underline">
+                    <a href="/api/v1/docs" target="_blank" class="text-xs text-purple-300 hover:text-purple-100 font-medium px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all">
                         API Docs
                     </a>
                 </div>
@@ -89,27 +97,34 @@
         </div>
     </header>
 
-    <!-- Main Content Body -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Main Content Area (Glass Content Viewport) -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-4">
-            <div>
-                &copy; 2026 <strong>The Champions Club</strong>. Built for the Odoo Hackathon Challenge.
+    <!-- Glass Footer -->
+    <footer class="mt-auto bg-slate-950/60 backdrop-blur-xl border-t border-white/10 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-4">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span>&copy; 2026 <strong>The Champions Club</strong> • Glassmorphic Odoo Architecture</span>
             </div>
-            <div class="flex gap-4">
-                <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> Strict Anti-Collision</span>
-                <span class="flex items-center gap-1"><i data-lucide="layers" class="w-3.5 h-3.5 text-blue-600"></i> Unified Shelf Inventory</span>
-                <span class="flex items-center gap-1"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-purple-600"></i> Multi-Payment (Cash/Card/UPI)</span>
+            <div class="flex flex-wrap gap-4 text-slate-300">
+                <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i> Strict Anti-Collision
+                </span>
+                <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-400"></i> Single-Shelf Stock
+                </span>
+                <span class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+                    <i data-lucide="credit-card" class="w-3.5 h-3.5 text-purple-400"></i> Cash / Card / UPI
+                </span>
             </div>
         </div>
     </footer>
 
-    <!-- Toast Notification Overlay -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Toast Notification Overlay (Glass Floating Alert) -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
 
     <!-- Core App Scripts -->
     <script src="/static/js/app.js"></script>
