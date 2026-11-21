@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% import 'macros.html' as f %}{% block body %}
+<div class="auth">
+    <div>
+        <p class="eyebrow">Club access</p>
+        <h1>Welcome <em>back.</em></h1>
+        <p>Sign in to your club workspace.</p>
+</div>
+    <section>
+        <h2>Sign in</h2>
+        <a class="btn" href="/login">Member sign in ↗</a>
+        {% call f.form('login','Sign in →') %}{{f.field('email','Email','email')}}{{f.field('password','Password','password')}}{% endcall %}<details>
+        <summary>Demo credentials</summary>
+        <p>Password for every demo account: <b>password123</b></p>
+        <div class="chips">{% for role in ['owner','desk','bar','shop','physio','silver','gold','free'] %}
+    <button class="ghost" data-login="{{role}}@club.com">{{role}}@club.com</button>{% endfor %}
+</div>
+</details>
+</section>
+    <details class="panel" {% if request.query_params.get('signup') %}open{% endif %}>
+    <summary>Create a Free membership</summary>
+    {% call f.form('register','Create account') %}{{f.reg()}}{% endcall %}
+</details>
+</div>{% endblock %}
