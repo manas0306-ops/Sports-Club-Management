@@ -25,4 +25,4 @@ if __name__ == "__main__":
     print("   Owner Dashboard:   http://127.0.0.1:8000/owner")
     print("   API Documentation: http://127.0.0.1:8000/api/v1/docs")
     print("=======================================================\n")
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True, reload_dirs=["app"])
