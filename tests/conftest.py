@@ -10,8 +10,10 @@ from datetime import date, datetime, timedelta
 from app.database import Base, get_db
 from app.main import app
 from app.models import (
+    User, UserRole, Guardian, PlayerProfile, AuditLog,
     Member, Court, ProductCategory, Product, BarTable, BarMenuItem, Employee
 )
+from app.services.auth_security import hash_password
 
 from sqlalchemy.pool import StaticPool
 
@@ -62,6 +64,92 @@ def db_session():
         expiry_date=today + timedelta(days=100)
     )
     session.add_all([m_gold, m_silver, m_junior])
+    session.flush()
+
+    # User Accounts fixtures (fast rounds=4 for blazing quick test execution)
+    u_admin = User(
+        username="admin_test",
+        email="admin@test.com",
+        password_hash=hash_password("AdminPass123!", rounds=4),
+        primary_role="ADMIN",
+        is_active=True,
+        is_verified=True
+    )
+    u_member = User(
+        username="member_test",
+        email="gold@test.com",
+        password_hash=hash_password("MemberPass123!", rounds=4),
+        primary_role="MEMBER",
+        is_active=True,
+        is_verified=True
+    )
+    u_junior = User(
+        username="junior_test",
+        email="junior@test.com",
+        password_hash=hash_password("MemberPass123!", rounds=4),
+        primary_role="MEMBER",
+        is_active=True,
+        is_verified=True
+    )
+    u_player = User(
+        username="player_test",
+        email="player@test.com",
+        password_hash=hash_password("PlayerPass123!", rounds=4),
+        primary_role="PLAYER",
+        is_active=True,
+        is_verified=True
+    )
+    u_staff = User(
+        username="staff_test",
+        email="staff@test.com",
+        password_hash=hash_password("StaffPass123!", rounds=4),
+        primary_role="STAFF",
+        is_active=True,
+        is_verified=True
+    )
+    u_inactive = User(
+        username="inactive_test",
+        email="inactive@test.com",
+        password_hash=hash_password("Secret123!", rounds=4),
+        primary_role="MEMBER",
+        is_active=False,
+        is_verified=True
+    )
+    session.add_all([u_admin, u_member, u_junior, u_player, u_staff, u_inactive])
+    session.flush()
+
+    # Link member profiles
+    m_gold.user_id = u_member.id
+    m_junior.user_id = u_junior.id
+
+    # Guardian fixture
+    g_junior = Guardian(
+        member_id=m_junior.id,
+        guardian_name="Guardian Senior",
+        relationship_type="Parent",
+        contact_phone="+91 99999 44444",
+        contact_email="guardian@test.com",
+        consent_status="approved",
+        consent_date=today
+    )
+    session.add(g_junior)
+
+    # PlayerProfile fixture
+    p_profile = PlayerProfile(
+        user_id=u_player.id,
+        athlete_name="Athlete Test",
+        email="player@test.com",
+        phone="+91 99999 55555",
+        primary_sport="Tennis",
+        skill_level="Professional",
+        club_ranking="Seed #1",
+        team_name="Champions Elite",
+        training_schedule="Daily Drills",
+        upcoming_matches="Match A vs B",
+        match_history="Won 6-0 6-0",
+        performance_metrics="First Serve: 80%"
+    )
+    session.add(p_profile)
 
     # Court fixtures
     court_tennis = Court(

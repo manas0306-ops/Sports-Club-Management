@@ -57,8 +57,7 @@ def get_current_user(
     if user:
         return user
     
-    accept = request.headers.get("accept", "")
-    if "text/html" in accept and not request.url.path.startswith("/api/"):
+    if not request.url.path.startswith("/api/"):
         login_url = f"/login?next={request.url.path}"
         raise HTTPException(
             status_code=status.HTTP_307_TEMPORARY_REDIRECT,

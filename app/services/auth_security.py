@@ -23,12 +23,12 @@ _LOGIN_ATTEMPTS: Dict[str, Dict[str, Any]] = {}
 MAX_FAILED_ATTEMPTS = 5
 LOCKOUT_DURATION_SECONDS = 60
 
-def hash_password(password: str) -> str:
+def hash_password(password: str, rounds: int = 12) -> str:
     """Hashes a plaintext password using bcrypt with a random salt."""
     if not password:
         raise ValueError("Password cannot be empty")
     pwd_bytes = password.encode("utf-8")[:72] # Bcrypt max 72 bytes
-    salt = bcrypt.gensalt(rounds=12)
+    salt = bcrypt.gensalt(rounds=rounds)
     hashed = bcrypt.hashpw(pwd_bytes, salt)
     return hashed.decode("utf-8")
 
