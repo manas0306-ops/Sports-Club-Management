@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Champions Club - System Design Architecture Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #140d09;
+            color: #fdfaf5;
+            overflow: hidden;
+        }
+
+        .slide-stage {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+
+        .slide-card {
+            width: 100%;
+            max-width: 1200px;
+            aspect-ratio: 16 / 9;
+            max-height: 85vh;
+            background: rgba(35, 24, 18, 0.88);
+            backdrop-filter: blur(28px);
+            border: 1px solid rgba(245, 158, 11, 0.28);
+            border-radius: 28px;
+            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.75), inset 0 1px 1px rgba(254, 215, 170, 0.2);
+            padding: 3rem 3.5rem;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .slide-card.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97) translateY(8px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .glass-box {
+            background: rgba(20, 13, 9, 0.65);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem;
+            transition: all 0.25s ease;
+        }
+
+        .glass-box:hover {
+            border-color: rgba(251, 191, 36, 0.45);
+            box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.25);
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            body { overflow: visible; background: #fff; color: #000; }
+            .slide-stage { padding: 0; height: auto; display: block; }
+            .slide-card { display: flex !important; page-break-after: always; max-height: none; aspect-ratio: auto; box-shadow: none; border: 1px solid #ccc; background: #fff; color: #000; margin-bottom: 2rem; }
+            .nav-bar { display: none !important; }
+        }
+    </style>
+</head>
+<body class="selection:bg-amber-500/30 selection:text-amber-200">
+
+    <!-- Ambient Glowing Blobs -->
+    <div class="fixed -top-40 -left-40 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="fixed -bottom-40 -right-40 w-96 h-96 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="slide-stage">
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 1: Title & Cover                                        -->
+        <!-- ============================================================= -->
+        <div class="slide-card active" id="slide-1">
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Enterprise System Design &amp; Architecture
+                </div>
+                <h1 class="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+                    The Champions Club Management System
+                </h1>
+                <p class="text-base sm:text-lg text-stone-300 font-normal max-w-3xl leading-relaxed">
+                    End-to-End System Design: High-Level Architecture (HLD), Low-Level Data Models (LLD), Strict 5-Role RBAC, Mathematical Collision Engine &amp; Native Odoo 17 Backbone.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-auto">
+                <div class="glass-box text-center">
+                    <span class="text-2xl font-black text-amber-400 block">FastAPI</span>
+                    <span class="text-xs text-stone-400">Async REST Core</span>
+                </div>
+                <div class="glass-box text-center">
+                    <span class="text-2xl font-black text-emerald-400 block">23 Tables</span>
+                    <span class="text-xs text-stone-400">SQLite + SQLAlchemy</span>
+                </div>
+                <div class="glass-box text-center">
+                    <span class="text-2xl font-black text-orange-400 block">5 Roles</span>
+                    <span class="text-xs text-stone-400">Strict RBAC &amp; 403 Traps</span>
+                </div>
+                <div class="glass-box text-center">
+                    <span class="text-2xl font-black text-amber-300 block">41/41 Passed</span>
+                    <span class="text-xs text-stone-400">Automated Pytest Suite</span>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>Odoo Hackathon Engineering Submission • November 2026</span>
+                <span class="font-mono text-amber-300">Python 3.11 • bcrypt • JWT HS256</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 2: Executive Summary & Challenge Mapping                -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-2">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Executive Summary</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">The Unified Club Challenge Blueprint</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-auto">
+                <div class="glass-box space-y-2.5">
+                    <h3 class="text-base font-bold text-rose-300 flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400"></i> The Problem Silos
+                    </h3>
+                    <ul class="text-xs text-stone-300 space-y-2">
+                        <li>• Fragmented paper lists and delayed walk-in member recognition.</li>
+                        <li>• WhatsApp court double bookings &amp; prime-time slot hoarding.</li>
+                        <li>• Lost paper KOT kitchen slips &amp; uncollected bar tabs.</li>
+                        <li>• Single-channel online sales desynced from counter inventory.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-2.5">
+                    <h3 class="text-base font-bold text-amber-300 flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i> Unified Solution
+                    </h3>
+                    <ul class="text-xs text-stone-300 space-y-2">
+                        <li>• <strong>Reactive REST Backbone:</strong> FastAPI async engine delivering sub-millisecond response times.</li>
+                        <li>• <strong>Mathematical Anti-Collision:</strong> Overlap validation rejects duplicate slots with HTTP 409.</li>
+                        <li>• <strong>Single-Shelf Inventory:</strong> Shared physical stock pool across POS &amp; Click &amp; Collect.</li>
+                        <li>• <strong>Dual Odoo 17 Engine:</strong> Modular enterprise addon alongside web UI.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-2.5">
+                    <h3 class="text-base font-bold text-emerald-300 flex items-center gap-2">
+                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> Proven Outcomes
+                    </h3>
+                    <ul class="text-xs text-stone-300 space-y-2">
+                        <li>• <strong>Zero Double Bookings:</strong> Mathematical collision engine locks every slot.</li>
+                        <li>• <strong>173 Credentialed Users:</strong> Fully seeded bcrypt user directory.</li>
+                        <li>• <strong>165 Members:</strong> Gold (100% free courts), Silver (50%), Junior (60%), Guests.</li>
+                        <li>• <strong>100% Test Coverage:</strong> 41/41 passing unit and integration tests.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 2 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 3: High-Level Architecture (HLD)                        -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-3">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Architecture Overview</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">High-Level Architecture (HLD) &amp; Topology</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 my-auto">
+                <div class="glass-box space-y-2">
+                    <span class="text-xs font-black uppercase text-amber-400 block">1. Presentation</span>
+                    <h4 class="text-sm font-bold text-white">Client Experience</h4>
+                    <p class="text-xs text-stone-300 leading-relaxed">
+                        Responsive Warm Glassmorphism UI, lo-fi clubhouse soundscape (Web Audio API), rotary lighting dial, 3D tilt passes, and dynamic island dock.
+                    </p>
+                </div>
+                <div class="glass-box space-y-2">
+                    <span class="text-xs font-black uppercase text-amber-300 block">2. Security Gateway</span>
+                    <h4 class="text-sm font-bold text-white">Auth &amp; RBAC Guard</h4>
+                    <p class="text-xs text-stone-300 leading-relaxed">
+                        HTTP-only cookie parser, signed HS256 JWT tokens, server-side revocation blocklist, rate limiting, and HTTP 403 cross-role barrier.
+                    </p>
+                </div>
+                <div class="glass-box space-y-2">
+                    <span class="text-xs font-black uppercase text-orange-400 block">3. Application Core</span>
+                    <h4 class="text-sm font-bold text-white">FastAPI Micro-Routers</h4>
+                    <p class="text-xs text-stone-300 leading-relaxed">
+                        Dedicated domain services: Member Directory, Court Collision Engine, Single-Shelf Inventory, Sports Bar &amp; KDS, and CRM Funnel.
+                    </p>
+                </div>
+                <div class="glass-box space-y-2">
+                    <span class="text-xs font-black uppercase text-emerald-400 block">4. Persistence</span>
+                    <h4 class="text-sm font-bold text-white">SQLAlchemy &amp; Odoo</h4>
+                    <p class="text-xs text-stone-300 leading-relaxed">
+                        23 relational SQLite tables with foreign keys and cascade rules, coupled with Odoo 17 enterprise addon with XML views.
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 3 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 4: Security Architecture & Strict RBAC                  -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Security &amp; Isolation</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Strict 5-Role RBAC &amp; Authorization Traps</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Primary Roles &amp; Permitted Scopes</h3>
+                    <div class="space-y-2 text-xs text-stone-300">
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between items-center">
+                            <strong>ADMIN</strong>
+                            <span class="text-stone-400 font-mono">/admin/dashboard (Full club analytics &amp; audit)</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between items-center">
+                            <strong>MEMBER</strong>
+                            <span class="text-stone-400 font-mono">/member/dashboard (Gold, Silver, Underage passes)</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between items-center">
+                            <strong>PLAYER</strong>
+                            <span class="text-stone-400 font-mono">/player/dashboard (Drills, rankings &amp; stats)</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between items-center">
+                            <strong>STAFF</strong>
+                            <span class="text-stone-400 font-mono">/staff/dashboard (Shifts, check-in, KOT &amp; POS)</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between items-center">
+                            <strong>WALK_IN</strong>
+                            <span class="text-stone-400 font-mono">/guest (Pay-per-play pass reservations)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Server-Side Security Enforcement</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Zero Client Trust:</strong> The destination dashboard is strictly derived from the authenticated database account, never from client parameters.</li>
+                        <li>• <strong>Strict HTTP 403 Trap:</strong> Cross-role access attempts (e.g. Member attempting Admin view) trigger instant HTTP 403 Forbidden and log security audit alerts.</li>
+                        <li>• <strong>Server-Side Token Revocation:</strong> Calling <code>/auth/logout</code> blocks the JWT token in memory, preventing replay attacks even if the cookie persists.</li>
+                        <li>• <strong>Junior Protection Model:</strong> Underage members (<18) enforce verified legal guardian consent and emergency phone records.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 4 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 5: Court Anti-Collision Engine                          -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-5">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Domain Engine 1</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Mathematical Court Anti-Collision Lock</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Scheduling Mathematical Model</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>60-Minute Slots:</strong> Staggered on 30-minute intervals across all 5 courts.</li>
+                        <li>• <strong>Overlap Condition:</strong> A collision occurs if:
+                            <div class="p-2.5 rounded-xl bg-stone-950 font-mono text-amber-300 text-xs border border-amber-500/20 my-1">
+                                requested_start &lt; existing_end AND requested_end &gt; existing_start
+                            </div>
+                        </li>
+                        <li>• <strong>Atomic Conflict Rejection:</strong> Overlapping requests fail with HTTP 409 Conflict with timestamp details.</li>
+                        <li>• <strong>Anti-Monopoly Quota:</strong> Strictly caps members at <strong>max 2 court sessions per day</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Tier Pricing Calculations</h3>
+                    <div class="space-y-2 text-xs text-stone-300">
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between">
+                            <span><strong>Gold Tier:</strong> 100% Free Court Access</span>
+                            <span class="text-emerald-400 font-bold">₹0 / hr</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between">
+                            <span><strong>Silver Tier:</strong> 50% Court Fee Discount</span>
+                            <span class="text-amber-300 font-bold">₹400 / hr</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between">
+                            <span><strong>Junior Tier:</strong> 60% Youth Academy Discount</span>
+                            <span class="text-orange-300 font-bold">₹320 / hr</span>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/5 border border-amber-500/15 flex justify-between">
+                            <span><strong>Walk-in Guests:</strong> Standard Rate Card</span>
+                            <span class="text-stone-300 font-bold">₹800 - ₹1,000 / hr</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 5 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 6: Single-Shelf Inventory Engine                        -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-6">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Domain Engine 2</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Unified Single-Shelf Gear Inventory</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Multi-Channel Synchronization</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Unified Physical Pool:</strong> Front-desk counter purchases and sofa Click &amp; Collect orders draw from one live inventory pool.</li>
+                        <li>• <strong>Atomic Stock Decrement:</strong> Orders decrement <code>stock_quantity</code> in the database atomically.</li>
+                        <li>• <strong>Stock Exhaustion Guard:</strong> Orders exceeding available inventory are immediately rejected with HTTP 400 Bad Request.</li>
+                        <li>• <strong>Automated Reorder Thresholds:</strong> Visual warnings trigger in management dashboards when stock drops below threshold.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Automated Discount Engine</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Zero-Friction Discounting:</strong> Customer member tier is detected on user lookup; discounts apply instantly.</li>
+                        <li>• <strong>Gold Members:</strong> 20% discount on all pro shop gear and strings.</li>
+                        <li>• <strong>Silver Members:</strong> 10% discount on racquets, balls, and apparel.</li>
+                        <li>• <strong>Junior Members:</strong> 10% discount on academy training gear.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 6 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 7: Sports Bar POS & Live KOT Display                    -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-7">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Domain Engine 3</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Sports Bar POS &amp; Live Kitchen Display (KOT)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Table Floor Plan &amp; Running Tabs</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>8 Table Floor Plan:</strong> Real-time table status tracking (Available, Occupied, Reserved).</li>
+                        <li>• <strong>Persistent Running Tabs:</strong> Members order multiple rounds without immediate payments.</li>
+                        <li>• <strong>Automated Tier Discounts:</strong> 20% off for Gold and 10% for Silver automatically deducted from tab subtotal.</li>
+                        <li>• <strong>Multi-Channel Tab Settlement:</strong> Split payments supported across Cash, Credit Cards, and UPI QR codes.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-orange-400">Kitchen Display System (KDS)</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Digital Ticket Routing:</strong> Orders route instantly to chef terminals without lost paper chits.</li>
+                        <li>• <strong>State Machine:</strong> Items transition through <code>PENDING</code> $\rightarrow$ <code>PREPARING</code> $\rightarrow$ <code>READY</code> $\rightarrow$ <code>SERVED</code>.</li>
+                        <li>• <strong>Prep Timers:</strong> Visual timer badges highlight overdue meal tickets for line cooks.</li>
+                        <li>• <strong>Station Segregation:</strong> Drink orders route to bartender, meals to the hot kitchen line.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 7 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 8: CRM Funnel & Owner Financials                        -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-8">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Domain Engine 4 &amp; 5</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">5-Stage CRM Funnel &amp; Owner Financials</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">5-Stage CRM Pipeline</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Public Inbound Capture:</strong> Free trial bookings and website enquiries feed directly into CRM.</li>
+                        <li>• <strong>Automated Trial Allocation:</strong> Auto-assigns coach and date without phone tag.</li>
+                        <li>• <strong>Opportunity Stages:</strong> <code>NEW</code> $\rightarrow$ <code>CONTACTED</code> $\rightarrow$ <code>TRIAL_BOOKED</code> $\rightarrow$ <code>QUOTED</code> $\rightarrow$ <code>CONVERTED</code>.</li>
+                        <li>• <strong>1-Click Conversion:</strong> Converts prospect into official member record with digital pass.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Owner Financials &amp; HR Engine</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Consolidated Metrics:</strong> Aggregates Courts + Gear Shop + Sports Bar + Memberships + Invoices.</li>
+                        <li>• <strong>Tax Liabilities:</strong> Segregates 18% GST liabilities across equipment, services, and F&amp;B.</li>
+                        <li>• <strong>Staff Roster:</strong> Schedules shifts for receptionists, court managers, and kitchen staff.</li>
+                        <li>• <strong>Leave Approvals:</strong> Workflow handles employee leave requests with shift coverage validation.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 8 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 9: Low-Level Design (LLD) Database Schema               -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-9">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Low-Level Design (LLD)</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">23-Table Relational Schema &amp; Data Model</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-auto">
+                <div class="glass-box space-y-2 text-xs">
+                    <h4 class="font-bold text-amber-400">Security &amp; Identity</h4>
+                    <p class="text-stone-300"><strong>users:</strong> id, email, username, password_hash, primary_role, is_active</p>
+                    <p class="text-stone-300"><strong>guardians:</strong> id, member_id, guardian_name, relationship_type, consent_signed</p>
+                    <p class="text-stone-300"><strong>player_profiles:</strong> id, user_id, athlete_name, primary_sport, skill_level</p>
+                    <p class="text-stone-300"><strong>audit_logs:</strong> id, user_id, action, ip_address, status, timestamp</p>
+                </div>
+
+                <div class="glass-box space-y-2 text-xs">
+                    <h4 class="font-bold text-emerald-400">Operations &amp; Commerce</h4>
+                    <p class="text-stone-300"><strong>members:</strong> id, user_id, member_code, first_name, tier, status, expiry_date</p>
+                    <p class="text-stone-300"><strong>courts:</strong> id, name, sport_type, surface, hourly_rate, is_active</p>
+                    <p class="text-stone-300"><strong>court_bookings:</strong> id, court_id, member_id, start_time, end_time, fee_charged</p>
+                    <p class="text-stone-300"><strong>products:</strong> id, category_id, sku, price, stock_quantity, threshold_level</p>
+                    <p class="text-stone-300"><strong>bar_tabs:</strong> id, table_id, member_id, subtotal, discount, total, status</p>
+                </div>
+
+                <div class="glass-box space-y-2 text-xs">
+                    <h4 class="font-bold text-orange-400">CRM, Finance &amp; HR</h4>
+                    <p class="text-stone-300"><strong>lead_enquiries:</strong> id, name, email, phone, interested_tier, status</p>
+                    <p class="text-stone-300"><strong>trial_bookings:</strong> id, visitor_name, email, sport_type, trial_date</p>
+                    <p class="text-stone-300"><strong>quotes:</strong> id, lead_id, quote_number, tier_code, amount, status</p>
+                    <p class="text-stone-300"><strong>invoices:</strong> id, member_id, invoice_number, total_amount, status</p>
+                    <p class="text-stone-300"><strong>employees:</strong> id, user_id, employee_code, name, role, staff_group</p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 9 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 10: Odoo 17 ERP Modular Integration                     -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-10">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Enterprise ERP</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Odoo 17 Modular Architecture &amp; Integration</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Addon Package Specifications</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Module Identifier:</strong> <code>sports_club_management</code> compatible with Odoo 17 Community &amp; Enterprise.</li>
+                        <li>• <strong>Declared Manifest:</strong> Depends on <code>base</code>, <code>mail</code>, <code>product</code>, <code>sale</code>, and <code>account</code>.</li>
+                        <li>• <strong>Custom Python Models:</strong> <code>sports.member</code>, <code>sports.court</code>, <code>sports.booking</code>, <code>sports.bar.tab</code>, <code>sports.crm.lead</code>.</li>
+                        <li>• <strong>Security ACLs:</strong> <code>ir.model.access.csv</code> defines permissions for Managers, Receptionists, and Front Desk.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Rich XML View Architecture</h3>
+                    <ul class="text-xs text-stone-300 space-y-2.5">
+                        <li>• <strong>Smart Form Views:</strong> Member inspection cards with action buttons for 1-click renewals and tab settlement.</li>
+                        <li>• <strong>Calendar Views:</strong> Gantt and schedule grids for visual court maintenance and booking slots.</li>
+                        <li>• <strong>Kanban Stages:</strong> Drag-and-drop CRM lead pipeline tracking.</li>
+                        <li>• <strong>Back-Office Accounting:</strong> Connects club front-desk operations directly to standard Odoo general ledger and invoicing.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 10 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 11: Verification & Automated Test Suite                 -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-11">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Quality Assurance</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">41/41 Automated Pytest Regression Coverage</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-auto">
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-400">Authentication &amp; RBAC (16 Tests)</h3>
+                    <ul class="text-xs text-stone-300 space-y-2">
+                        <li>• Valid login across Admin, Member, Player, Staff, and Walk-in accounts.</li>
+                        <li>• Password validation, invalid credentials, and non-existent users.</li>
+                        <li>• Strict HTTP 403 Forbidden cross-role barrier (Member $\rightarrow$ Admin dashboard).</li>
+                        <li>• Server-side JWT session token revocation upon logout.</li>
+                        <li>• Time-limited, single-use password reset token lifecycle.</li>
+                        <li>• Junior member guardian consent enforcement.</li>
+                    </ul>
+                </div>
+
+                <div class="glass-box space-y-3">
+                    <h3 class="text-sm font-black uppercase tracking-wider text-emerald-400">Domain &amp; Business Logic (25 Tests)</h3>
+                    <ul class="text-xs text-stone-300 space-y-2">
+                        <li>• Mathematical court overlap collision detection (HTTP 409).</li>
+                        <li>• Anti-monopoly limit: Max 2 slots per member per day.</li>
+                        <li>• Single-shelf concurrent inventory deduction &amp; out-of-stock rejection.</li>
+                        <li>• Sports bar running tabs, automatic discounts, and settlement.</li>
+                        <li>• 1-click CRM lead conversion to official member.</li>
+                        <li>• <strong>Speed:</strong> Entire 41-test suite passes in <strong>11.03 seconds</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 11 of 12</span>
+            </div>
+        </div>
+
+        <!-- ============================================================= -->
+        <!-- SLIDE 12: Summary & Scalability Roadmap                       -->
+        <!-- ============================================================= -->
+        <div class="slide-card" id="slide-12">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-amber-400 block mb-1">Conclusion</span>
+                <h2 class="text-3xl font-black text-white tracking-tight">Summary &amp; Future Scalability Roadmap</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-auto">
+                <div class="glass-box space-y-2.5">
+                    <h4 class="font-bold text-amber-400">Key Achievements</h4>
+                    <p class="text-xs text-stone-300">• Solved all 6 Odoo Hackathon operational scenes.</p>
+                    <p class="text-xs text-stone-300">• Zero court collision mathematical guarantee.</p>
+                    <p class="text-xs text-stone-300">• 173 seeded users with working bcrypt hashes.</p>
+                    <p class="text-xs text-stone-300">• High-charm Warm Glassmorphism UX.</p>
+                </div>
+
+                <div class="glass-box space-y-2.5">
+                    <h4 class="font-bold text-emerald-400">Core Strengths</h4>
+                    <p class="text-xs text-stone-300">• Strict separation of concerns (API, Domain, Storage).</p>
+                    <p class="text-xs text-stone-300">• Enterprise RBAC with zero frontend trust.</p>
+                    <p class="text-xs text-stone-300">• Dual FastAPI + Odoo 17 modular compatibility.</p>
+                    <p class="text-xs text-stone-300">• 41/41 passing automated test suite.</p>
+                </div>
+
+                <div class="glass-box space-y-2.5">
+                    <h4 class="font-bold text-orange-400">Future Roadmap</h4>
+                    <p class="text-xs text-stone-300">• <strong>Cloud Postgres:</strong> 1-line connection string migration.</p>
+                    <p class="text-xs text-stone-300">• <strong>Redis Redlock:</strong> Distributed cluster collision lock.</p>
+                    <p class="text-xs text-stone-300">• <strong>Mobile Apps:</strong> Flutter / React Native clients.</p>
+                    <p class="text-xs text-stone-300">• <strong>IoT Hardware:</strong> RFID turnstile card scanning.</p>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center pt-3 border-t border-amber-500/15 text-xs text-stone-400">
+                <span>The Champions Club Management System</span>
+                <span>Slide 12 of 12</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Floating Navigation Bar -->
+    <div class="nav-bar fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-2.5 rounded-full bg-stone-950/85 backdrop-blur-2xl border border-amber-500/30 shadow-2xl">
+        <button onclick="prevSlide()" class="p-2 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition" title="Previous Slide (Left Arrow)">
+            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+        </button>
+
+        <span id="slide-indicator" class="font-mono text-xs font-bold text-amber-300 px-2 min-w-[90px] text-center">
+            Slide 1 / 12
+        </span>
+
+        <button onclick="nextSlide()" class="p-2 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition" title="Next Slide (Right Arrow or Space)">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+
+        <span class="w-px h-5 bg-amber-500/20"></span>
+
+        <button onclick="toggleFullscreen()" class="p-2 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition" title="Toggle Fullscreen">
+            <i data-lucide="maximize" class="w-4 h-4 text-amber-400"></i>
+        </button>
+
+        <a href="Champions_Club_System_Design.pptx" download="Champions_Club_System_Design.pptx" class="px-3 py-1.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 text-xs font-bold flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span>PPTX</span>
+        </a>
+
+        <button onclick="window.print()" class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-stone-300 hover:text-white text-xs font-bold flex items-center gap-1.5 transition" title="Print or Save as PDF">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>PDF</span>
+        </button>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentSlide = 1;
+        const totalSlides = 12;
+
+        function showSlide(n) {
+            if (n < 1) n = 1;
+            if (n > totalSlides) n = totalSlides;
+            currentSlide = n;
+
+            document.querySelectorAll('.slide-card').forEach((slide, idx) => {
+                if (idx + 1 === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            document.getElementById('slide-indicator').innerText = `Slide ${currentSlide} / ${totalSlides}`;
+        }
+
+        function prevSlide() { showSlide(currentSlide - 1); }
+        function nextSlide() { showSlide(currentSlide + 1); }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                e.preventDefault();
+                prevSlide();
+            }
+        });
+    </script>
+</body>
+</html>

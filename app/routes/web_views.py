@@ -2,7 +2,7 @@
 Frontend Web Views Router (Server-rendered UI templates)
 """
 from fastapi import APIRouter, Request, Depends
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import RedirectResponse, Response, FileResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import date
@@ -344,3 +344,24 @@ def view_owner(request: Request, db: Session = Depends(get_db)):
             "leaves": leaves
         }
     )
+
+@router.get("/presentation")
+def view_presentation(request: Request):
+    """Interactive System Design & Architecture Presentation Deck"""
+    return templates.TemplateResponse(
+        request=request,
+        name="presentation_viewer.html",
+        context={}
+    )
+
+@router.get("/Champions_Club_System_Design.pptx")
+@router.get("/download-presentation")
+def download_presentation():
+    """Direct download of the bulletproof PowerPoint presentation"""
+    return FileResponse(
+        path="Champions_Club_System_Design.pptx",
+        filename="Champions_Club_System_Design.pptx",
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    )
+
+
