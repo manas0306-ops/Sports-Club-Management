@@ -2,7 +2,7 @@
 Member & Tier Domain Models
 """
 from datetime import datetime, date
-from sqlalchemy import Column, Integer, String, Float, Boolean, Date, DateTime, Text, Enum
+from sqlalchemy import Column, Integer, String, Float, Boolean, Date, DateTime, Text, Enum, ForeignKey
 from sqlalchemy.orm import relationship
 import enum
 
@@ -43,14 +43,31 @@ class Member(Base):
     notes = Column(Text, nullable=True)
     photo_url = Column(String(255), nullable=True)
     
+    # Linked User Account
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
+    user = relationship("User", back_populates="member_profile")
+    guardian = relationship("Guardian", back_populates="member", uselist=False, cascade="all, delete-orphan")
     court_bookings = relationship("CourtBooking", back_populates="member", cascade="all, delete-orphan")
     shop_orders = relationship("ShopOrder", back_populates="member")
     bar_tabs = relationship("BarTab", back_populates="member")
     invoices = relationship("Invoice", back_populates="member")
+
+    @property
+    def membership_category(self) -> str:
+        """Normalized category: GOLD, SILVER, or UNDERAGE"""
+        t = (self.tier or "").lower()
+        if t == "gold":
+            return "GOLD"
+        elif t in ("junior", "underage") or self.is_junior:
+            return "UNDERAGE"
+        elif t == "walkin":
+            return "WALK_IN"
+        return "SILVER"
 
     @property
     def full_name(self) -> str:

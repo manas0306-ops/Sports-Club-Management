@@ -41,9 +41,11 @@ class Employee(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=True)
     employee_code = Column(String(50), unique=True, nullable=False) # e.g. EMP-001
     name = Column(String(100), nullable=False)
     role = Column(String(50), nullable=False) # "front_desk", "bartender", "head_coach", "maintenance", "manager"
+    staff_group = Column(String(50), default="GENERAL_STAFF") # RECEPTIONIST, COURT_MANAGER, SHOP_STAFF, BAR_STAFF, KITCHEN_STAFF, GENERAL_STAFF
     email = Column(String(150), unique=True, nullable=False)
     phone = Column(String(30), nullable=False)
     
@@ -52,6 +54,14 @@ class Employee(Base):
     hire_date = Column(Date, default=date.today)
     is_active = Column(Boolean, default=True)
 
+    # Granular permission groups
+    can_checkin_members = Column(Boolean, default=True)
+    can_manage_courts = Column(Boolean, default=False)
+    can_operate_pos = Column(Boolean, default=False)
+    can_view_kot = Column(Boolean, default=False)
+    can_approve_leaves = Column(Boolean, default=False)
+
+    user = relationship("User", back_populates="employee_profile")
     shifts = relationship("StaffShift", back_populates="employee", cascade="all, delete-orphan")
     leaves = relationship("LeaveRequest", back_populates="employee", cascade="all, delete-orphan")
 
