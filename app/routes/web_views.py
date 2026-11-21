@@ -2,6 +2,7 @@
 Frontend Web Views Router (Server-rendered UI templates)
 """
 from fastapi import APIRouter, Request, Depends
+from fastapi.responses import RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from datetime import date
@@ -13,11 +14,39 @@ from app.models.shop import Product, ProductCategory
 from app.models.bar import BarTable, BarMenuItem
 from app.models.crm import LeadEnquiry
 from app.models.finance import Invoice, Employee, LeaveRequest
+from app.models.user import UserRole
+from app.services.auth_dependencies import get_optional_current_user
+from app.services.auth_security import SESSION_COOKIE_NAME
 from app.config import settings
 
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(include_in_schema=False)
+
+@router.get("/login")
+def view_login(request: Request, db: Session = Depends(get_db)):
+    current_user = get_optional_current_user(request, db)
+    if current_user:
+        dashboards = {
+            UserRole.ADMIN.value: "/admin/dashboard",
+            UserRole.MEMBER.value: "/member/dashboard",
+            UserRole.PLAYER.value: "/player/dashboard",
+            UserRole.STAFF.value: "/staff/dashboard",
+            UserRole.WALK_IN.value: "/guest"
+        }
+        target = dashboards.get(current_user.primary_role, "/")
+        return RedirectResponse(url=target, status_code=303)
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={}
+    )
+
+@router.get("/logout")
+def view_logout():
+    res = RedirectResponse(url="/login", status_code=303)
+    res.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
+    return res
 
 @router.get("/")
 def view_index(request: Request, db: Session = Depends(get_db)):

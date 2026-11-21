@@ -88,13 +88,13 @@
                     </a>
                 </nav>
 
-                <!-- Status Badges & Quick Links -->
-                <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/35 backdrop-blur-md shadow-sm">
-                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> System Live
-                    </span>
-                    <a href="/api/v1/docs" target="_blank" class="text-xs text-amber-300 hover:text-white font-medium px-2.5 py-1 rounded-lg bg-white/5 border border-amber-500/20 hover:border-amber-500/40 transition-all">
-                        API Docs
+                <!-- Status Badges & Auth Controls -->
+                <div class="flex items-center space-x-2.5">
+                    <a href="/login" class="px-3.5 py-1.5 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+                        <i data-lucide="log-in" class="w-3.5 h-3.5"></i> Sign In
+                    </a>
+                    <a href="/guest" class="text-xs text-stone-300 hover:text-white px-2.5 py-1.5 rounded-xl glass-btn font-semibold hidden sm:inline-flex items-center gap-1">
+                        <i data-lucide="ticket" class="w-3.5 h-3.5 text-amber-400"></i> Guest Portal
                     </a>
                 </div>
             </div>
