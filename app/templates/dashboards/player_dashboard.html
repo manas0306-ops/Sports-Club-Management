@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Athlete Player Portal - The Champions Club{% endblock %}
+
+{% block content %}
+<div class="space-y-7">
+
+    <!-- Top Athlete Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 glass-panel p-6 shadow-2xl border border-amber-500/25 relative overflow-hidden backdrop-blur-3xl">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 rounded-2xl bg-emerald-500/20 text-emerald-300 border-2 border-emerald-400/50 flex items-center justify-center font-black text-2xl shadow-lg">
+                <i data-lucide="zap" class="w-8 h-8"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <h1 class="text-2xl font-black text-white tracking-tight">{{ player.athlete_name }}</h1>
+                    <span class="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                        {{ player.club_ranking }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {{ player.team_name }}
+                    </span>
+                </div>
+                <div class="text-xs text-stone-300 flex flex-wrap gap-4 mt-1.5 font-medium">
+                    <span class="flex items-center gap-1 text-emerald-400 font-bold"><i data-lucide="activity" class="w-3.5 h-3.5"></i> Primary Sport: {{ player.primary_sport }}</span>
+                    <span class="flex items-center gap-1 text-stone-300"><i data-lucide="layers" class="w-3.5 h-3.5 text-amber-400"></i> Skill: {{ player.skill_level }}</span>
+                    <span class="flex items-center gap-1 text-stone-300"><i data-lucide="phone" class="w-3.5 h-3.5 text-orange-400"></i> {{ player.phone }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <a href="/courts" class="px-4 py-2 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+                <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Book Practice Court
+            </a>
+            <a href="/logout" class="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/35 font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Sign Out
+            </a>
+        </div>
+    </div>
+
+    <!-- 1. Athlete Performance Statistics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="glass-card p-5 border border-emerald-500/20 bg-emerald-500/10">
+            <span class="text-xs text-emerald-300 font-semibold block uppercase tracking-wider">Tournament Win Rate</span>
+            <span class="text-3xl font-black text-white mt-1 block">82%</span>
+            <span class="text-[11px] text-stone-300 mt-1 block">14 Wins • 3 Losses (2026 Circuit)</span>
+        </div>
+
+        <div class="glass-card p-5 border border-amber-500/20 bg-amber-500/10">
+            <span class="text-xs text-amber-300 font-semibold block uppercase tracking-wider">Club Standing</span>
+            <span class="text-3xl font-black text-amber-300 mt-1 block font-mono">{{ player.club_ranking }}</span>
+            <span class="text-[11px] text-stone-300 mt-1 block">Qualified for Club Championship Finals</span>
+        </div>
+
+        <div class="glass-card p-5 border border-orange-500/20 bg-orange-500/10">
+            <span class="text-xs text-orange-300 font-semibold block uppercase tracking-wider">Training Discipline</span>
+            <span class="text-3xl font-black text-orange-300 mt-1 block">6.5 hrs</span>
+            <span class="text-[11px] text-stone-300 mt-1 block">Weekly Court &amp; Gym Conditioning</span>
+        </div>
+    </div>
+
+    <!-- 2. Training Schedule & Upcoming Match Fixtures -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Weekly Training Regimen -->
+        <div class="glass-panel p-6 shadow-xl border border-amber-500/20 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-amber-500/15">
+                <h3 class="text-sm font-black text-white flex items-center gap-2">
+                    <i data-lucide="dumbbell" class="w-4 h-4 text-amber-400"></i> Pro Coaching &amp; Training Schedule
+                </h3>
+                <span class="text-xs text-amber-300 font-bold">Coach David (Head Pro)</span>
+            </div>
+            
+            <div class="p-4 rounded-2xl bg-stone-900/60 border border-amber-500/15 text-xs text-stone-200 space-y-2">
+                <p class="leading-relaxed font-medium">{{ player.training_schedule }}</p>
+                <div class="pt-2 border-t border-amber-500/10 flex items-center gap-2 text-stone-400">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Training sessions are pre-cleared by the sports director. Floodlit courts reserved.</span>
+                </div>
+            </div>
+
+            <!-- Performance Metrics Drilldown -->
+            <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-200">
+                <span class="font-bold block mb-1">Key Performance Metrics:</span>
+                <p>{{ player.performance_metrics }}</p>
+            </div>
+        </div>
+
+        <!-- Upcoming Competitive Matches -->
+        <div class="glass-panel p-6 shadow-xl border border-amber-500/20 space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-amber-500/15">
+                <h3 class="text-sm font-black text-white flex items-center gap-2">
+                    <i data-lucide="trophy" class="w-4 h-4 text-emerald-400"></i> Upcoming Match &amp; Tournament Fixtures
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    Confirmed Fixture
+                </span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-stone-900/60 border border-amber-500/15 text-xs space-y-2">
+                <span class="font-bold text-white block text-sm">{{ player.upcoming_matches }}</span>
+                <p class="text-stone-300">Surface: Centre Red Clay Court 1 • Standard Tournament Balls • Line Umpire Appointed</p>
+            </div>
+
+            <!-- Recent Results -->
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-stone-400 uppercase tracking-wider block">Recent Match Records:</span>
+                <div class="p-3.5 rounded-xl bg-stone-950/60 border border-amber-500/10 text-xs text-stone-200">
+                    {{ player.match_history }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

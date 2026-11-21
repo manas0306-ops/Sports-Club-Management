@@ -9,13 +9,18 @@ from datetime import date
 
 from app.database import get_db
 from app.models.member import Member
-from app.models.court import Court
+from app.models.court import Court, CourtBooking
 from app.models.shop import Product, ProductCategory
 from app.models.bar import BarTable, BarMenuItem
 from app.models.crm import LeadEnquiry
 from app.models.finance import Invoice, Employee, LeaveRequest
-from app.models.user import UserRole
-from app.services.auth_dependencies import get_optional_current_user
+from app.models.user import User, UserRole
+from app.models.guardian import Guardian
+from app.models.player import PlayerProfile
+from app.models.audit import AuditLog
+from app.services.auth_dependencies import (
+    require_admin, require_member, require_player, require_staff, require_walk_in, get_optional_current_user
+)
 from app.services.auth_security import SESSION_COOKIE_NAME
 from app.config import settings
 
@@ -47,6 +52,171 @@ def view_logout():
     res = RedirectResponse(url="/login", status_code=303)
     res.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
     return res
+
+# =========================================================================
+# STRICT ISOLATED ROLE DASHBOARDS
+# =========================================================================
+
+@router.get("/admin/dashboard")
+def view_admin_dashboard(
+    request: Request,
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    ADMIN Portal: Strictly accessible by ADMIN role accounts only.
+    Provides complete executive KPIs, user governance, staff roster, and system audit logs.
+    """
+    total_members = db.query(Member).count()
+    active_members = db.query(Member).filter(Member.status == "active").count()
+    expired_members = db.query(Member).filter(Member.status == "expired").count()
+    gold_count = db.query(Member).filter(Member.tier == "gold").count()
+    silver_count = db.query(Member).filter(Member.tier == "silver").count()
+    underage_count = db.query(Member).filter((Member.tier == "junior") | (Member.is_junior == True)).count()
+    
+    total_users = db.query(User).count()
+    guardian_count = db.query(Guardian).count()
+    staff_count = db.query(Employee).count()
+    player_count = db.query(PlayerProfile).count()
+    
+    employees = db.query(Employee).all()
+    leaves = db.query(LeaveRequest).order_by(LeaveRequest.created_at.desc()).all()
+    audit_logs = db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(15).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboards/admin_dashboard.html",
+        context={
+            "current_user": current_user,
+            "total_members": total_members,
+            "active_members": active_members,
+            "expired_members": expired_members,
+            "gold_count": gold_count,
+            "silver_count": silver_count,
+            "underage_count": underage_count,
+            "total_users": total_users,
+            "guardian_count": guardian_count,
+            "staff_count": staff_count,
+            "player_count": player_count,
+            "employees": employees,
+            "leaves": leaves,
+            "audit_logs": audit_logs,
+            "tiers": settings.TIERS
+        }
+    )
+
+@router.get("/member/dashboard")
+def view_member_dashboard(
+    request: Request,
+    current_user: User = Depends(require_member),
+    db: Session = Depends(get_db)
+):
+    """
+    MEMBER Portal: Strictly accessible by MEMBER role accounts only.
+    Provides personal digital membership cards (Gold, Silver, Underage), bookings, and renewal.
+    """
+    # IDOR Protection: Member can only view their own linked member profile
+    member = current_user.member_profile
+    if not member:
+        # Fallback for safety if linked profile is not mapped
+        member = db.query(Member).filter(Member.email == current_user.email).first()
+        if not member:
+            member = db.query(Member).first()
+
+    bookings = db.query(CourtBooking).filter(
+        CourtBooking.member_id == member.id
+    ).order_by(CourtBooking.booking_date.desc()).all()
+
+    invoices = db.query(Invoice).filter(
+        Invoice.member_id == member.id
+    ).order_by(Invoice.issue_date.desc()).all()
+
+    total_spend = sum(b.total_amount for b in bookings) + sum(inv.amount_paid for inv in invoices)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboards/member_dashboard.html",
+        context={
+            "current_user": current_user,
+            "member": member,
+            "bookings": bookings,
+            "invoices": invoices,
+            "total_spend": total_spend,
+            "tiers": settings.TIERS
+        }
+    )
+
+@router.get("/player/dashboard")
+def view_player_dashboard(
+    request: Request,
+    current_user: User = Depends(require_player),
+    db: Session = Depends(get_db)
+):
+    """
+    PLAYER Portal: Strictly accessible by PLAYER role accounts only.
+    Provides athlete training regimen, tournament fixtures, and performance metrics.
+    """
+    player = current_user.player_profile
+    if not player:
+        player = db.query(PlayerProfile).filter(PlayerProfile.email == current_user.email).first()
+        if not player:
+            player = db.query(PlayerProfile).first()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboards/player_dashboard.html",
+        context={
+            "current_user": current_user,
+            "player": player
+        }
+    )
+
+@router.get("/staff/dashboard")
+def view_staff_dashboard(
+    request: Request,
+    current_user: User = Depends(require_staff),
+    db: Session = Depends(get_db)
+):
+    """
+    STAFF Portal: Strictly accessible by STAFF role accounts only.
+    Provides departmental action cards, roster shifts, and attendance logging.
+    """
+    employee = current_user.employee_profile
+    if not employee:
+        employee = db.query(Employee).filter(Employee.email == current_user.email).first()
+        if not employee:
+            employee = db.query(Employee).first()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboards/staff_dashboard.html",
+        context={
+            "current_user": current_user,
+            "employee": employee
+        }
+    )
+
+@router.get("/guest")
+def view_guest_portal(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    GUEST Portal: Accessible by WALK_IN accounts and general public visitors.
+    Offers pay-per-play reservations, standard rate cards, and membership upgrade showcase.
+    """
+    current_user = get_optional_current_user(request, db)
+    courts = db.query(Court).filter(Court.is_active == True).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="guest_portal.html",
+        context={
+            "current_user": current_user,
+            "courts": courts,
+            "tiers": settings.TIERS
+        }
+    )
 
 @router.get("/")
 def view_index(request: Request, db: Session = Depends(get_db)):
