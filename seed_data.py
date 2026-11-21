@@ -5,10 +5,12 @@ Preloads realistic club data covering all 6 scenes from the Odoo challenge probl
 from datetime import date, datetime, timedelta, time
 from app.database import SessionLocal, engine, Base
 from app.models import (
+    User, UserRole, Guardian, PlayerProfile, AuditLog,
     Member, Court, CourtBooking, ProductCategory, Product,
     BarTable, BarMenuItem, BarTab, BarOrderItem, BarDailyClosing,
     LeadEnquiry, TrialBooking, Quote, Invoice, Employee, StaffShift, LeaveRequest
 )
+from app.services.auth_security import hash_password
 
 def generate_members(today):
     first_names = [
@@ -222,14 +224,123 @@ def seed_database():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
 
-    print("Seeding The Champions Club database...")
+    print("Seeding The Champions Club database with Multi-Role Authentication...")
+
+    today = date.today()
+
+    # 0. Seed Central Administrator Account
+    admin_user = User(
+        username="admin",
+        email="admin@champions.club",
+        password_hash=hash_password("ChampionsAdmin2026!"),
+        primary_role=UserRole.ADMIN.value,
+        is_active=True,
+        is_verified=True
+    )
+    db.add(admin_user)
+    db.flush()
+    print("Seeded Administrator Account: admin@champions.club (Role: ADMIN)")
 
     # 1. Seed Members (165 total: 35 Gold, 65 Silver, 35 Junior, 30 Walk-in)
-    today = date.today()
     members = generate_members(today)
-    db.add_all(members)
+    guardians = []
+    
+    for m in members:
+        is_walkin = (m.tier == "walkin")
+        role = UserRole.WALK_IN.value if is_walkin else UserRole.MEMBER.value
+        pwd = "GuestPass123!" if is_walkin else "MemberPass123!"
+        username = m.email.split("@")[0].replace(".", "_")
+        
+        user = User(
+            username=username,
+            email=m.email,
+            password_hash=hash_password(pwd),
+            primary_role=role,
+            is_active=(m.status != "suspended"),
+            is_verified=True
+        )
+        db.add(user)
+        db.flush()
+        m.user_id = user.id
+        db.add(m)
+        db.flush()
+
+        # If underage / junior, create Guardian consent record
+        if m.is_junior or m.tier == "junior":
+            g_name = m.emergency_contact_name or f"{m.last_name} Guardian"
+            guardians.append(Guardian(
+                member_id=m.id,
+                guardian_name=g_name,
+                relationship_type="Parent",
+                contact_phone=m.emergency_contact_phone or "+91 98000 00000",
+                contact_email=f"guardian.{m.last_name.lower()}@example.com",
+                consent_status="approved",
+                consent_date=today - timedelta(days=45),
+                notes="Verified parental consent on record for junior academy access."
+            ))
+
+    db.add_all(guardians)
     db.commit()
-    print(f"Successfully seeded {len(members)} realistic members (Gold, Silver, Junior, Walk-in).")
+    print(f"Successfully seeded {len(members)} realistic members with credentialed user accounts & {len(guardians)} guardian consent profiles.")
+
+    # 1B. Seed Dedicated Athlete Player Profiles
+    player1_user = User(
+        username="player_arjun",
+        email="player.arjun@champions.club",
+        password_hash=hash_password("PlayerPass123!"),
+        primary_role=UserRole.PLAYER.value,
+        is_active=True,
+        is_verified=True
+    )
+    db.add(player1_user)
+    db.flush()
+
+    p1 = PlayerProfile(
+        user_id=player1_user.id,
+        athlete_name="Arjun Rathore",
+        email="player.arjun@champions.club",
+        phone="+91 98888 77777",
+        primary_sport="Tennis",
+        secondary_sports="Padel",
+        skill_level="Professional",
+        club_ranking="Club Seed #1",
+        team_name="The Champions Pro Squad",
+        training_schedule="Tue & Thu 06:00 - 08:00 (Serve & Volley Drills), Sat 16:00 - 18:00 (Match Simulation)",
+        upcoming_matches="Championship Semi-Final vs. Vikram M. (Court 1, Saturday 18:00)",
+        match_history="Won 6-4 6-2 vs. Kabir P.; Won 7-5 6-3 vs. Dev K.",
+        performance_metrics="First Serve Win %: 78% | Break Point Conversion: 65% | Aces/Match: 11"
+    )
+    db.add(p1)
+
+    player2_user = User(
+        username="player_priya",
+        email="player.priya@champions.club",
+        password_hash=hash_password("PlayerPass123!"),
+        primary_role=UserRole.PLAYER.value,
+        is_active=True,
+        is_verified=True
+    )
+    db.add(player2_user)
+    db.flush()
+
+    p2 = PlayerProfile(
+        user_id=player2_user.id,
+        athlete_name="Priya Sen",
+        email="player.priya@champions.club",
+        phone="+91 98765 43211",
+        primary_sport="Badminton",
+        secondary_sports="Tennis",
+        skill_level="Advanced",
+        club_ranking="Club Seed #2",
+        team_name="The Champions Pro Squad",
+        training_schedule="Mon, Wed & Fri 07:00 - 09:00 (Footwork & Smash Drills)",
+        upcoming_matches="Karnataka Open Quarter-Final (Court 2, Sunday 10:00)",
+        match_history="Won 21-18 21-15 vs. Sanya M.",
+        performance_metrics="Smash Velocity: 295 km/h | Net Play Accuracy: 84%"
+    )
+    db.add(p2)
+    db.commit()
+    print("Seeded Player Athlete Profiles: player_arjun & player_priya (Role: PLAYER)")
 
     # 2. Seed Courts (Scene 2: Tennis, Cricket, Padel)
     courts = [
@@ -549,14 +660,37 @@ def seed_database():
     db.commit()
 
     # 7. Seed Owner Finance, Invoices & HR Staff (Scene 6)
+    # Provision Staff User Accounts
+    staff_users = [
+        User(username="staff_coach", email="staff.coach@champions.club", password_hash=hash_password("StaffPass123!"), primary_role=UserRole.STAFF.value, is_active=True, is_verified=True),
+        User(username="staff_reception", email="staff.reception@champions.club", password_hash=hash_password("StaffPass123!"), primary_role=UserRole.STAFF.value, is_active=True, is_verified=True),
+        User(username="staff_bar", email="staff.bar@champions.club", password_hash=hash_password("StaffPass123!"), primary_role=UserRole.STAFF.value, is_active=True, is_verified=True),
+        User(username="staff_kitchen", email="staff.kitchen@champions.club", password_hash=hash_password("StaffPass123!"), primary_role=UserRole.STAFF.value, is_active=True, is_verified=True)
+    ]
+    db.add_all(staff_users)
+    db.flush()
+
     employees = [
-        Employee(employee_code="EMP-001", name="David Miller", role="head_coach", email="david.pro@championsclub.in", phone="+91 99111 00001", monthly_salary=65000.0),
-        Employee(employee_code="EMP-002", name="Anita Roy", role="front_desk", email="anita.frontdesk@championsclub.in", phone="+91 99111 00002", monthly_salary=32000.0),
-        Employee(employee_code="EMP-003", name="Rajesh Kumar", role="bartender", email="rajesh.bar@championsclub.in", phone="+91 99111 00003", monthly_salary=28000.0),
-        Employee(employee_code="EMP-004", name="Suresh Patil", role="court_maintenance", email="suresh.turf@championsclub.in", phone="+91 99111 00004", monthly_salary=24000.0)
+        Employee(user_id=staff_users[0].id, employee_code="EMP-001", name="David Miller", role="head_coach", staff_group="COURT_MANAGER", email="david.pro@championsclub.in", phone="+91 99111 00001", monthly_salary=65000.0, can_manage_courts=True),
+        Employee(user_id=staff_users[1].id, employee_code="EMP-002", name="Anita Roy", role="front_desk", staff_group="RECEPTIONIST", email="anita.frontdesk@championsclub.in", phone="+91 99111 00002", monthly_salary=32000.0, can_checkin_members=True, can_manage_courts=True),
+        Employee(user_id=staff_users[2].id, employee_code="EMP-003", name="Rajesh Kumar", role="bartender", staff_group="BAR_STAFF", email="rajesh.bar@championsclub.in", phone="+91 99111 00003", monthly_salary=28000.0, can_operate_pos=True),
+        Employee(user_id=staff_users[3].id, employee_code="EMP-004", name="Suresh Patil", role="court_maintenance", staff_group="GENERAL_STAFF", email="suresh.turf@championsclub.in", phone="+91 99111 00004", monthly_salary=24000.0, can_view_kot=True)
     ]
     db.add_all(employees)
     db.commit()
+
+    # Provision Dedicated Walk-in Guest User
+    guest_user = User(
+        username="guest_rohit",
+        email="guest.rohit@champions.club",
+        password_hash=hash_password("GuestPass123!"),
+        primary_role=UserRole.WALK_IN.value,
+        is_active=True,
+        is_verified=True
+    )
+    db.add(guest_user)
+    db.commit()
+    print("Seeded Staff Accounts (staff_reception, staff_coach, staff_bar, staff_kitchen) & Guest User (guest_rohit).")
 
     # Employee Shifts
     shifts = [
