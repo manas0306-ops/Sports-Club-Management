@@ -5,75 +5,78 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Header bar (Frosted Glass Header) -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 shadow-xl">
+    <!-- Header bar (Frosted Glass Header in Warm Espresso & Amber) -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 shadow-xl border border-amber-500/20">
         <div>
             <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-                <i data-lucide="users" class="w-6 h-6 text-purple-400"></i> Member Management &amp; Front Desk
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
+                Member Management &amp; Front Desk
             </h1>
-            <p class="text-xs text-slate-400 mt-1">Instant recognition, tier privileges, expiry alerts, and unified 360° club history.</p>
+            <p class="text-xs text-stone-300 mt-1">Instant recognition, tier privileges, expiry alerts, and unified 360° club history.</p>
         </div>
-        <button onclick="openModal('new-member-modal')" class="px-5 py-2.5 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/25">
+        <button onclick="openModal('new-member-modal')" class="px-5 py-2.5 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/25">
             <i data-lucide="user-plus" class="w-4 h-4"></i> New Member Sign-Up
         </button>
     </div>
 
     <!-- Quick Search & Lookup (Scene 1) -->
-    <div class="glass-panel p-6 shadow-lg space-y-4">
-        <label class="block text-xs font-bold text-purple-300 uppercase tracking-wider">Fast Front Desk Member Lookup</label>
+    <div class="glass-panel p-6 shadow-lg space-y-4 border border-amber-500/15">
+        <label class="block text-xs font-bold text-amber-300 uppercase tracking-wider">Fast Front Desk Member Lookup</label>
         <div class="relative">
-            <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+            <i data-lucide="search" class="w-5 h-5 text-amber-400 absolute left-3.5 top-3.5"></i>
             <input type="text" id="member-search-input" oninput="handleMemberSearch(this.value)" placeholder="Search by Member Code (e.g. TC-GOLD-0001), Name, Phone or Email..." class="glass-input w-full pl-11 pr-4 py-3 text-sm">
         </div>
-        <!-- Live Search Dropdown in Glass -->
-        <div id="search-results-dropdown" class="hidden divide-y divide-white/10 border border-white/10 rounded-2xl bg-slate-900/90 backdrop-blur-2xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto"></div>
+        <!-- Live Search Dropdown in Warm Glass -->
+        <div id="search-results-dropdown" class="hidden divide-y divide-amber-500/15 border border-amber-500/20 rounded-2xl bg-stone-950/95 backdrop-blur-2xl shadow-2xl overflow-hidden max-h-64 overflow-y-auto"></div>
     </div>
 
     <!-- Active Selected Member 360 View Profile -->
-    <div id="member-profile-panel" class="hidden glass-panel p-7 space-y-6 border border-white/15 shadow-2xl">
+    <div id="member-profile-panel" class="hidden glass-panel p-7 space-y-6 border border-amber-500/25 shadow-2xl">
         <!-- Profile Header -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-white/10">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-amber-500/15">
             <div class="flex items-center gap-4">
-                <img id="prof-photo" src="" class="w-16 h-16 rounded-2xl border-2 border-purple-400/40 shadow-lg bg-slate-800 p-0.5">
+                <img id="prof-photo" src="" class="w-16 h-16 rounded-2xl border-2 border-amber-400/50 shadow-lg bg-stone-900 p-0.5 object-cover">
                 <div>
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-2.5 flex-wrap">
                         <h2 id="prof-name" class="text-2xl font-black text-white"></h2>
                         <span id="prof-tier-badge" class="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider"></span>
                         <span id="prof-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold"></span>
                     </div>
-                    <div class="text-xs text-slate-400 flex flex-wrap gap-4 mt-1.5 font-medium">
-                        <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-purple-400"></i> <strong id="prof-code" class="text-slate-200"></strong></span>
-                        <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3.5 h-3.5 text-blue-400"></i> <span id="prof-phone" class="text-slate-200"></span></span>
-                        <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-emerald-400"></i> <span id="prof-email" class="text-slate-200"></span></span>
+                    <div class="text-xs text-stone-300 flex flex-wrap gap-4 mt-1.5 font-medium">
+                        <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5 text-amber-400"></i> <strong id="prof-code" class="text-white"></strong></span>
+                        <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3.5 h-3.5 text-amber-300"></i> <span id="prof-phone" class="text-stone-300"></span></span>
+                        <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5 text-orange-400"></i> <span id="prof-email" class="text-stone-300"></span></span>
                     </div>
                 </div>
             </div>
 
             <!-- Expiry & Renewal Actions -->
-            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-md">
+            <div class="flex items-center gap-3 bg-stone-900/60 p-3.5 rounded-2xl border border-amber-500/20 backdrop-blur-md">
                 <div>
-                    <span class="block text-[11px] text-slate-400 font-medium">Membership Expiry</span>
+                    <span class="block text-[11px] text-stone-400 font-medium">Membership Expiry</span>
                     <span id="prof-expiry" class="text-sm font-extrabold text-white"></span>
                     <span id="prof-days-alert" class="block text-xs font-bold mt-0.5"></span>
                 </div>
-                <button onclick="renewCurrentMember()" class="px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
+                <button onclick="renewCurrentMember()" class="px-3.5 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 font-bold text-xs transition flex items-center gap-1.5 shadow-sm">
                     <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Renew 1 Year
                 </button>
             </div>
         </div>
 
-        <!-- Tier Entitlements Cards (Frosted Glass Tiles) -->
+        <!-- Tier Entitlements Cards (Warm Frosted Glass Tiles) -->
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div class="glass-card p-4 border border-purple-500/20 bg-purple-500/10">
-                <span class="text-xs text-purple-300 font-semibold block">Court Access Rate</span>
+            <div class="glass-card p-4 border border-amber-500/20 bg-amber-500/10">
+                <span class="text-xs text-amber-300 font-semibold block">Court Access Rate</span>
                 <span id="entitle-court" class="text-lg font-black text-white mt-0.5 block"></span>
             </div>
-            <div class="glass-card p-4 border border-blue-500/20 bg-blue-500/10">
-                <span class="text-xs text-blue-300 font-semibold block">Pro Shop Discount</span>
+            <div class="glass-card p-4 border border-orange-500/20 bg-orange-500/10">
+                <span class="text-xs text-orange-300 font-semibold block">Pro Shop Discount</span>
                 <span id="entitle-shop" class="text-lg font-black text-white mt-0.5 block"></span>
             </div>
-            <div class="glass-card p-4 border border-amber-500/20 bg-amber-500/10">
-                <span class="text-xs text-amber-300 font-semibold block">Bar &amp; Café Discount</span>
+            <div class="glass-card p-4 border border-amber-600/20 bg-amber-600/10">
+                <span class="text-xs text-amber-200 font-semibold block">Bar &amp; Café Discount</span>
                 <span id="entitle-bar" class="text-lg font-black text-white mt-0.5 block"></span>
             </div>
             <div class="glass-card p-4 border border-emerald-500/20 bg-emerald-500/10">
@@ -87,32 +90,34 @@
             <!-- Recent Court Bookings -->
             <div class="glass-card p-4 space-y-3">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i data-lucide="calendar" class="w-4 h-4 text-purple-400"></i> Recent Court Bookings
+                    <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i> Recent Court Bookings
                 </h3>
-                <div id="prof-bookings-list" class="space-y-2 text-xs divide-y divide-white/5"></div>
+                <div id="prof-bookings-list" class="space-y-2 text-xs divide-y divide-amber-500/10"></div>
             </div>
 
             <!-- Open Tab & Bar Orders -->
             <div class="glass-card p-4 space-y-3">
                 <div class="flex justify-between items-center">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <i data-lucide="coffee" class="w-4 h-4 text-amber-400"></i> Active Bar Tab &amp; Purchases
+                        <i data-lucide="coffee" class="w-4 h-4 text-orange-400"></i> Active Bar Tab &amp; Purchases
                     </h3>
                     <div id="prof-open-tab-pill"></div>
                 </div>
-                <div id="prof-shop-list" class="space-y-2 text-xs divide-y divide-white/5"></div>
+                <div id="prof-shop-list" class="space-y-2 text-xs divide-y divide-amber-500/10"></div>
             </div>
         </div>
     </div>
 
-    <!-- Full Members Directory Table in Frosted Glass -->
-    <div class="glass-panel overflow-hidden shadow-2xl">
-        <div class="p-6 border-b border-white/10 flex justify-between items-center">
-            <h2 class="text-lg font-black text-white">Club Members Directory ({{ members|length }})</h2>
+    <!-- Full Members Directory Content Table in Warm Frosted Glass -->
+    <div class="glass-panel overflow-hidden shadow-2xl border border-amber-500/20">
+        <div class="p-6 border-b border-amber-500/15 flex justify-between items-center bg-stone-950/40">
+            <h2 class="text-lg font-black text-white flex items-center gap-2.5">
+                <i data-lucide="list" class="w-5 h-5 text-amber-400"></i> Active Member Directory Table ({{ members|length }})
+            </h2>
         </div>
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-300">
-                <thead class="bg-white/5 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/10">
+            <table class="glass-table text-left text-sm text-stone-200">
+                <thead>
                     <tr>
                         <th class="px-6 py-3.5">Member</th>
                         <th class="px-6 py-3.5">Code</th>
@@ -123,34 +128,34 @@
                         <th class="px-6 py-3.5 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody class="divide-y divide-amber-500/10">
                     {% for m in members %}
-                    <tr class="hover:bg-white/5 transition-colors cursor-pointer" onclick="loadMemberProfile({{ m.id }})">
+                    <tr class="hover:bg-amber-500/10 transition cursor-pointer" onclick="loadMemberProfile({{ m.id }})">
                         <td class="px-6 py-4 font-semibold text-white flex items-center gap-3">
-                            <img src="{{ m.photo_url }}" class="w-8 h-8 rounded-xl bg-slate-800 border border-white/10">
+                            <img src="{{ m.photo_url }}" class="w-8 h-8 rounded-xl bg-stone-800 border border-amber-500/20 object-cover">
                             {{ m.full_name }}
                         </td>
-                        <td class="px-6 py-4 font-mono text-xs text-purple-300">{{ m.member_code }}</td>
+                        <td class="px-6 py-4 font-mono text-xs text-amber-300 font-bold">{{ m.member_code }}</td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase
-                                {% if m.tier == 'gold' %} bg-amber-400/20 text-amber-300 border border-amber-400/30
-                                {% elif m.tier == 'silver' %} bg-slate-400/20 text-slate-200 border border-slate-400/30
-                                {% elif m.tier == 'junior' %} bg-blue-500/20 text-blue-300 border border-blue-500/30
-                                {% else %} bg-slate-500/20 text-slate-400 {% endif %}">
+                                {% if m.tier == 'gold' %} bg-amber-400/20 text-amber-300 border border-amber-400/35
+                                {% elif m.tier == 'silver' %} bg-stone-600/40 text-stone-200 border border-stone-500/30
+                                {% elif m.tier == 'junior' %} bg-orange-500/20 text-orange-300 border border-orange-500/30
+                                {% else %} bg-stone-700/40 text-stone-400 {% endif %}">
                                 {{ m.tier }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-xs">{{ m.phone }}</td>
-                        <td class="px-6 py-4 text-xs font-medium">{{ m.expiry_date }}</td>
+                        <td class="px-6 py-4 text-xs text-stone-300">{{ m.phone }}</td>
+                        <td class="px-6 py-4 text-xs font-medium text-stone-300">{{ m.expiry_date }}</td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold
-                                {% if m.status == 'active' %} bg-emerald-500/20 text-emerald-300 border border-emerald-500/30
-                                {% else %} bg-rose-500/20 text-rose-300 border border-rose-500/30 {% endif %}">
+                                {% if m.status == 'active' %} bg-emerald-500/20 text-emerald-300 border border-emerald-500/35
+                                {% else %} bg-rose-500/20 text-rose-300 border border-rose-500/35 {% endif %}">
                                 {{ m.status|capitalize }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button onclick="event.stopPropagation(); loadMemberProfile({{ m.id }})" class="text-purple-300 hover:text-white font-bold text-xs underline">
+                            <button onclick="event.stopPropagation(); loadMemberProfile({{ m.id }})" class="glass-btn px-3 py-1 text-xs text-amber-300 hover:text-white inline-flex items-center gap-1 font-bold">
                                 View Profile
                             </button>
                         </td>
@@ -163,37 +168,37 @@
 
 </div>
 
-<!-- Modal: New Member Registration (Glass Modal) -->
+<!-- Modal: New Member Registration (Warm Glass Modal) -->
 <div id="new-member-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
-    <div class="glass-panel max-w-lg w-full p-6 sm:p-8 space-y-5 border border-white/20 shadow-2xl">
-        <div class="flex justify-between items-center pb-2 border-b border-white/10">
+    <div class="glass-panel max-w-lg w-full p-6 sm:p-8 space-y-5 border border-amber-500/25 shadow-2xl">
+        <div class="flex justify-between items-center pb-2 border-b border-amber-500/15">
             <h3 class="text-lg font-black text-white">New Member Registration</h3>
-            <button onclick="closeModal('new-member-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button onclick="closeModal('new-member-modal')" class="text-stone-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <form onsubmit="submitNewMember(event)" class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">First Name</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">First Name</label>
                     <input type="text" name="first_name" required class="glass-input w-full px-3 py-2 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Last Name</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Last Name</label>
                     <input type="text" name="last_name" required class="glass-input w-full px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Email</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Email</label>
                     <input type="email" name="email" required class="glass-input w-full px-3 py-2 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Phone</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Phone</label>
                     <input type="tel" name="phone" required class="glass-input w-full px-3 py-2 text-sm">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Membership Plan</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Membership Plan</label>
                     <select name="tier" class="glass-input w-full px-3 py-2 text-sm font-bold">
                         <option value="gold">Gold Tier (₹5,000/mo)</option>
                         <option value="silver" selected>Silver Tier (₹2,500/mo)</option>
@@ -201,57 +206,58 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Duration (Months)</label>
-                    <select name="duration_months" class="glass-input w-full px-3 py-2 text-sm">
-                        <option value="1">1 Month</option>
-                        <option value="3">3 Months</option>
-                        <option value="6">6 Months</option>
-                        <option value="12" selected>12 Months (Annual)</option>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Primary Sport</label>
+                    <select name="primary_sport" class="glass-input w-full px-3 py-2 text-sm">
+                        <option value="tennis">Tennis</option>
+                        <option value="cricket">Cricket</option>
+                        <option value="padel">Padel</option>
                     </select>
                 </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Date of Birth</label>
-                    <input type="date" name="date_of_birth" class="glass-input w-full px-3 py-2 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Emergency Phone</label>
-                    <input type="tel" name="emergency_contact_phone" placeholder="Emergency contact" class="glass-input w-full px-3 py-2 text-sm">
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
-                <button type="button" onclick="closeModal('new-member-modal')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white rounded-lg">Cancel</button>
-                <button type="submit" class="px-5 py-2 text-sm font-bold glass-btn-primary">Enroll Member</button>
+            <div class="flex justify-end gap-3 pt-3 border-t border-amber-500/15">
+                <button type="button" onclick="closeModal('new-member-modal')" class="glass-btn px-4 py-2 text-xs">Cancel</button>
+                <button type="submit" class="glass-btn-primary px-5 py-2 text-xs">Enroll Member</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    let activeSelectedMemberId = null;
+    let currentLoadedMemberId = null;
 
-    async function handleMemberSearch(val) {
+    async function handleMemberSearch(query) {
         const dropdown = document.getElementById('search-results-dropdown');
-        if (!val || val.length < 1) {
+        if (!query || query.trim().length < 2) {
             dropdown.classList.add('hidden');
             return;
         }
+
         try {
-            const res = await fetch(`/api/v1/members/search?q=${encodeURIComponent(val)}`);
-            const data = await res.json();
-            if (data.length === 0) {
-                dropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">No member found matching query.</div>';
+            const res = await fetch(`/api/v1/members/search?q=${encodeURIComponent(query)}`);
+            const members = await res.json();
+
+            if (members.length === 0) {
+                dropdown.innerHTML = '<div class="p-4 text-xs text-stone-400 text-center">No member matches found</div>';
                 dropdown.classList.remove('hidden');
                 return;
             }
-            dropdown.innerHTML = data.map(m => `
-                <div onclick="selectMemberFromSearch(${m.id})" class="p-3 hover:bg-white/10 cursor-pointer flex justify-between items-center transition">
-                    <div>
-                        <div class="font-bold text-sm text-white">${m.name} <span class="text-xs font-mono text-purple-400 font-semibold">(${m.member_code})</span></div>
-                        <div class="text-xs text-slate-400">${m.phone} | ${m.email}</div>
+
+            dropdown.innerHTML = members.map(m => `
+                <div onclick="selectSearchMember(${m.id})" class="p-3.5 hover:bg-amber-500/15 cursor-pointer flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <img src="${m.photo_url}" class="w-8 h-8 rounded-xl bg-stone-800 object-cover border border-amber-500/20">
+                        <div>
+                            <span class="text-sm font-bold text-white block">${m.full_name}</span>
+                            <span class="text-[11px] text-stone-400">${m.phone} • ${m.email}</span>
+                        </div>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${m.tier === 'gold' ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30' : 'bg-slate-700 text-slate-200'}">${m.tier}</span>
+                    <div class="text-right">
+                        <span class="font-mono text-xs font-bold text-amber-300 block">${m.member_code}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                            m.tier === 'gold' ? 'bg-amber-400/20 text-amber-300' :
+                            m.tier === 'silver' ? 'bg-stone-500/20 text-stone-300' : 'bg-orange-500/20 text-orange-300'
+                        }">${m.tier}</span>
+                    </div>
                 </div>
             `).join('');
             dropdown.classList.remove('hidden');
@@ -260,124 +266,151 @@
         }
     }
 
-    function selectMemberFromSearch(id) {
+    function selectSearchMember(id) {
         document.getElementById('search-results-dropdown').classList.add('hidden');
+        document.getElementById('member-search-input').value = '';
         loadMemberProfile(id);
     }
 
-    async function loadMemberProfile(memberId) {
-        activeSelectedMemberId = memberId;
+    async function loadMemberProfile(id) {
         try {
-            const res = await fetch(`/api/v1/members/${memberId}`);
+            const res = await fetch(`/api/v1/members/${id}/profile`);
             const data = await res.json();
-            if (!res.ok) return showToast(data.detail || 'Error loading profile', 'error');
+            currentLoadedMemberId = data.id;
 
-            document.getElementById('member-profile-panel').classList.remove('hidden');
-            document.getElementById('member-profile-panel').scrollIntoView({ behavior: 'smooth' });
-
-            document.getElementById('prof-photo').src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.name)}`;
-            document.getElementById('prof-name').innerText = data.name;
+            // Fill profile data
+            document.getElementById('prof-photo').src = data.photo_url;
+            document.getElementById('prof-name').innerText = data.full_name;
             document.getElementById('prof-code').innerText = data.member_code;
             document.getElementById('prof-phone').innerText = data.phone;
             document.getElementById('prof-email').innerText = data.email;
             document.getElementById('prof-expiry').innerText = data.expiry_date;
 
-            const daysAlert = document.getElementById('prof-days-alert');
-            if (data.is_expired) {
-                daysAlert.innerText = `EXPIRED (${Math.abs(data.days_to_expiry)} days ago)`;
-                daysAlert.className = 'block text-xs font-bold text-rose-400';
-            } else if (data.days_to_expiry <= 30) {
-                daysAlert.innerText = `Expiring soon: ${data.days_to_expiry} days left`;
-                daysAlert.className = 'block text-xs font-bold text-amber-400';
-            } else {
-                daysAlert.innerText = `Active: ${data.days_to_expiry} days remaining`;
-                daysAlert.className = 'block text-xs font-semibold text-emerald-400';
-            }
-
+            // Tier Badge
             const tierBadge = document.getElementById('prof-tier-badge');
             tierBadge.innerText = data.tier;
-            tierBadge.className = `px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
-                data.tier === 'gold' ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' : data.tier === 'junior' ? 'bg-blue-400/20 text-blue-300 border border-blue-400/40' : 'bg-slate-400/20 text-slate-200 border border-slate-400/40'
-            }`;
+            tierBadge.className = 'px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ' + (
+                data.tier === 'gold' ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' :
+                data.tier === 'silver' ? 'bg-stone-400/20 text-stone-200 border border-stone-400/30' :
+                'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+            );
 
+            // Status Badge
             const statusBadge = document.getElementById('prof-status-badge');
-            statusBadge.innerText = data.status.toUpperCase();
-            statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${data.status === 'active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}`;
+            statusBadge.innerText = data.status;
+            statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ' + (
+                data.status === 'active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+            );
 
-            document.getElementById('entitle-court').innerText = data.privileges.court_discount === 1.0 ? '100% Free Access' : `${data.privileges.court_discount * 100}% Discount`;
-            document.getElementById('entitle-shop').innerText = `${data.privileges.shop_discount * 100}% Off`;
-            document.getElementById('entitle-bar').innerText = `${data.privileges.bar_discount * 100}% Off`;
-            document.getElementById('prof-total-spend').innerText = formatINR(data.stats.total_spend);
-
-            // Recent bookings
-            const bookingsList = document.getElementById('prof-bookings-list');
-            if (data.recent_bookings.length === 0) {
-                bookingsList.innerHTML = '<div class="py-2 text-slate-400">No bookings on record yet.</div>';
+            // Expiry alert
+            const alertEl = document.getElementById('prof-days-alert');
+            if (data.is_expired) {
+                alertEl.innerText = 'EXPIRED';
+                alertEl.className = 'block text-xs font-bold text-rose-400 mt-0.5';
+            } else if (data.days_until_expiry <= 30) {
+                alertEl.innerText = `Expiring soon (${data.days_until_expiry} days)`;
+                alertEl.className = 'block text-xs font-bold text-amber-400 mt-0.5';
             } else {
-                bookingsList.innerHTML = data.recent_bookings.map(b => `
+                alertEl.innerText = `${data.days_until_expiry} days remaining`;
+                alertEl.className = 'block text-xs font-bold text-emerald-400 mt-0.5';
+            }
+
+            // Entitlements
+            document.getElementById('entitle-court').innerText = data.privileges.court_discount_pct === 100 ? '100% Free' : `${data.privileges.court_discount_pct}% Off`;
+            document.getElementById('entitle-shop').innerText = `${data.privileges.shop_discount_pct}% Off`;
+            document.getElementById('entitle-bar').innerText = `${data.privileges.bar_discount_pct}% Off`;
+            document.getElementById('prof-total-spend').innerText = formatINR(data.total_club_spend);
+
+            // Recent Bookings list
+            const bList = document.getElementById('prof-bookings-list');
+            if (data.recent_court_bookings.length === 0) {
+                bList.innerHTML = '<div class="py-2 text-stone-400 italic">No bookings recorded yet.</div>';
+            } else {
+                bList.innerHTML = data.recent_court_bookings.map(b => `
                     <div class="py-2 flex justify-between items-center">
                         <div>
-                            <span class="font-semibold text-white">${b.court}</span>
-                            <span class="text-slate-400 block text-[11px]">${b.date} | ${b.time}</span>
+                            <span class="font-bold text-white block">${b.court_name}</span>
+                            <span class="text-stone-400">${b.date} • ${b.start_time} - ${b.end_time}</span>
                         </div>
-                        <div class="text-right">
-                            <span class="font-bold text-white">${formatINR(b.amount)}</span>
-                            <span class="block text-[10px] text-emerald-400 capitalize">${b.status}</span>
-                        </div>
+                        <span class="font-bold text-emerald-400 font-mono">${formatINR(b.amount_paid)}</span>
                     </div>
                 `).join('');
             }
 
-            // Open tab pill
+            // Open Tab Pill
             const tabPill = document.getElementById('prof-open-tab-pill');
-            if (data.open_tab) {
-                tabPill.innerHTML = `<span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/40 animate-pulse">Open Tab: ${data.open_tab.tab_number} (${formatINR(data.open_tab.amount)})</span>`;
+            if (data.open_bar_tab) {
+                tabPill.innerHTML = `
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        Running Tab: ${formatINR(data.open_bar_tab.total_bill)} (${data.open_bar_tab.table})
+                    </span>
+                `;
             } else {
-                tabPill.innerHTML = `<span class="text-xs text-slate-500">No open tab</span>`;
+                tabPill.innerHTML = '<span class="text-[11px] text-stone-400">No active bar tab</span>';
             }
+
+            // Purchases list
+            const pList = document.getElementById('prof-shop-list');
+            if (data.recent_shop_orders.length === 0) {
+                pList.innerHTML = '<div class="py-2 text-stone-400 italic">No shop orders yet.</div>';
+            } else {
+                pList.innerHTML = data.recent_shop_orders.map(o => `
+                    <div class="py-2 flex justify-between items-center">
+                        <div>
+                            <span class="font-mono text-amber-300 font-bold">${o.order_number}</span>
+                            <span class="text-stone-400 block">${o.created_at} (${o.channel})</span>
+                        </div>
+                        <span class="font-bold text-white font-mono">${formatINR(o.total_amount)}</span>
+                    </div>
+                `).join('');
+            }
+
+            // Show panel and scroll into view smoothly
+            const panel = document.getElementById('member-profile-panel');
+            panel.classList.remove('hidden');
+            panel.scrollIntoView({ behavior: 'smooth' });
+            if (window.lucide) lucide.createIcons();
 
         } catch (e) {
             console.error(e);
+            showToast('Error loading profile', 'error');
         }
     }
 
     async function renewCurrentMember() {
-        if (!activeSelectedMemberId) return;
+        if (!currentLoadedMemberId) return;
         try {
-            const res = await fetch(`/api/v1/members/${activeSelectedMemberId}/renew`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ member_id: activeSelectedMemberId, duration_months: 12 })
-            });
+            const res = await fetch(`/api/v1/members/${currentLoadedMemberId}/renew`, { method: 'POST' });
             const data = await res.json();
             if (res.ok) {
                 showToast(data.message);
-                loadMemberProfile(activeSelectedMemberId);
+                loadMemberProfile(currentLoadedMemberId);
             } else {
                 showToast(data.detail || 'Renewal failed', 'error');
             }
         } catch (e) {
-            showToast('Renewal error', 'error');
+            showToast('Network error', 'error');
         }
     }
 
     async function submitNewMember(e) {
         e.preventDefault();
         const form = e.target;
-        const formData = Object.fromEntries(new FormData(form));
+        const data = Object.fromEntries(new FormData(form));
         try {
-            const res = await fetch('/api/v1/members/', {
+            const res = await fetch('/api/v1/members', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(data)
             });
             const json = await res.json();
             if (res.ok) {
-                showToast(json.message);
+                showToast(`Enrolled: ${json.full_name} (${json.member_code})!`);
                 closeModal('new-member-modal');
-                setTimeout(() => window.location.reload(), 1000);
+                setTimeout(() => window.location.reload(), 800);
             } else {
-                showToast(json.detail || 'Failed to create member', 'error');
+                showToast(json.detail || 'Registration failed', 'error');
             }
         } catch (e) {
             showToast('Network error', 'error');

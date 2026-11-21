@@ -5,34 +5,34 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Header bar -->
-    <div class="glass-panel p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <!-- Header bar (Warm Glass Header) -->
+    <div class="glass-panel p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-amber-500/20">
         <div class="flex items-center gap-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-lg shadow-purple-500/30 border border-purple-400/30">
-                <i data-lucide="chef-hat" class="w-6 h-6 text-white"></i>
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-amber-600 to-orange-600 text-stone-950 flex items-center justify-center font-bold shadow-lg shadow-amber-500/30 border border-amber-400/40">
+                <i data-lucide="chef-hat" class="w-6 h-6"></i>
             </div>
             <div>
                 <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
                     Live Kitchen Display System (KOT)
                 </h1>
-                <p class="text-xs text-slate-400 mt-0.5">Real-Time Order Routing • Table Tagging • Zero Lost Tabs & Kitchen Confusion</p>
+                <p class="text-xs text-stone-300 mt-0.5">Real-Time Order Routing • Table Tagging • Zero Lost Tabs & Kitchen Confusion</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <button onclick="fetchKitchenTickets()" class="glass-btn px-4 py-2 text-xs flex items-center gap-2">
+            <button onclick="fetchKitchenTickets()" class="glass-btn px-4 py-2 text-xs flex items-center gap-2 text-amber-300 hover:text-white">
                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Tickets
             </button>
-            <span class="px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/30 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Auto-polling (5s)
+            <span class="px-3 py-1.5 rounded-xl bg-amber-500/15 text-amber-300 font-mono text-xs font-bold border border-amber-500/35 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Auto-polling (5s)
             </span>
         </div>
     </div>
 
     <!-- Active Tickets Grid -->
     <div id="kot-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="p-12 text-center text-slate-400 col-span-3 glass-panel">
-            <i data-lucide="loader-2" class="w-8 h-8 text-purple-400 animate-spin mx-auto mb-2"></i>
+        <div class="p-12 text-center text-stone-400 col-span-3 glass-panel border border-amber-500/15">
+            <i data-lucide="loader-2" class="w-8 h-8 text-amber-400 animate-spin mx-auto mb-2"></i>
             <p class="text-sm font-semibold">Loading active kitchen tickets...</p>
         </div>
     </div>
@@ -48,12 +48,12 @@
 
             if (tickets.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-3 glass-panel p-12 text-center text-slate-400 space-y-3">
-                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+                    <div class="col-span-3 glass-panel p-12 text-center text-stone-400 space-y-3 border border-amber-500/20">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
                             <i data-lucide="check-circle-2" class="w-8 h-8"></i>
                         </div>
                         <h3 class="text-lg font-extrabold text-white">All Kitchen Orders Served!</h3>
-                        <p class="text-xs text-slate-400 max-w-md mx-auto">No pending or preparing food orders right now. Orders placed at the Bar will pop up here in real-time.</p>
+                        <p class="text-xs text-stone-400 max-w-md mx-auto">No pending or preparing food orders right now. Orders placed at the Bar will pop up here in real-time.</p>
                     </div>
                 `;
                 if (window.lucide) lucide.createIcons();
@@ -63,13 +63,13 @@
             container.innerHTML = tickets.map(t => `
                 <div class="kot-card rounded-2xl p-5 space-y-4">
                     <!-- Ticket Header -->
-                    <div class="flex justify-between items-start pb-3 border-b border-white/10">
+                    <div class="flex justify-between items-start pb-3 border-b border-amber-500/15">
                         <div>
-                            <span class="font-mono text-xs font-bold text-purple-400 block">${t.kot_ticket_number}</span>
+                            <span class="font-mono text-xs font-bold text-amber-400 block">${t.kot_ticket_number}</span>
                             <h3 class="font-black text-xl text-white mt-0.5">${t.table}</h3>
-                            <span class="text-xs text-slate-400">Guest: ${t.customer_name}</span>
+                            <span class="text-xs text-stone-400">Guest: ${t.customer_name}</span>
                         </div>
-                        <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-white/10 text-slate-300 border border-white/10">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-white/10 text-stone-300 border border-amber-500/15">
                             ⏱️ ${t.ordered_at}
                         </span>
                     </div>
@@ -77,16 +77,16 @@
                     <!-- Items list -->
                     <div class="space-y-2.5 text-xs">
                         ${t.items.map(item => `
-                            <div class="p-3 rounded-xl border border-white/10 bg-slate-900/60 flex justify-between items-center gap-2">
+                            <div class="p-3 rounded-xl border border-amber-500/15 bg-stone-950/70 flex justify-between items-center gap-2">
                                 <div>
-                                    <div class="font-bold text-sm text-slate-100">${item.item_name} <span class="text-purple-400 font-black">x${item.quantity}</span></div>
-                                    ${item.kitchen_notes ? `<span class="text-amber-400 font-semibold block text-[11px] mt-0.5">Note: "${item.kitchen_notes}"</span>` : ''}
+                                    <div class="font-bold text-sm text-stone-100">${item.item_name} <span class="text-amber-400 font-black">x${item.quantity}</span></div>
+                                    ${item.kitchen_notes ? `<span class="text-orange-400 font-semibold block text-[11px] mt-0.5">Note: "${item.kitchen_notes}"</span>` : ''}
                                 </div>
                                 <div class="flex items-center gap-1.5 flex-shrink-0">
                                     <button onclick="advanceStatus(${item.order_item_id}, '${item.kot_status}')" class="px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-tight transition ${
-                                        item.kot_status === 'pending' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30' :
-                                        item.kot_status === 'preparing' ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 hover:bg-cyan-500/30' :
-                                        'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30'
+                                        item.kot_status === 'pending' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/35 hover:bg-amber-500/35' :
+                                        item.kot_status === 'preparing' ? 'bg-orange-500/20 text-orange-300 border border-orange-500/35 hover:bg-orange-500/35' :
+                                        'bg-emerald-500/20 text-emerald-300 border border-emerald-500/35 hover:bg-emerald-500/35'
                                     }">
                                         ${item.kot_status} ➔
                                     </button>

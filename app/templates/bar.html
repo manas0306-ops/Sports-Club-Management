@@ -5,17 +5,20 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Header bar (Glass Header) -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 shadow-xl">
+    <!-- Header bar (Warm Glass Header) -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 glass-panel p-6 shadow-xl border border-amber-500/20">
         <div>
             <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-                <i data-lucide="coffee" class="w-6 h-6 text-rose-400"></i> Bar &amp; Cafeteria POS
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center">
+                    <i data-lucide="coffee" class="w-5 h-5 text-amber-400"></i>
+                </div>
+                Bar &amp; Cafeteria POS
             </h1>
-            <p class="text-xs text-slate-400 mt-1">Table Tracking • Running Tabs • Kitchen Order Tickets (KOT) • Auto Member Discounts • Multi-Payment</p>
+            <p class="text-xs text-stone-300 mt-1">Table Tracking • Running Tabs • Kitchen Order Tickets (KOT) • Auto Member Discounts • Multi-Payment</p>
         </div>
         <div class="flex items-center gap-2.5">
-            <a href="/kitchen" target="_blank" class="px-4 py-2 rounded-xl glass-btn font-bold text-xs flex items-center gap-1.5">
-                <i data-lucide="chef-hat" class="w-4 h-4 text-purple-400"></i> Open Kitchen KOT Board
+            <a href="/kitchen" target="_blank" class="px-4 py-2 rounded-xl glass-btn font-bold text-xs flex items-center gap-1.5 text-amber-300 hover:text-white">
+                <i data-lucide="chef-hat" class="w-4 h-4"></i> Open Kitchen KOT Board
             </a>
             <button onclick="triggerDailyClosing()" class="px-4 py-2 rounded-xl glass-btn-primary font-bold text-xs flex items-center gap-1.5 shadow-md">
                 <i data-lucide="calculator" class="w-4 h-4"></i> End-of-Day Closing
@@ -23,19 +26,19 @@
         </div>
     </div>
 
-    <!-- Main 2-Column POS Layout in Frosted Glass -->
+    <!-- Main 2-Column POS Layout in Warm Frosted Glass -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
         <!-- Column 1 & 2: Table Map & Menu Ordering Pad -->
         <div class="lg:col-span-2 space-y-6">
 
             <!-- Table Map Tracking (Scene 4) -->
-            <div class="glass-panel p-6 shadow-xl space-y-4">
+            <div class="glass-panel p-6 shadow-xl space-y-4 border border-amber-500/15">
                 <div class="flex justify-between items-center">
                     <h2 class="text-sm font-black text-white flex items-center gap-2">
-                        <i data-lucide="grid" class="w-4 h-4 text-purple-400"></i> Floor &amp; Table Tracking
+                        <i data-lucide="grid" class="w-4 h-4 text-amber-400"></i> Floor &amp; Table Tracking
                     </h2>
-                    <span class="text-xs text-slate-400">Click any table to open or inspect tab</span>
+                    <span class="text-xs text-stone-400">Click any table to open or inspect tab</span>
                 </div>
 
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
@@ -43,9 +46,9 @@
                     <div onclick="handleTableClick({{ t.id }}, '{{ t.table_number }}', '{{ t.status }}')"
                         class="p-4 rounded-2xl border text-center cursor-pointer transition table-node {{ 'table-occupied' if t.status == 'occupied' else 'table-available' }}">
                         <div class="text-sm font-black text-white">{{ t.table_number }}</div>
-                        <div class="text-[11px] text-slate-400 capitalize mt-0.5">{{ t.area }} • Cap: {{ t.capacity }}</div>
+                        <div class="text-[11px] text-stone-300 capitalize mt-0.5">{{ t.area }} • Cap: {{ t.capacity }}</div>
                         <span class="inline-block mt-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider
-                            {{ 'bg-amber-400/20 text-amber-300 border border-amber-400/30' if t.status == 'occupied' else 'bg-slate-700/40 text-slate-300 border border-white/10' }}">
+                            {{ 'bg-amber-500/25 text-amber-300 border border-amber-400/40' if t.status == 'occupied' else 'bg-stone-800/40 text-stone-300 border border-amber-500/15' }}">
                             {{ t.status }}
                         </span>
                     </div>
@@ -53,8 +56,8 @@
                 </div>
             </div>
 
-            <!-- Bar Menu & Items Catalog in Glass Cards -->
-            <div class="glass-panel p-6 shadow-xl space-y-4">
+            <!-- Bar Menu & Items Catalog in Warm Glass Cards -->
+            <div class="glass-panel p-6 shadow-xl space-y-4 border border-amber-500/15">
                 <h2 class="text-sm font-black text-white flex items-center gap-2">
                     <i data-lucide="utensils" class="w-4 h-4 text-amber-400"></i> Menu Items (Direct to KOT)
                 </h2>
@@ -62,15 +65,15 @@
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                     {% for m in menu_items %}
                     <div onclick="addItemToOrderPad({{ m.id }}, '{{ m.name }}', {{ m.price }})"
-                        class="glass-card p-4 flex flex-col justify-between cursor-pointer hover:border-purple-400/40">
+                        class="glass-card p-4 flex flex-col justify-between cursor-pointer hover:border-amber-400/50 border border-amber-500/15">
                         <div>
-                            <span class="text-[10px] font-extrabold text-purple-300 uppercase tracking-wider">{{ m.category }}</span>
+                            <span class="text-[10px] font-extrabold text-amber-300 uppercase tracking-wider">{{ m.category }}</span>
                             <div class="font-extrabold text-xs text-white mt-1">{{ m.name }}</div>
-                            <span class="text-[10px] text-slate-400 block mt-0.5 line-clamp-2">{{ m.description }}</span>
+                            <span class="text-[10px] text-stone-400 block mt-0.5 line-clamp-2">{{ m.description }}</span>
                         </div>
-                        <div class="mt-4 flex justify-between items-center pt-2 border-t border-white/5">
-                            <span class="font-black text-sm text-white">₹{{ m.price }}</span>
-                            <span class="px-2 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">+ Add</span>
+                        <div class="mt-4 flex justify-between items-center pt-2 border-t border-amber-500/10">
+                            <span class="font-black text-sm text-white font-mono">₹{{ m.price }}</span>
+                            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold">+ Add</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -81,34 +84,34 @@
 
         <!-- Column 3: Active Tab & Settlement Terminal -->
         <div class="space-y-4">
-            <div class="glass-panel p-6 shadow-2xl space-y-4 border border-purple-500/30">
-                <div class="flex justify-between items-center pb-3 border-b border-white/10">
+            <div class="glass-panel p-6 shadow-2xl space-y-4 border border-amber-500/25">
+                <div class="flex justify-between items-center pb-3 border-b border-amber-500/15">
                     <div>
                         <h3 class="font-black text-white text-base">Running Tab Terminal</h3>
-                        <span id="terminal-tab-ref" class="text-xs font-mono text-purple-300 font-bold">No active tab selected</span>
+                        <span id="terminal-tab-ref" class="text-xs font-mono text-amber-300 font-bold">No active tab selected</span>
                     </div>
                     <button onclick="openModal('new-tab-modal')" class="px-3 py-1.5 rounded-xl glass-btn-primary font-bold text-xs">
                         + New Tab
                     </button>
                 </div>
 
-                <!-- Tab metadata in Glass Box -->
-                <div class="bg-white/5 p-3.5 rounded-xl border border-white/10 text-xs space-y-1.5 backdrop-blur-md">
+                <!-- Tab metadata in Warm Glass Box -->
+                <div class="bg-stone-900/60 p-3.5 rounded-xl border border-amber-500/15 text-xs space-y-1.5 backdrop-blur-md">
                     <div class="flex justify-between">
-                        <span class="text-slate-400">Customer:</span>
+                        <span class="text-stone-400">Customer:</span>
                         <strong id="tab-cust-name" class="text-white">Select or open a tab</strong>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-slate-400">Auto Member Discount:</span>
+                        <span class="text-stone-400">Auto Member Discount:</span>
                         <span id="tab-discount-rate" class="font-bold text-emerald-400">0%</span>
                     </div>
                 </div>
 
                 <!-- Selected items for next order dispatch -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1.5">Items To Send to Kitchen (KOT):</label>
-                    <div id="pending-items-list" class="space-y-2 max-h-48 overflow-y-auto divide-y divide-white/5 text-xs">
-                        <div class="py-3 text-center text-slate-400 text-xs">Click menu items to add to tab.</div>
+                    <label class="block text-xs font-bold text-stone-300 mb-1.5">Items To Send to Kitchen (KOT):</label>
+                    <div id="pending-items-list" class="space-y-2 max-h-48 overflow-y-auto divide-y divide-amber-500/10 text-xs">
+                        <div class="py-3 text-center text-stone-400 text-xs">Click menu items to add to tab.</div>
                     </div>
                 </div>
 
@@ -118,8 +121,8 @@
                 </button>
 
                 <!-- Settlement breakdown -->
-                <div class="pt-3 border-t border-white/10 space-y-2 text-xs">
-                    <div class="flex justify-between text-slate-400">
+                <div class="pt-3 border-t border-amber-500/15 space-y-2 text-xs">
+                    <div class="flex justify-between text-stone-400">
                         <span>Tab Gross Subtotal</span>
                         <span id="tab-gross" class="text-white font-semibold">₹0</span>
                     </div>
@@ -127,27 +130,27 @@
                         <span>Automatic Member Discount</span>
                         <span id="tab-discount">-₹0</span>
                     </div>
-                    <div class="flex justify-between text-slate-400">
+                    <div class="flex justify-between text-stone-400">
                         <span>F&amp;B GST (5%)</span>
                         <span id="tab-tax" class="text-white font-semibold">₹0</span>
                     </div>
-                    <div class="flex justify-between text-white font-black text-lg pt-2 border-t border-white/10">
+                    <div class="flex justify-between text-white font-black text-lg pt-2 border-t border-amber-500/15">
                         <span>Total Due</span>
-                        <span id="tab-total" class="text-amber-400">₹0</span>
+                        <span id="tab-total" class="text-amber-300 font-mono">₹0</span>
                     </div>
                 </div>
 
-                <!-- Multi-Payment Buttons -->
+                <!-- Multi-Payment Buttons in Warm Glass -->
                 <div class="space-y-2 pt-2">
-                    <span class="block text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Settle Tab By:</span>
+                    <span class="block text-[10px] font-extrabold text-stone-400 uppercase tracking-wider">Settle Tab By:</span>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="settleCurrentTab('cash')" class="py-2.5 rounded-xl glass-btn text-xs font-bold text-emerald-300 hover:border-emerald-400/50">
                             💵 Cash
                         </button>
-                        <button onclick="settleCurrentTab('card')" class="py-2.5 rounded-xl glass-btn text-xs font-bold text-blue-300 hover:border-blue-400/50">
+                        <button onclick="settleCurrentTab('card')" class="py-2.5 rounded-xl glass-btn text-xs font-bold text-stone-200 hover:border-amber-400/50">
                             💳 Card
                         </button>
-                        <button onclick="settleCurrentTab('upi')" class="py-2.5 rounded-xl glass-btn text-xs font-bold text-purple-300 hover:border-purple-400/50">
+                        <button onclick="settleCurrentTab('upi')" class="py-2.5 rounded-xl glass-btn text-xs font-bold text-amber-300 hover:border-amber-400/50">
                             📱 UPI
                         </button>
                     </div>
@@ -159,17 +162,17 @@
 
 </div>
 
-<!-- Modal: Open New Tab in Glass -->
+<!-- Modal: Open New Tab in Warm Glass -->
 <div id="new-tab-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
-    <div class="glass-panel max-w-md w-full p-6 sm:p-8 space-y-4 border border-white/20 shadow-2xl">
-        <div class="flex justify-between items-center pb-2 border-b border-white/10">
+    <div class="glass-panel max-w-md w-full p-6 sm:p-8 space-y-4 border border-amber-500/25 shadow-2xl">
+        <div class="flex justify-between items-center pb-2 border-b border-amber-500/15">
             <h3 class="text-lg font-black text-white">Open New Bar Tab</h3>
-            <button onclick="closeModal('new-tab-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button onclick="closeModal('new-tab-modal')" class="text-stone-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
 
         <form onsubmit="submitOpenTab(event)" class="space-y-3.5">
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Select Table (Optional)</label>
+                <label class="block text-xs font-bold text-stone-300 mb-1">Select Table (Optional)</label>
                 <select id="modal-table-id" class="glass-input w-full px-3.5 py-2 text-sm font-semibold">
                     <option value="">-- No Table (Bar Counter / Takeaway) --</option>
                     {% for t in tables %}
@@ -179,7 +182,7 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-300 mb-1">Club Member (Auto-Discount Applied)</label>
+                <label class="block text-xs font-bold text-stone-300 mb-1">Club Member (Auto-Discount Applied)</label>
                 <select id="modal-member-id" onchange="handleModalMemberChange(this)" class="glass-input w-full px-3.5 py-2 text-sm font-semibold">
                     <option value="">-- Walk-in Guest (0% Off) --</option>
                     {% for m in members %}
@@ -192,13 +195,13 @@
 
             <div id="modal-guest-fields" class="space-y-2">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Guest Name</label>
+                    <label class="block text-xs font-bold text-stone-300 mb-1">Guest Name</label>
                     <input type="text" id="modal-cust-name" placeholder="Guest Name" class="glass-input w-full px-3.5 py-2 text-sm">
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-3 border-t border-white/10">
-                <button type="button" onclick="closeModal('new-tab-modal')" class="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white rounded-lg">Cancel</button>
+            <div class="flex justify-end gap-3 pt-3 border-t border-amber-500/15">
+                <button type="button" onclick="closeModal('new-tab-modal')" class="px-4 py-2 text-sm font-semibold text-stone-300 hover:text-white rounded-lg">Cancel</button>
                 <button type="submit" class="px-5 py-2 text-sm font-bold glass-btn-primary">Open Tab</button>
             </div>
         </form>
@@ -287,7 +290,7 @@
     function renderPendingItems() {
         const list = document.getElementById('pending-items-list');
         if (pendingOrderItems.length === 0) {
-            list.innerHTML = '<div class="py-3 text-center text-slate-400 text-xs">No pending items. Click menu to add.</div>';
+            list.innerHTML = '<div class="py-3 text-center text-stone-400 text-xs">No pending items. Click menu to add.</div>';
             document.getElementById('btn-dispatch-kot').disabled = true;
             return;
         }
@@ -303,7 +306,7 @@
                         <input type="text" placeholder="Kitchen note (e.g. less ice)" onchange="updateNote(${idx}, this.value)" class="glass-input block text-[11px] px-2 py-0.5 mt-1 w-44">
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="font-bold text-white">₹${line}</span>
+                        <span class="font-bold text-white font-mono">₹${line}</span>
                         <button onclick="removePendingItem(${idx})" class="text-rose-400 font-bold"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                     </div>
                 </div>

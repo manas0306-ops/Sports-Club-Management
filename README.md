@@ -5,11 +5,59 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Odoo](https://img.shields.io/badge/Odoo-17.0%20%2F%2018.0-714B67?logo=odoo)](https://www.odoo.com/)
 [![Tests](https://img.shields.io/badge/Tests-16%20Passed%20(100%25)-success?logo=pytest)](tests/)
+[![UI Design](https://img.shields.io/badge/UI-Warm%20Amber%20Glassmorphism-f59e0b?logo=adobexd)](app/static/css/styles.css)
 [![License](https://img.shields.io/badge/License-LGPL--3.0-purple.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
 > **Official Solution for the Odoo Hackathon & Challenge:**  
-> A complete, unified software platform that solves the real, day-to-day operational headaches of a modern tennis, cricket, and padel club. Designed and implemented with a **Dual-Delivery Architecture**: a **standalone, turnkey interactive web platform** for immediate live evaluation and testing, plus a **native Odoo 17/18 module suite** (`odoo_addons/sports_club_management/`).
+> A complete, unified software platform that solves the real, day-to-day operational headaches of a modern tennis, cricket, and padel club. Designed and implemented with a **Dual-Delivery Architecture**: a **standalone, turnkey interactive web platform** for immediate live evaluation and testing, plus a **native Odoo 17/18 module suite** (`odoo_addons/sports_club_management/`). Built with a luxury **Warm Amber & Espresso Glassmorphism UI** featuring frosted acrylic panels, ambient glowing caramel backdrops, and crisp ivory pill controls.
+
+---
+
+## 📑 Table of Contents (Content Table)
+
+- [📖 Executive Summary & The Problem](#-executive-summary--the-problem)
+- [📊 Project Details & Architecture Content Table (Master Matrix)](#-project-details--architecture-content-table-master-matrix)
+- [🏗️ System Architecture & Data Flow](#️-system-architecture--data-flow)
+- [🎨 Warm Amber Glassmorphism Design System](#-warm-amber-glassmorphism-design-system)
+- [🌟 Solution Walkthrough: The 6 Problem Scenes](#-solution-walkthrough-the-6-problem-scenes)
+  - [1️⃣ Scene 1: A New Member Walks In](#1️⃣-scene-1-a-new-member-walks-in)
+  - [2️⃣ Scene 2: Booking a Court on a Busy Evening](#2️⃣-scene-2-booking-a-court-on-a-busy-evening)
+  - [3️⃣ Scene 3: Gearing Up Before a Match](#3️⃣-scene-3-gearing-up-before-a-match)
+  - [4️⃣ Scene 4: After the Match, at the Bar](#4️⃣-scene-4-after-the-match-at-the-bar)
+  - [5️⃣ Scene 5: A Stranger Finds the Club Online](#5️⃣-scene-5-a-stranger-finds-the-club-online)
+  - [6️⃣ Scene 6: The Owner, at the End of the Month](#6️⃣-scene-6-the-owner-at-the-end-of-the-month)
+- [🚀 Quick Start Guide (Standalone Web Platform)](#-quick-start-guide-standalone-web-platform)
+- [🧪 Automated Test Suite (100% Pass)](#-automated-test-suite-100-pass)
+- [📦 Native Odoo 17/18 Addon](#-native-odoo-1718-addon-odoo_addonssports_club_management)
+- [📂 Project Directory Structure](#-project-structure)
+- [🛡️ License & Contributors](#️-license)
+
+---
+
+## 📊 Project Details & Architecture Content Table (Master Matrix)
+
+This comprehensive content table summarizes all domain modules, problem scenes from the challenge specification, implemented business logic, underlying data models, live routes, and automated verification status:
+
+| Scene & Module | Problem Addressed | Implemented Logic & Constraints | Domain Models | Live Web Route | API Endpoint | Test Status |
+|:---|:---|:---|:---|:---|:---|:---:|
+| **Scene 1: Front Desk & Members** | Fragmented spreadsheets, lost renewals, slow member recognition | Gold (100% free court), Silver (50%), Junior (60%) tiers; instant search by ID/phone/name; automated 12-mo expiration; 1-click renewal | `Member`, `MembershipTier` | [`/members`](http://127.0.0.1:8000/members) | `/api/v1/members` | ✅ 100% Pass |
+| **Scene 2: Court Scheduling** | WhatsApp chaos, double-booking disputes, monopolized evening slots | 1-hour sessions with 30-min staggered slots; strict anti-collision conflict rejection (HTTP 409); max 2 plays/member/day; Friday Social play mode | `Court`, `CourtBooking` | [`/courts`](http://127.0.0.1:8000/courts) | `/api/v1/courts` | ✅ 100% Pass |
+| **Scene 3: Pro Gear Shop** | Counter POS sales desynchronized from sofa/online orders | Unified single-shelf inventory; instant real-time deduction; member auto-discounts (Gold 20%, Silver 10%); low-stock alerts (<5 units); Click & Collect / Delivery | `Product`, `ShopOrder`, `ShopOrderItem` | [`/shop`](http://127.0.0.1:8000/shop) | `/api/v1/shop` | ✅ 100% Pass |
+| **Scene 4: Sports Bar & KOT** | Paper slips lost, unpaid tabs, kitchen order confusion | Visual floor table map; live digital Kitchen Order Tickets (KOT); member discounts without asking; multi-payment settlement (Cash/Card/UPI); end-of-day register closing | `BarTable`, `BarTab`, `BarOrderItem` | [`/bar`](http://127.0.0.1:8000/bar) & [`/kitchen`](http://127.0.0.1:8000/kitchen) | `/api/v1/bar` | ✅ 100% Pass |
+| **Scene 5: Website & CRM** | Unanswered website leads, vanished trial requests | Public free trial booking with pro coach; 5-stage CRM Kanban pipeline; instant quotation generator with coaching add-ons; 1-click member conversion | `TrialBooking`, `CrmLead`, `Quotation` | [`/`](http://127.0.0.1:8000/) & [`/crm`](http://127.0.0.1:8000/crm) | `/api/v1/crm` | ✅ 100% Pass |
+| **Scene 6: Owner Financials** | Blind to multi-channel earnings, scattered payment apps | Consolidated multi-source revenue aggregation; Cash/Card/UPI/Online split; corporate team invoicing; staff roster & payroll ledger; 1-click leave approvals | `CorporateInvoice`, `Employee`, `EmployeeLeave` | [`/owner`](http://127.0.0.1:8000/owner) | `/api/v1/finance` | ✅ 100% Pass |
+
+---
+
+## 🎨 Warm Amber Glassmorphism Design System
+
+Inspired by modern luxury evening ambient smart lighting, the entire interface features a custom **Warm Amber & Espresso Glassmorphism** design system:
+
+* **Ambient Espresso Backdrop**: Deep velvet dark-chocolate/espresso base (`#120b08`) with radiant warm amber, glowing caramel, and burnt orange radial halation.
+* **Warm Frosted Panels**: Translucent smoky acrylic surfaces (`rgba(30, 19, 13, 0.68)`) with heavy blur (`backdrop-filter: blur(24px)`), soft apricot borders (`rgba(254, 215, 170, 0.15)`), and inner specular highlights.
+* **Crisp Ivory & Amber Pills**: Selected controls and active tabs feature soft ivory pills (`#fdfaf5`, text `#1c1917`, font-bold 800) with glowing warm amber secondary buttons.
+* **Luminous Table & Content Containers**: Data tables and content grids feature frosted headers (`rgba(28, 17, 11, 0.88)`), golden typography (`#fcd34d`), and warm hover transitions.
 
 ---
 
@@ -135,8 +183,8 @@ The turnkey web application runs instantly with zero complex dependencies.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/manas0306-ops/champions-club-odoo.git
-cd champions-club-odoo
+git clone https://github.com/manas0306-ops/Sports-Club-Management.git
+cd Sports-Club-Management
 ```
 
 ### 2. Install Dependencies
@@ -155,7 +203,7 @@ python seed_data.py
 python run.py
 ```
 Open your browser and navigate to:
-* **Public Club Website**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+* **Public Club Website & Matrix**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 * **Member Directory & Front Desk**: [http://127.0.0.1:8000/members](http://127.0.0.1:8000/members)
 * **Court Master Schedule**: [http://127.0.0.1:8000/courts](http://127.0.0.1:8000/courts)
 * **Pro Gear Shop (Unified Stock)**: [http://127.0.0.1:8000/shop](http://127.0.0.1:8000/shop)
@@ -240,7 +288,7 @@ odoo_addons/sports_club_management/
 ## 📂 Project Structure
 
 ```
-champions-club-odoo/
+Sports-Club-Management/
 ├── app/
 │   ├── config.py                  # Tiers, discounts, tax rates, operational rules
 │   ├── database.py                # SQLAlchemy engine & session maker
@@ -249,8 +297,8 @@ champions-club-odoo/
 │   ├── schemas/                   # Pydantic schemas for request/response validation
 │   ├── services/                  # Business logic services enforcing challenge constraints
 │   ├── routes/                    # REST API routers & server-rendered view controllers
-│   ├── static/                    # Custom CSS, JS utilities, and toast notifications
-│   └── templates/                 # Jinja2 templates for all 6 challenge scenes + portal
+│   ├── static/                    # Custom Warm Amber CSS, JS utilities, toast notifications
+│   └── templates/                 # Warm Frosted Jinja2 templates for all 6 scenes + portal
 ├── odoo_addons/                   # Official Odoo 17/18 Addon suite
 │   └── sports_club_management/    # Models, XML views, security, demo data
 ├── tests/                         # Automated Pytest suite (16 tests, 100% pass)
@@ -258,7 +306,7 @@ champions-club-odoo/
 ├── run.py                         # 1-click application runner
 ├── requirements.txt               # Python package dependencies
 ├── .gitignore                     # Clean repository ignore rules
-└── README.md                      # Complete system documentation
+└── README.md                      # Complete system documentation & content table
 ```
 
 ---
