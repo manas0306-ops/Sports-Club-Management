@@ -21,7 +21,7 @@ from app.models.audit import AuditLog
 from app.services.auth_dependencies import (
     require_admin, require_member, require_player, require_staff, require_walk_in, get_optional_current_user
 )
-from app.services.auth_security import SESSION_COOKIE_NAME
+from app.services.auth_security import SESSION_COOKIE_NAME, revoke_session_token
 from app.config import settings
 
 templates = Jinja2Templates(directory="app/templates")
@@ -44,11 +44,33 @@ def view_login(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={}
+        context={"mode": "login"}
+    )
+
+@router.get("/register")
+def view_register(request: Request, db: Session = Depends(get_db)):
+    current_user = get_optional_current_user(request, db)
+    if current_user:
+        dashboards = {
+            UserRole.ADMIN.value: "/admin/dashboard",
+            UserRole.MEMBER.value: "/member/dashboard",
+            UserRole.PLAYER.value: "/player/dashboard",
+            UserRole.STAFF.value: "/staff/dashboard",
+            UserRole.WALK_IN.value: "/guest"
+        }
+        target = dashboards.get(current_user.primary_role, "/")
+        return RedirectResponse(url=target, status_code=303)
+    return templates.TemplateResponse(
+        request=request,
+        name="login.html",
+        context={"mode": "register"}
     )
 
 @router.get("/logout")
-def view_logout():
+def view_logout(request: Request):
+    token = request.cookies.get(SESSION_COOKIE_NAME)
+    if token:
+        revoke_session_token(token)
     res = RedirectResponse(url="/login", status_code=303)
     res.delete_cookie(key=SESSION_COOKIE_NAME, path="/")
     return res

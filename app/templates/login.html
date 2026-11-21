@@ -1,167 +1,334 @@
 {% extends "base.html" %}
 
-{% block title %}Central Portal Login - The Champions Club{% endblock %}
+{% block title %}Authentication Portal - The Champions Club{% endblock %}
 
 {% block content %}
-<div class="min-h-[80vh] flex flex-col justify-center items-center py-6 px-4">
+<div class="min-h-[85vh] flex flex-col justify-center items-center py-6 px-4">
 
     <!-- Brand Header -->
-    <div class="text-center mb-8 space-y-2">
+    <div class="text-center mb-6 space-y-2">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-xl shadow-amber-500/10 mb-2">
             <i data-lucide="shield-check" class="w-8 h-8"></i>
         </div>
-        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight">The Champions Club</h1>
-        <p class="text-xs sm:text-sm text-stone-400 font-medium max-w-md mx-auto">
-            Secure, role-isolated authentication portal for club administration, athletes, members, staff &amp; guests.
+        <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase">
+            WELCOME TO CHAMPIONS CLUB
+        </h1>
+        <p class="text-sm sm:text-base text-amber-300/90 font-medium italic max-w-md mx-auto">
+            "Your game. Your community. Your club."
         </p>
     </div>
 
-    <!-- Login Container Card -->
-    <div class="w-full max-w-xl glass-panel p-6 sm:p-9 shadow-2xl border border-amber-500/25 relative overflow-hidden backdrop-blur-3xl">
+    <!-- Main Authentication Container Card -->
+    <div class="w-full max-w-xl glass-panel p-6 sm:p-9 shadow-2xl border border-amber-500/25 relative overflow-hidden backdrop-blur-3xl rounded-3xl">
 
-        <!-- Ambient Glow Blob -->
+        <!-- Ambient Glow Blobs -->
         <div class="absolute -top-24 -right-24 w-60 h-60 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="absolute -bottom-24 -left-24 w-60 h-60 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <!-- 1. Five Role Selector Tabs -->
-        <div class="mb-7">
-            <label class="block text-[11px] font-black uppercase tracking-wider text-amber-300/90 mb-2.5">
-                Select Your Access Role
-            </label>
-            <div class="grid grid-cols-5 gap-1.5 p-1.5 rounded-2xl bg-stone-950/60 border border-amber-500/20">
-                <button type="button" onclick="selectRole('MEMBER', this)" id="tab-member" class="role-tab active py-2.5 px-2 rounded-xl text-xs font-black transition flex flex-col items-center gap-1 bg-amber-500/30 text-amber-200 border border-amber-500/50 shadow-sm">
-                    <i data-lucide="award" class="w-4 h-4"></i>
-                    <span>MEMBER</span>
-                </button>
-                <button type="button" onclick="selectRole('ADMIN', this)" id="tab-admin" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
-                    <i data-lucide="shield" class="w-4 h-4"></i>
-                    <span>ADMIN</span>
-                </button>
-                <button type="button" onclick="selectRole('PLAYER', this)" id="tab-player" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
-                    <i data-lucide="zap" class="w-4 h-4"></i>
-                    <span>PLAYER</span>
-                </button>
-                <button type="button" onclick="selectRole('STAFF', this)" id="tab-staff" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
-                    <i data-lucide="briefcase" class="w-4 h-4"></i>
-                    <span>STAFF</span>
-                </button>
-                <button type="button" onclick="selectRole('WALK_IN', this)" id="tab-walkin" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
-                    <i data-lucide="ticket" class="w-4 h-4"></i>
-                    <span>GUEST</span>
-                </button>
-            </div>
+        <!-- Mode Switcher Tabs (Sign In vs Create Account) -->
+        <div class="grid grid-cols-2 p-1.5 rounded-2xl bg-stone-950/70 border border-amber-500/20 mb-6">
+            <button type="button" onclick="switchAuthMode('signin')" id="mode-tab-signin" class="py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-md">
+                <i data-lucide="log-in" class="w-4 h-4"></i>
+                <span>SIGN IN</span>
+            </button>
+            <button type="button" onclick="switchAuthMode('signup')" id="mode-tab-signup" class="py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 text-stone-400 hover:text-amber-200">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>CREATE ACCOUNT</span>
+            </button>
+        </div>
+
+        <!-- Alert Notification Box -->
+        <div id="auth-alert" class="hidden mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+            <i id="auth-alert-icon" data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
+            <span id="auth-alert-msg"></span>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- MODE 1: SIGN IN VIEW                                              -->
+        <!-- ================================================================= -->
+        <div id="signin-section" class="space-y-5">
             
-            <!-- Active Role Description Banner -->
-            <div id="role-info-banner" class="mt-3 py-2 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-center justify-between">
-                <span id="role-desc-text">Member Portal: Access Gold, Silver &amp; Underage digital cards and bookings.</span>
-                <span id="role-badge-pill" class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30">MEMBER</span>
-            </div>
-        </div>
-
-        <!-- Feedback Alert Box -->
-        <div id="login-alert" class="hidden mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-start gap-2.5">
-            <i id="alert-icon" data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0 mt-0.5"></i>
-            <span id="alert-msg"></span>
-        </div>
-
-        <!-- 2. Login Form -->
-        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
-            <input type="hidden" id="selected-role-input" value="MEMBER">
-
-            <!-- Identifier Input -->
+            <!-- Role Selector Tabs -->
             <div>
-                <label class="block text-xs font-bold text-stone-300 mb-1.5">Email or Account ID / Username</label>
-                <div class="relative">
-                    <i data-lucide="user" class="w-4 h-4 text-amber-400/80 absolute left-3.5 top-3.5"></i>
-                    <input type="text" id="login-identifier" required placeholder="e.g. rohan.sharma@example.com or admin" class="glass-input w-full pl-10 pr-4 py-3 text-sm text-white placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-400">
+                <div class="flex items-center justify-between mb-2">
+                    <label class="block text-[11px] font-black uppercase tracking-wider text-amber-300/90">
+                        Select Your Portal
+                    </label>
+                    <span class="text-[10px] text-stone-400">Strict Server-Enforced RBAC</span>
                 </div>
-            </div>
-
-            <!-- Password Input with Show/Hide Toggle -->
-            <div>
-                <div class="flex justify-between items-center mb-1.5">
-                    <label class="block text-xs font-bold text-stone-300">Password</label>
-                    <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] text-amber-400 hover:text-amber-300 transition">Forgot Password?</button>
-                </div>
-                <div class="relative">
-                    <i data-lucide="lock" class="w-4 h-4 text-amber-400/80 absolute left-3.5 top-3.5"></i>
-                    <input type="password" id="login-password" required placeholder="Enter your secret password" class="glass-input w-full pl-10 pr-11 py-3 text-sm text-white placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-400">
-                    <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-3 text-stone-400 hover:text-stone-200">
-                        <i id="eye-icon" data-lucide="eye" class="w-4 h-4"></i>
+                <div class="grid grid-cols-5 gap-1.5 p-1.5 rounded-2xl bg-stone-950/60 border border-amber-500/20">
+                    <button type="button" onclick="selectRole('MEMBER', this)" id="tab-member" class="role-tab active py-2.5 px-2 rounded-xl text-xs font-black transition flex flex-col items-center gap-1 bg-amber-500/30 text-amber-200 border border-amber-500/50 shadow-sm">
+                        <i data-lucide="award" class="w-4 h-4"></i>
+                        <span>MEMBER</span>
+                    </button>
+                    <button type="button" onclick="selectRole('ADMIN', this)" id="tab-admin" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                        <span>ADMIN</span>
+                    </button>
+                    <button type="button" onclick="selectRole('PLAYER', this)" id="tab-player" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
+                        <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span>PLAYER</span>
+                    </button>
+                    <button type="button" onclick="selectRole('STAFF', this)" id="tab-staff" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                        <span>STAFF</span>
+                    </button>
+                    <button type="button" onclick="selectRole('WALK_IN', this)" id="tab-walkin" class="role-tab py-2.5 px-2 rounded-xl text-xs font-bold transition flex flex-col items-center gap-1 text-stone-400 hover:text-amber-200 hover:bg-stone-800/40">
+                        <i data-lucide="ticket" class="w-4 h-4"></i>
+                        <span>GUEST</span>
                     </button>
                 </div>
+                
+                <!-- Role Description Banner -->
+                <div id="role-info-banner" class="mt-2.5 py-2 px-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-center justify-between">
+                    <span id="role-desc-text">Member Portal: Access Gold, Silver &amp; Underage digital passes and bookings.</span>
+                    <span id="role-badge-pill" class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-amber-400/20 text-amber-300 border border-amber-400/30">MEMBER</span>
+                </div>
             </div>
 
-            <!-- Remember Me -->
-            <div class="flex items-center justify-between pt-1">
-                <label class="flex items-center gap-2 cursor-pointer text-xs text-stone-300 select-none">
-                    <input type="checkbox" id="remember-me-checkbox" class="rounded bg-stone-900 border-amber-500/30 text-amber-500 focus:ring-amber-400 w-4 h-4">
-                    <span>Keep me logged in for 30 days</span>
-                </label>
-                <span class="text-[11px] text-stone-500">256-bit Encrypted Session</span>
-            </div>
+            <!-- Sign In Form -->
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <input type="hidden" id="selected-role-input" value="MEMBER">
 
-            <!-- Submit Button -->
-            <button type="submit" id="login-submit-btn" class="w-full py-3.5 px-4 rounded-xl glass-btn-primary font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 mt-4 transition">
-                <span id="btn-spinner" class="hidden"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i></span>
-                <span id="btn-text">Authenticate &amp; Enter Portal</span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-            </button>
-        </form>
+                <!-- Identifier Input -->
+                <div>
+                    <label class="block text-xs font-bold text-stone-300 mb-1.5">Email, Username, or Member ID</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="w-4 h-4 text-amber-400/80 absolute left-3.5 top-3.5"></i>
+                        <input type="text" id="login-identifier" required placeholder="e.g. rohan.sharma@example.com or TC-GOLD-0001" class="glass-input w-full pl-10 pr-4 py-3 text-sm text-white placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-400">
+                    </div>
+                </div>
 
-        <!-- Demo Quick-Fill Bar for Graders / Evaluators -->
-        <div class="mt-7 pt-5 border-t border-amber-500/15">
-            <div class="flex items-center justify-between mb-2.5">
-                <span class="text-[10px] font-black uppercase tracking-wider text-stone-400">⚡ Grader Quick-Fill Accounts</span>
-                <span class="text-[10px] text-amber-400">Click to autofill credentials</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-[11px]">
-                <button type="button" onclick="quickFill('ADMIN', 'admin@champions.club', 'ChampionsAdmin2026!')" class="p-1.5 rounded-lg glass-btn text-center text-amber-200 font-bold hover:bg-amber-500/20">
-                    Admin
+                <!-- Password Input with Show/Hide Toggle -->
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-bold text-stone-300">Password</label>
+                        <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] text-amber-400 hover:text-amber-300 transition">Forgot Password?</button>
+                    </div>
+                    <div class="relative">
+                        <i data-lucide="lock" class="w-4 h-4 text-amber-400/80 absolute left-3.5 top-3.5"></i>
+                        <input type="password" id="login-password" required placeholder="Enter your secret password" class="glass-input w-full pl-10 pr-11 py-3 text-sm text-white placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-amber-400">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', 'eye-icon-login')" class="absolute right-3.5 top-3 text-stone-400 hover:text-stone-200">
+                            <i id="eye-icon-login" data-lucide="eye" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Remember Me -->
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs text-stone-300 select-none">
+                        <input type="checkbox" id="remember-me-checkbox" class="rounded bg-stone-900 border-amber-500/30 text-amber-500 focus:ring-amber-400 w-4 h-4">
+                        <span>Keep me logged in for 30 days</span>
+                    </label>
+                    <span class="text-[11px] text-stone-500">256-bit Encrypted Session</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="login-submit-btn" class="w-full py-3.5 px-4 rounded-xl glass-btn-primary font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 mt-4 transition hover:scale-102">
+                    <span id="btn-spinner" class="hidden"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i></span>
+                    <span id="btn-text">Sign In &amp; Enter Portal</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
-                <button type="button" onclick="quickFill('MEMBER', 'rohan.sharma@example.com', 'MemberPass123!')" class="p-1.5 rounded-lg glass-btn text-center text-stone-300 font-bold hover:bg-amber-500/20">
-                    Gold Member
-                </button>
-                <button type="button" onclick="quickFill('MEMBER', 'aarav.junior@example.com', 'MemberPass123!')" class="p-1.5 rounded-lg glass-btn text-center text-orange-300 font-bold hover:bg-amber-500/20">
-                    Junior (<18)
-                </button>
-                <button type="button" onclick="quickFill('PLAYER', 'player.arjun@champions.club', 'PlayerPass123!')" class="p-1.5 rounded-lg glass-btn text-center text-emerald-300 font-bold hover:bg-amber-500/20">
-                    Pro Player
-                </button>
-                <button type="button" onclick="quickFill('STAFF', 'staff.reception@champions.club', 'StaffPass123!')" class="p-1.5 rounded-lg glass-btn text-center text-blue-300 font-bold hover:bg-amber-500/20">
-                    Staff POS
-                </button>
+            </form>
+
+            <div class="text-center pt-2 text-xs text-stone-400">
+                New to The Champions Club? 
+                <button type="button" onclick="switchAuthMode('signup')" class="text-amber-400 font-bold hover:underline ml-1">Create an Account</button>
             </div>
         </div>
 
-        <!-- Support Pill -->
-        <div class="mt-6 text-center text-xs text-stone-400">
-            Need access or forgot your credentials? Contact <a href="mailto:support@champions.club" class="text-amber-400 underline font-medium">Front Desk Support</a>
+        <!-- ================================================================= -->
+        <!-- MODE 2: CREATE ACCOUNT VIEW                                       -->
+        <!-- ================================================================= -->
+        <div id="signup-section" class="hidden space-y-4">
+            
+            <div class="pb-2 border-b border-amber-500/15">
+                <span class="text-xs uppercase font-extrabold tracking-wider text-amber-400 block">Registration Portal</span>
+                <p class="text-xs text-stone-300 mt-0.5">Create your membership, athlete, or guest pass in seconds.</p>
+            </div>
+
+            <form onsubmit="handleRegisterSubmit(event)" class="space-y-3.5 text-xs">
+                
+                <!-- Account Type Selector (Permitted Self-Registration Roles) -->
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Select Account Type</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="reg-account-type" value="MEMBER" checked onchange="updateAccountTypeUI()" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl bg-white/5 border border-amber-500/20 text-center peer-checked:bg-amber-500/25 peer-checked:border-amber-400 transition">
+                                <i data-lucide="award" class="w-4 h-4 mx-auto mb-1 text-amber-400"></i>
+                                <span class="font-bold text-white block">Club Member</span>
+                                <span class="text-[10px] text-stone-400">Full Access</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="reg-account-type" value="PLAYER" onchange="updateAccountTypeUI()" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl bg-white/5 border border-amber-500/20 text-center peer-checked:bg-emerald-500/25 peer-checked:border-emerald-400 transition">
+                                <i data-lucide="zap" class="w-4 h-4 mx-auto mb-1 text-emerald-400"></i>
+                                <span class="font-bold text-white block">Athlete / Player</span>
+                                <span class="text-[10px] text-stone-400">Tournaments</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="reg-account-type" value="WALK_IN" onchange="updateAccountTypeUI()" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl bg-white/5 border border-amber-500/20 text-center peer-checked:bg-stone-500/30 peer-checked:border-stone-400 transition">
+                                <i data-lucide="ticket" class="w-4 h-4 mx-auto mb-1 text-stone-300"></i>
+                                <span class="font-bold text-white block">Guest Pass</span>
+                                <span class="text-[10px] text-stone-400">Pay-Per-Play</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Existing Member Activation Checkbox -->
+                <div id="existing-member-toggle-wrap" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between">
+                    <div>
+                        <span class="font-bold text-amber-300 text-xs block">Already have an offline or club membership?</span>
+                        <span class="text-[11px] text-stone-400">Link your existing Member Code without creating a duplicate record.</span>
+                    </div>
+                    <input type="checkbox" id="reg-is-existing-member" onchange="toggleExistingMemberFields()" class="rounded bg-stone-900 border-amber-500/30 text-amber-500 w-4 h-4 cursor-pointer">
+                </div>
+
+                <!-- Existing Member Code Field (Conditional) -->
+                <div id="existing-member-code-box" class="hidden">
+                    <label class="block font-bold text-amber-300 mb-1">Your Existing Member ID</label>
+                    <input type="text" id="reg-member-code" placeholder="e.g. TC-GOLD-0001 or TC-SILVER-0012" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                </div>
+
+                <!-- Full Name & Mobile -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Full Legal Name</label>
+                        <input type="text" id="reg-fullname" required placeholder="e.g. Neil Sharma" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Mobile Phone</label>
+                        <input type="tel" id="reg-phone" required placeholder="e.g. +91 98765 43210" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                    </div>
+                </div>
+
+                <!-- Email Address -->
+                <div>
+                    <label class="block font-bold text-stone-300 mb-1">Email Address</label>
+                    <input type="email" id="reg-email" required placeholder="e.g. neil@example.com" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                </div>
+
+                <!-- Membership Category (if Member selected) -->
+                <div id="member-category-wrap">
+                    <label class="block font-bold text-stone-300 mb-1">Membership Category</label>
+                    <select id="reg-category" onchange="checkUnderageCategory()" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                        <option value="GOLD">Gold Tier (₹5,000/mo • 100% Free Court Access)</option>
+                        <option value="SILVER" selected>Silver Tier (₹2,500/mo • 50% Off Court Fees)</option>
+                        <option value="UNDERAGE">Underage Junior (<18 years • 60% Off Court Fees)</option>
+                    </select>
+                </div>
+
+                <!-- Underage Guardian Details Box (Conditional) -->
+                <div id="underage-guardian-box" class="hidden p-3.5 rounded-xl bg-orange-500/10 border border-orange-500/25 space-y-2.5">
+                    <span class="text-xs font-bold text-orange-300 block">Junior Member Guardian Information</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="reg-guardian-name" placeholder="Parent / Guardian Full Name" class="glass-input w-full px-3 py-2 text-xs text-white">
+                        <input type="tel" id="reg-guardian-phone" placeholder="Guardian Emergency Phone" class="glass-input w-full px-3 py-2 text-xs text-white">
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer text-[11px] text-orange-200">
+                        <input type="checkbox" id="reg-guardian-consent" class="rounded bg-stone-900 border-orange-500/30 text-orange-500 w-3.5 h-3.5">
+                        <span>I confirm legal guardian consent for youth club participation</span>
+                    </label>
+                </div>
+
+                <!-- Password & Confirm Password -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Password</label>
+                        <input type="password" id="reg-password" required minlength="6" placeholder="At least 6 characters" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-stone-300 mb-1">Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" required minlength="6" placeholder="Re-type password" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+                    </div>
+                </div>
+
+                <!-- Terms and Privacy Consent -->
+                <div class="pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs text-stone-300">
+                        <input type="checkbox" id="reg-terms" required checked class="rounded bg-stone-900 border-amber-500/30 text-amber-500 w-4 h-4">
+                        <span>I agree to The Champions Club rules and privacy policy.</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="reg-submit-btn" class="w-full py-3.5 px-4 rounded-xl glass-btn-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 mt-2 transition hover:scale-102">
+                    <span id="reg-btn-spinner" class="hidden"><i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i></span>
+                    <span id="reg-btn-text">Create Account &amp; Enter Portal</span>
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                </button>
+            </form>
+
+            <div class="text-center pt-2 text-xs text-stone-400">
+                Already registered? 
+                <button type="button" onclick="switchAuthMode('signin')" class="text-amber-400 font-bold hover:underline ml-1">Sign In</button>
+            </div>
+        </div>
+
+        <!-- Support Footer Notice -->
+        <div class="mt-6 pt-4 border-t border-amber-500/15 text-center text-xs text-stone-400">
+            For administrative inquiries or staff scheduling, please contact <a href="mailto:support@champions.club" class="text-amber-400 underline font-medium">Front Desk Reception</a>.
         </div>
 
     </div>
 </div>
 
-<!-- Forgot Password Modal -->
+<!-- ===================================================================== -->
+<!-- FORGOT PASSWORD / PASSWORD RESET MODAL                                -->
+<!-- ===================================================================== -->
 <div id="forgot-password-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
-    <div class="glass-panel max-w-md w-full p-6 sm:p-7 space-y-4 border border-amber-500/25 shadow-2xl">
+    <div class="glass-panel max-w-md w-full p-6 sm:p-7 space-y-4 border border-amber-500/25 shadow-2xl rounded-3xl">
         <div class="flex justify-between items-center pb-2 border-b border-amber-500/15">
             <h3 class="text-base font-black text-white flex items-center gap-2">
-                <i data-lucide="key" class="w-4 h-4 text-amber-400"></i> Reset Password
+                <i data-lucide="key" class="w-4 h-4 text-amber-400"></i> Password Recovery
             </h3>
-            <button onclick="closeModal('forgot-password-modal')" class="text-stone-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <button type="button" onclick="closeForgotPasswordModal()" class="text-stone-400 hover:text-white">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
-        <p class="text-xs text-stone-300">Enter your registered email address to receive a secure password recovery token.</p>
-        <form onsubmit="handleForgotPassword(event)" class="space-y-3">
+
+        <!-- Step 1: Request Reset Token -->
+        <div id="fp-step-1" class="space-y-3">
+            <p class="text-xs text-stone-300">
+                Enter your registered email address to receive a secure password reset token.
+            </p>
             <div>
-                <label class="block text-xs font-bold text-stone-300 mb-1">Registered Email</label>
-                <input type="email" id="forgot-email" required placeholder="you@champions.club" class="glass-input w-full px-3 py-2 text-sm">
+                <label class="block text-xs font-bold text-stone-300 mb-1">Account Email</label>
+                <input type="email" id="forgot-email" required placeholder="e.g. rohan.sharma@example.com" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
             </div>
-            <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="closeModal('forgot-password-modal')" class="glass-btn px-3 py-1.5 text-xs">Cancel</button>
-                <button type="submit" class="glass-btn-primary px-4 py-1.5 text-xs">Send Link</button>
+            <button type="button" onclick="requestResetToken()" id="fp-btn-step1" class="w-full py-2.5 rounded-xl glass-btn-primary font-bold text-xs flex items-center justify-center gap-1.5">
+                <span>Generate Reset Code</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
+
+        <!-- Step 2: Enter Token & New Password -->
+        <div id="fp-step-2" class="hidden space-y-3">
+            <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-[11px] text-emerald-300">
+                Token generated! Please enter your reset token and your new password.
             </div>
-        </form>
+            <div>
+                <label class="block text-xs font-bold text-stone-300 mb-1">Reset Code / Token</label>
+                <input type="text" id="reset-token-input" placeholder="Paste your reset token" class="glass-input w-full px-3.5 py-2.5 text-xs text-white font-mono">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-stone-300 mb-1">New Password</label>
+                <input type="password" id="reset-new-password" minlength="6" placeholder="Min 6 characters" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-stone-300 mb-1">Confirm New Password</label>
+                <input type="password" id="reset-confirm-password" minlength="6" placeholder="Confirm password" class="glass-input w-full px-3.5 py-2.5 text-xs text-white">
+            </div>
+            <button type="button" onclick="submitNewPassword()" id="fp-btn-step2" class="w-full py-2.5 rounded-xl glass-btn-gold text-stone-950 font-bold text-xs flex items-center justify-center gap-1.5">
+                <span>Update Password &amp; Finish</span>
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -189,11 +356,39 @@
         }
     };
 
+    function switchAuthMode(mode) {
+        if (typeof playSoftClick === 'function') playSoftClick();
+        hideAlert();
+
+        const tabSignIn = document.getElementById('mode-tab-signin');
+        const tabSignUp = document.getElementById('mode-tab-signup');
+        const secSignIn = document.getElementById('signin-section');
+        const secSignUp = document.getElementById('signup-section');
+
+        if (mode === 'signup') {
+            tabSignUp.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-amber-600', 'text-stone-950', 'shadow-md');
+            tabSignUp.classList.remove('text-stone-400');
+            tabSignIn.classList.remove('bg-gradient-to-r', 'from-amber-500', 'to-amber-600', 'text-stone-950', 'shadow-md');
+            tabSignIn.classList.add('text-stone-400');
+
+            secSignIn.classList.add('hidden');
+            secSignUp.classList.remove('hidden');
+        } else {
+            tabSignIn.classList.add('bg-gradient-to-r', 'from-amber-500', 'to-amber-600', 'text-stone-950', 'shadow-md');
+            tabSignIn.classList.remove('text-stone-400');
+            tabSignUp.classList.remove('bg-gradient-to-r', 'from-amber-500', 'to-amber-600', 'text-stone-950', 'shadow-md');
+            tabSignUp.classList.add('text-stone-400');
+
+            secSignUp.classList.add('hidden');
+            secSignIn.classList.remove('hidden');
+        }
+        if (window.lucide) lucide.createIcons();
+    }
+
     function selectRole(role, btn) {
         if (typeof playSoftClick === 'function') playSoftClick();
         document.getElementById('selected-role-input').value = role;
         
-        // Update tab styling
         document.querySelectorAll('.role-tab').forEach(t => {
             t.classList.remove('active', 'bg-amber-500/30', 'text-amber-200', 'border', 'border-amber-500/50', 'shadow-sm');
             t.classList.add('text-stone-400');
@@ -201,7 +396,6 @@
         btn.classList.add('active', 'bg-amber-500/30', 'text-amber-200', 'border', 'border-amber-500/50', 'shadow-sm');
         btn.classList.remove('text-stone-400');
 
-        // Update banner text
         const meta = ROLE_METADATA[role] || ROLE_METADATA['MEMBER'];
         document.getElementById('role-desc-text').innerText = meta.desc;
         const badge = document.getElementById('role-badge-pill');
@@ -211,10 +405,47 @@
         hideAlert();
     }
 
-    function togglePasswordVisibility() {
+    function updateAccountTypeUI() {
+        const type = document.querySelector('input[name="reg-account-type"]:checked').value;
+        const catWrap = document.getElementById('member-category-wrap');
+        const existToggle = document.getElementById('existing-member-toggle-wrap');
+
+        if (type === 'MEMBER') {
+            catWrap.classList.remove('hidden');
+            existToggle.classList.remove('hidden');
+        } else {
+            catWrap.classList.add('hidden');
+            existToggle.classList.add('hidden');
+            document.getElementById('underage-guardian-box').classList.add('hidden');
+            document.getElementById('existing-member-code-box').classList.add('hidden');
+            document.getElementById('reg-is-existing-member').checked = false;
+        }
+    }
+
+    function toggleExistingMemberFields() {
+        const isChecked = document.getElementById('reg-is-existing-member').checked;
+        const box = document.getElementById('existing-member-code-box');
+        if (isChecked) {
+            box.classList.remove('hidden');
+        } else {
+            box.classList.add('hidden');
+        }
+    }
+
+    function checkUnderageCategory() {
+        const cat = document.getElementById('reg-category').value;
+        const guardianBox = document.getElementById('underage-guardian-box');
+        if (cat === 'UNDERAGE') {
+            guardianBox.classList.remove('hidden');
+        } else {
+            guardianBox.classList.add('hidden');
+        }
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
         if (typeof playSoftClick === 'function') playSoftClick();
-        const input = document.getElementById('login-password');
-        const icon = document.getElementById('eye-icon');
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
         if (input.type === 'password') {
             input.type = 'text';
             icon.setAttribute('data-lucide', 'eye-off');
@@ -226,8 +457,8 @@
     }
 
     function showAlert(msg, isError = true) {
-        const box = document.getElementById('login-alert');
-        const txt = document.getElementById('alert-msg');
+        const box = document.getElementById('auth-alert');
+        const txt = document.getElementById('auth-alert-msg');
         txt.innerText = msg;
         box.className = isError 
             ? 'mb-5 p-3.5 rounded-xl text-xs font-semibold flex items-start gap-2.5 bg-rose-500/20 border border-rose-500/35 text-rose-300'
@@ -237,25 +468,12 @@
     }
 
     function hideAlert() {
-        document.getElementById('login-alert').classList.add('hidden');
+        document.getElementById('auth-alert').classList.add('hidden');
     }
 
-    function quickFill(role, id, pwd) {
-        if (typeof playSoftClick === 'function') playSoftClick();
-        const tabMap = {
-            'ADMIN': 'tab-admin',
-            'MEMBER': 'tab-member',
-            'PLAYER': 'tab-player',
-            'STAFF': 'tab-staff',
-            'WALK_IN': 'tab-walkin'
-        };
-        const tabEl = document.getElementById(tabMap[role]);
-        if (tabEl) selectRole(role, tabEl);
-        document.getElementById('login-identifier').value = id;
-        document.getElementById('login-password').value = pwd;
-        if (window.showToast) showToast(`Autofilled demo ${role} credentials ✨`);
-    }
-
+    // =========================================================================
+    // SIGN IN FORM SUBMIT
+    // =========================================================================
     async function handleLoginSubmit(e) {
         e.preventDefault();
         hideAlert();
@@ -284,9 +502,8 @@
 
             if (res.ok) {
                 showAlert(data.message, false);
-                btnText.innerText = 'Authorized! Redirecting...';
+                btnText.innerText = 'Authorized! Entering Portal...';
                 
-                // Get ?next= URL param if present and appropriate
                 const urlParams = new URLSearchParams(window.location.search);
                 const nextUrl = urlParams.get('next');
                 
@@ -296,29 +513,119 @@
                     } else {
                         window.location.href = data.redirect_url;
                     }
-                }, 600);
+                }, 400);
             } else {
-                showAlert(data.detail || 'Authentication failed. Please check credentials.');
+                showAlert(data.detail || 'Authentication failed. Please verify credentials.');
                 btn.disabled = false;
                 spinner.classList.add('hidden');
-                btnText.innerText = 'Authenticate & Enter Portal';
+                btnText.innerText = 'Sign In & Enter Portal';
             }
         } catch (err) {
             console.error(err);
-            showAlert('Network communication error. Please check server connectivity.');
+            showAlert('Network error. Unable to communicate with authentication server.');
             btn.disabled = false;
             spinner.classList.add('hidden');
-            btnText.innerText = 'Authenticate & Enter Portal';
+            btnText.innerText = 'Sign In & Enter Portal';
         }
     }
 
-    function openForgotPasswordModal() {
-        openModal('forgot-password-modal');
+    // =========================================================================
+    // CREATE ACCOUNT FORM SUBMIT
+    // =========================================================================
+    async function handleRegisterSubmit(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const fullName = document.getElementById('reg-fullname').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const confirmPassword = document.getElementById('reg-confirm-password').value;
+        const accountType = document.querySelector('input[name="reg-account-type"]:checked').value;
+        const category = document.getElementById('reg-category').value;
+        const isExisting = document.getElementById('reg-is-existing-member').checked;
+        const existingCode = document.getElementById('reg-member-code').value.trim();
+        const guardianName = document.getElementById('reg-guardian-name').value.trim();
+        const guardianPhone = document.getElementById('reg-guardian-phone').value.trim();
+        const guardianConsent = document.getElementById('reg-guardian-consent').checked;
+        const termsConsent = document.getElementById('reg-terms').checked;
+
+        if (password !== confirmPassword) {
+            showAlert('Passwords do not match.');
+            return;
+        }
+
+        const btn = document.getElementById('reg-submit-btn');
+        const spinner = document.getElementById('reg-btn-spinner');
+        const btnText = document.getElementById('reg-btn-text');
+
+        btn.disabled = true;
+        spinner.classList.remove('hidden');
+        btnText.innerText = 'Creating Profile...';
+
+        try {
+            const res = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name: fullName,
+                    email: email,
+                    phone: phone,
+                    password: password,
+                    confirm_password: confirmPassword,
+                    account_type: accountType,
+                    membership_category: category,
+                    is_existing_member_activation: isExisting,
+                    existing_member_code: existingCode,
+                    guardian_name: guardianName,
+                    guardian_phone: guardianPhone,
+                    guardian_consent: guardianConsent,
+                    terms_consent: termsConsent
+                })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showAlert(data.message, false);
+                btnText.innerText = 'Success! Entering Dashboard...';
+                setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                }, 500);
+            } else {
+                showAlert(data.detail || 'Registration failed. Please check the inputs.');
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                btnText.innerText = 'Create Account & Enter Portal';
+            }
+        } catch (err) {
+            console.error(err);
+            showAlert('Network error during registration.');
+            btn.disabled = false;
+            spinner.classList.add('hidden');
+            btnText.innerText = 'Create Account & Enter Portal';
+        }
     }
 
-    async function handleForgotPassword(e) {
-        e.preventDefault();
-        const email = document.getElementById('forgot-email').value;
+    // =========================================================================
+    // FORGOT PASSWORD MODAL LOGIC
+    // =========================================================================
+    function openForgotPasswordModal() {
+        document.getElementById('forgot-password-modal').classList.remove('hidden');
+        document.getElementById('forgot-password-modal').classList.add('flex');
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgot-password-modal').classList.add('hidden');
+        document.getElementById('forgot-password-modal').classList.remove('flex');
+    }
+
+    async function requestResetToken() {
+        const email = document.getElementById('forgot-email').value.trim();
+        if (!email) {
+            showToast('Please enter your email', 'error');
+            return;
+        }
         try {
             const res = await fetch('/api/v1/auth/forgot-password', {
                 method: 'POST',
@@ -326,11 +633,61 @@
                 body: JSON.stringify({ email })
             });
             const data = await res.json();
-            closeModal('forgot-password-modal');
-            showToast(data.message);
+            if (res.ok) {
+                showToast(data.message);
+                if (data.reset_token) {
+                    document.getElementById('reset-token-input').value = data.reset_token;
+                }
+                document.getElementById('fp-step-1').classList.add('hidden');
+                document.getElementById('fp-step-2').classList.remove('hidden');
+            } else {
+                showToast(data.detail || 'Unable to request reset', 'error');
+            }
         } catch (err) {
-            showToast('Unable to process request', 'error');
+            showToast('Network error', 'error');
         }
     }
+
+    async function submitNewPassword() {
+        const token = document.getElementById('reset-token-input').value.trim();
+        const newPassword = document.getElementById('reset-new-password').value;
+        const confirmPassword = document.getElementById('reset-confirm-password').value;
+
+        if (newPassword !== confirmPassword) {
+            showToast('Passwords do not match', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/v1/auth/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: token,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast(data.message);
+                closeForgotPasswordModal();
+                showAlert(data.message, false);
+                switchAuthMode('signin');
+            } else {
+                showToast(data.detail || 'Failed to reset password', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        }
+    }
+
+    // Auto-check URL parameters (e.g. ?mode=register)
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('mode') === 'register' || window.location.pathname === '/register') {
+            switchAuthMode('signup');
+        }
+    });
 </script>
 {% endblock %}

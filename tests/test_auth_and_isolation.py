@@ -194,3 +194,178 @@ def test_guest_portal_public_access(client, db_session):
     response = client.get("/guest")
     assert response.status_code == 200
     assert "Guest Portal" in response.text
+
+# =========================================================================
+# NEW REGISTRATION, ACTIVATION & PASSWORD RESET TESTS
+# =========================================================================
+
+def test_register_new_member_success(client, db_session):
+    """New member self-registers, creates linked Member record and authenticates."""
+    payload = {
+        "full_name": "Devansh Singhania",
+        "email": "devansh.singh@example.com",
+        "phone": "+91 99887 76655",
+        "password": "DevanshPass123!",
+        "confirm_password": "DevanshPass123!",
+        "account_type": "MEMBER",
+        "membership_category": "GOLD",
+        "terms_consent": True
+    }
+    response = client.post("/api/v1/auth/register", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["success"] is True
+    assert data["role"] == "MEMBER"
+    assert data["redirect_url"] == "/member/dashboard"
+
+    # Verify created in DB
+    member = db_session.query(Member).filter(Member.email == "devansh.singh@example.com").first()
+    assert member is not None
+    assert member.tier == "gold"
+    assert member.user is not None
+    assert member.user.primary_role == "MEMBER"
+
+def test_register_duplicate_email_rejected(client, db_session):
+    """Attempting to register with an existing active account email returns 409 Conflict."""
+    payload = {
+        "full_name": "Another Rohan",
+        "email": "gold@test.com", # already registered in test fixtures
+        "phone": "+91 91111 22222",
+        "password": "Password123!",
+        "confirm_password": "Password123!",
+        "account_type": "MEMBER",
+        "terms_consent": True
+    }
+    response = client.post("/api/v1/auth/register", json=payload)
+    assert response.status_code == 409
+    assert "already registered" in response.json()["detail"].lower()
+
+def test_register_password_mismatch_rejected(client, db_session):
+    """Mismatched passwords return 400 Bad Request."""
+    payload = {
+        "full_name": "Test Mismatch",
+        "email": "mismatch@example.com",
+        "phone": "+91 90000 11111",
+        "password": "SecretPassword1!",
+        "confirm_password": "DifferentPassword2!",
+        "account_type": "MEMBER",
+        "terms_consent": True
+    }
+    response = client.post("/api/v1/auth/register", json=payload)
+    assert response.status_code == 400
+    assert "match" in response.json()["detail"].lower()
+
+def test_register_admin_or_staff_forbidden(client, db_session):
+    """Public self-registration for ADMIN or STAFF must strictly return 403 Forbidden."""
+    for forbidden_role in ["ADMIN", "STAFF"]:
+        payload = {
+            "full_name": f"Hacker {forbidden_role}",
+            "email": f"hacker.{forbidden_role.lower()}@example.com",
+            "phone": "+91 99999 00000",
+            "password": "HackerPassword1!",
+            "confirm_password": "HackerPassword1!",
+            "account_type": forbidden_role,
+            "terms_consent": True
+        }
+        response = client.post("/api/v1/auth/register", json=payload)
+        assert response.status_code == 403
+        assert "strictly prohibited" in response.json()["detail"].lower()
+
+def test_register_links_existing_member_no_duplicate(client, db_session):
+    """
+    If an existing member record exists in DB without a password or needing activation,
+    registering with their member_code links the account without creating duplicate member records.
+    """
+    initial_member_count = db_session.query(Member).count()
+    gold_m = db_session.query(Member).filter(Member.tier == "gold").first()
+    assert gold_m is not None
+
+    payload = {
+        "full_name": "Gold Member Name",
+        "email": "gold.newalias@example.com",
+        "phone": gold_m.phone,
+        "password": "NewActivatedPassword123!",
+        "confirm_password": "NewActivatedPassword123!",
+        "account_type": "MEMBER",
+        "is_existing_member_activation": True,
+        "existing_member_code": gold_m.member_code,
+        "terms_consent": True
+    }
+    response = client.post("/api/v1/auth/register", json=payload)
+    assert response.status_code == 200
+
+    # Verify no duplicate member was created
+    final_member_count = db_session.query(Member).count()
+    assert final_member_count == initial_member_count
+
+def test_member_activation_endpoint(client, db_session):
+    """Existing member can activate account via /api/v1/auth/activate."""
+    gold_m = db_session.query(Member).filter(Member.tier == "gold").first()
+    payload = {
+        "member_code": gold_m.member_code,
+        "identifier": gold_m.email,
+        "new_password": "FreshActivationPass123!",
+        "confirm_password": "FreshActivationPass123!"
+    }
+    response = client.post("/api/v1/auth/activate", json=payload)
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+
+def test_forgot_and_reset_password_flow(client, db_session):
+    """Complete password reset lifecycle: request token -> verify & update -> login with new password."""
+    # 1. Request reset token
+    res_req = client.post("/api/v1/auth/forgot-password", json={"email": "gold@test.com"})
+    assert res_req.status_code == 200
+    token = res_req.json().get("reset_token")
+    assert token is not None
+
+    # 2. Reset password
+    res_reset = client.post("/api/v1/auth/reset-password", json={
+        "token": token,
+        "new_password": "BrandNewSecretPassword123!",
+        "confirm_password": "BrandNewSecretPassword123!"
+    })
+    assert res_reset.status_code == 200
+    assert "successfully reset" in res_reset.json()["message"].lower()
+
+    # 3. Authenticate with new password
+    res_login = client.post("/api/v1/auth/login", json={
+        "identifier": "gold@test.com",
+        "password": "BrandNewSecretPassword123!",
+        "selected_role": "MEMBER"
+    })
+    assert res_login.status_code == 200
+    assert res_login.json()["success"] is True
+
+def test_login_with_member_code(client, db_session):
+    """Members can authenticate using their Member ID (e.g. TC-GOLD-0001) instead of email."""
+    gold_m = db_session.query(Member).filter(Member.tier == "gold").first()
+    res = client.post("/api/v1/auth/login", json={
+        "identifier": gold_m.member_code,
+        "password": "MemberPass123!",
+        "selected_role": "MEMBER"
+    })
+    assert res.status_code == 200
+    assert res.json()["role"] == "MEMBER"
+
+def test_server_side_session_token_revocation(client, db_session):
+    """Session token is revoked server-side upon logout and cannot be re-used."""
+    # Login as admin
+    res_login = client.post("/api/v1/auth/login", json={
+        "identifier": "admin@test.com",
+        "password": "AdminPass123!",
+        "selected_role": "ADMIN"
+    })
+    token = res_login.cookies.get("champions_session")
+    assert token is not None
+
+    # Access admin dashboard
+    assert client.get("/admin/dashboard", cookies={"champions_session": token}).status_code == 200
+
+    # Logout
+    res_logout = client.post("/api/v1/auth/logout", cookies={"champions_session": token})
+    assert res_logout.status_code == 200
+
+    # Even if an attacker preserves the old token and presents it manually, it is blocked
+    res_blocked = client.get("/admin/dashboard", headers={"Authorization": f"Bearer {token}"}, follow_redirects=False)
+    assert res_blocked.status_code == 307
