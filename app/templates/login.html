@@ -190,6 +190,7 @@
     };
 
     function selectRole(role, btn) {
+        if (typeof playSoftClick === 'function') playSoftClick();
         document.getElementById('selected-role-input').value = role;
         
         // Update tab styling
@@ -211,6 +212,7 @@
     }
 
     function togglePasswordVisibility() {
+        if (typeof playSoftClick === 'function') playSoftClick();
         const input = document.getElementById('login-password');
         const icon = document.getElementById('eye-icon');
         if (input.type === 'password') {
@@ -239,6 +241,7 @@
     }
 
     function quickFill(role, id, pwd) {
+        if (typeof playSoftClick === 'function') playSoftClick();
         const tabMap = {
             'ADMIN': 'tab-admin',
             'MEMBER': 'tab-member',
@@ -250,6 +253,7 @@
         if (tabEl) selectRole(role, tabEl);
         document.getElementById('login-identifier').value = id;
         document.getElementById('login-password').value = pwd;
+        if (window.showToast) showToast(`Autofilled demo ${role} credentials ✨`);
     }
 
     async function handleLoginSubmit(e) {

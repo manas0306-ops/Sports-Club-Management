@@ -128,10 +128,60 @@
     </footer>
 
     <!-- Toast Notification Overlay (Glass Floating Alert) -->
-    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+    <div id="toast-container" class="fixed bottom-20 right-6 z-50 flex flex-col gap-2.5 pointer-events-none"></div>
+
+    <!-- Floating Dynamic Island / Bottom Glass Dock (Inspired by Smart Control & Ambient Docks) -->
+    <div class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 max-w-fit px-4 py-2.5 dynamic-dock flex items-center gap-3 sm:gap-4 shadow-2xl">
+        <!-- Ambient Clubhouse Synth / Lo-Fi Player -->
+        <button onclick="toggleAmbientLounge()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 transition group" title="Toggle Clubhouse Ambient Soundscape">
+            <div class="flex items-center gap-0.5 h-4">
+                <span class="sound-bar h-1"></span>
+                <span class="sound-bar h-2"></span>
+                <span class="sound-bar h-1"></span>
+                <span class="sound-bar h-3"></span>
+                <span class="sound-bar h-1"></span>
+            </div>
+            <span id="ambient-btn-text" class="text-[11px] font-bold tracking-tight hidden sm:inline">Club Ambient Vibe</span>
+            <i id="ambient-play-icon" data-lucide="play" class="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition"></i>
+        </button>
+
+        <span class="w-px h-5 bg-amber-500/20 hidden sm:block"></span>
+
+        <!-- Quick Access Pills -->
+        <div class="flex items-center gap-1.5">
+            <a href="/" onmouseenter="playSoftClick()" class="p-2 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold" title="Home Portal">
+                <i data-lucide="home" class="w-4 h-4 text-amber-400"></i>
+                <span class="hidden md:inline">Home</span>
+            </a>
+            <a href="/courts" onmouseenter="playSoftClick()" class="p-2 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold" title="Court Visualizer">
+                <i data-lucide="sun" class="w-4 h-4 text-emerald-400"></i>
+                <span class="hidden md:inline">Courts</span>
+            </a>
+            <a href="/bar" onmouseenter="playSoftClick()" class="p-2 sm:px-2.5 sm:py-1.5 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition flex items-center gap-1.5 text-xs font-semibold" title="Bar & Shakes">
+                <i data-lucide="cup-soda" class="w-4 h-4 text-orange-400"></i>
+                <span class="hidden md:inline">Bar</span>
+            </a>
+            <a href="/login" onmouseenter="playSoftClick()" class="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-stone-950 font-black text-xs transition shadow-lg shadow-amber-500/30 flex items-center gap-1 hover:scale-105" title="Login / Select Portal">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Portals</span>
+            </a>
+        </div>
+
+        <span class="w-px h-5 bg-amber-500/20 hidden lg:block"></span>
+
+        <!-- Live Atmosphere Status -->
+        <div class="hidden lg:flex items-center gap-2 text-[11px] text-amber-300/90 font-mono">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>24°C • Floodlights Ready</span>
+        </div>
+    </div>
 
     <!-- Core App Scripts -->
     <script src="/static/js/app.js"></script>
+    <script src="/static/js/ambient_interactions.js"></script>
     <script>
         lucide.createIcons();
     </script>
