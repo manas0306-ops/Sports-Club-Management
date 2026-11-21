@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Court Form View -->
+    <record id="view_sports_court_form" model="ir.ui.view">
+        <field name="name">sports.court.form</field>
+        <field name="model">sports.court</field>
+        <field name="arch" type="xml">
+            <form string="Sports Court">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sport_type"/>
+                            <field name="surface_type"/>
+                            <field name="hourly_rate"/>
+                        </group>
+                        <group>
+                            <field name="has_floodlights"/>
+                            <field name="is_active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Court Tree View -->
+    <record id="view_sports_court_tree" model="ir.ui.view">
+        <field name="name">sports.court.tree</field>
+        <field name="model">sports.court</field>
+        <field name="arch" type="xml">
+            <tree string="Courts &amp; Pitches">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="sport_type" widget="badge"/>
+                <field name="surface_type"/>
+                <field name="hourly_rate"/>
+                <field name="has_floodlights"/>
+                <field name="is_active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Booking Form View -->
+    <record id="view_sports_court_booking_form" model="ir.ui.view">
+        <field name="name">sports.court.booking.form</field>
+        <field name="model">sports.court.booking</field>
+        <field name="arch" type="xml">
+            <form string="Court Booking">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="confirmed,completed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Slot Information">
+                            <field name="court_id"/>
+                            <field name="booking_date"/>
+                            <field name="start_time"/>
+                            <field name="end_time"/>
+                            <field name="is_social_play"/>
+                        </group>
+                        <group string="Player Information">
+                            <field name="is_walkin"/>
+                            <field name="member_id" invisible="is_walkin"/>
+                            <field name="guest_name" invisible="not is_walkin"/>
+                            <field name="guest_phone" invisible="not is_walkin"/>
+                        </group>
+                    </group>
+
+                    <group string="Pricing &amp; Rates">
+                        <group>
+                            <field name="base_rate"/>
+                            <field name="discount_percent"/>
+                            <field name="discount_amount"/>
+                        </group>
+                        <group>
+                            <field name="court_fee"/>
+                            <field name="tax_amount"/>
+                            <field name="total_amount"/>
+                            <field name="payment_state" widget="badge"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Booking Calendar View -->
+    <record id="view_sports_court_booking_calendar" model="ir.ui.view">
+        <field name="name">sports.court.booking.calendar</field>
+        <field name="model">sports.court.booking</field>
+        <field name="arch" type="xml">
+            <calendar string="Court Bookings"
+                      date_start="start_time"
+                      date_stop="end_time"
+                      color="court_id"
+                      mode="week">
+                <field name="name"/>
+                <field name="court_id"/>
+                <field name="member_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Booking Tree View -->
+    <record id="view_sports_court_booking_tree" model="ir.ui.view">
+        <field name="name">sports.court.booking.tree</field>
+        <field name="model">sports.court.booking</field>
+        <field name="arch" type="xml">
+            <tree string="Bookings" decoration-info="is_social_play" decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="court_id"/>
+                <field name="booking_date"/>
+                <field name="start_time"/>
+                <field name="end_time"/>
+                <field name="member_id"/>
+                <field name="guest_name"/>
+                <field name="total_amount"/>
+                <field name="payment_state" widget="badge"/>
+                <field name="state" widget="badge"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_sports_court_bookings" model="ir.actions.act_window">
+        <field name="name">Court Master Schedule</field>
+        <field name="res_model">sports.court.booking</field>
+        <field name="view_mode">calendar,tree,form</field>
+    </record>
+
+    <record id="action_sports_courts" model="ir.actions.act_window">
+        <field name="name">Courts Configuration</field>
+        <field name="res_model">sports.court</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_sports_booking_calendar"
+              name="Court Schedule"
+              parent="menu_sports_courts_root"
+              action="action_sports_court_bookings"
+              sequence="10"/>
+
+    <menuitem id="menu_sports_courts_list"
+              name="Courts Roster"
+              parent="menu_sports_courts_root"
+              action="action_sports_courts"
+              sequence="20"/>
+</odoo>

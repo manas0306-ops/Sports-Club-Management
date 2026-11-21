@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}The Champions Club - Welcome & Public Portal{% endblock %}
+
+{% block content %}
+<div class="space-y-12">
+
+    <!-- Hero Section -->
+    <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-purple-950 via-purple-900 to-slate-900 text-white shadow-xl p-8 sm:p-12 lg:p-16">
+        <div class="max-w-3xl space-y-6 relative z-10">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-800 text-purple-200 border border-purple-700">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> Elite Sports Club & Digital Experience
+            </span>
+            <h1 class="text-4xl sm:text-5xl font-black tracking-tight leading-tight">
+                Where Passion Meets the Court.
+            </h1>
+            <p class="text-lg text-slate-300 leading-relaxed">
+                The Champions Club brings together world-class tennis, tournament-spec cricket nets, premium gear, and a vibrant post-match bar & cafeteria — all running on a seamless unified digital platform.
+            </p>
+            <div class="flex flex-wrap gap-4 pt-2">
+                <a href="#trial-section" class="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold transition flex items-center gap-2 shadow-lg shadow-amber-500/20">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i> Book a Free Trial Session
+                </a>
+                <a href="/courts" class="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold backdrop-blur transition flex items-center gap-2 border border-white/10">
+                    <i data-lucide="calendar" class="w-5 h-5"></i> View Live Court Schedule
+                </a>
+            </div>
+        </div>
+        <!-- Decorative subtle pattern overlay -->
+        <div class="absolute -right-16 -bottom-16 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- Membership Plans & Entitlements -->
+    <div class="space-y-6">
+        <div class="text-center max-w-2xl mx-auto space-y-2">
+            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Membership Plans</h2>
+            <p class="text-slate-500 text-sm">Choose the tier that fits your training routine. Enjoy zero court fees or hefty discounts across the club.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Gold Tier -->
+            <div class="bg-white rounded-2xl border-2 border-amber-400 p-6 shadow-md hover:shadow-xl transition relative flex flex-col justify-between">
+                <div class="absolute -top-3.5 right-6 px-3 py-0.5 rounded-full bg-amber-500 text-slate-950 text-xs font-black uppercase tracking-wider">
+                    Most Popular
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-9 h-9 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                            <i data-lucide="crown" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Gold Tier</h3>
+                            <span class="text-xs text-amber-700 font-semibold">Premium Full Access</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <span class="text-4xl font-black text-slate-900">₹5,000</span>
+                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
+                        <li class="flex items-center gap-2 font-semibold text-emerald-700">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 100% Free Court Access (₹0 fee)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 20% Off at Pro Gear Shop
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 20% Off at Bar & Cafeteria
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Free Entry to Friday Social Play
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Running Tab Privileges
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="selectTierForEnquiry('gold')" class="mt-6 w-full py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition shadow-sm">
+                    Enquire for Gold
+                </button>
+            </div>
+
+            <!-- Silver Tier -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Silver Tier</h3>
+                            <span class="text-xs text-slate-500 font-medium">Standard Club Membership</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <span class="text-4xl font-black text-slate-900">₹2,500</span>
+                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 50% Off Court Fees (₹400/hr)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Pro Gear Shop
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Bar & Cafeteria
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Discounted Friday Social Play
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="selectTierForEnquiry('silver')" class="mt-6 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition">
+                    Enquire for Silver
+                </button>
+            </div>
+
+            <!-- Junior Tier -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
+                            <i data-lucide="user-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg text-slate-900">Junior Tier</h3>
+                            <span class="text-xs text-blue-600 font-semibold">Under 18 Dedicated Youth</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <span class="text-4xl font-black text-slate-900">₹1,500</span>
+                        <span class="text-xs text-slate-500 font-medium">/ month</span>
+                    </div>
+                    <ul class="space-y-2.5 text-sm text-slate-600 pt-2 border-t border-slate-100">
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 60% Off Court Fees (₹320/hr)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 10% Off at Pro Gear Shop
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> 5% Off Bar Healthy Snacks
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i> Junior Academy Clinic access
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="selectTierForEnquiry('junior')" class="mt-6 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition">
+                    Enquire for Junior
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial Session & Enquiries Section (Scene 5 Problem Solver) -->
+    <div id="trial-section" class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        
+        <!-- Book Trial Session Form -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                    <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-slate-900">Book a Free Trial Session</h3>
+                    <p class="text-xs text-slate-500">Pick a court, choose your slot, and hit the court with our pro coach.</p>
+                </div>
+            </div>
+
+            <form id="trial-form" onsubmit="submitTrial(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Your Full Name</label>
+                        <input type="text" name="visitor_name" required placeholder="Alex Turner" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                        <input type="tel" name="visitor_phone" required placeholder="+91 98765 43210" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+                    <input type="email" name="visitor_email" required placeholder="alex@example.com" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Sport</label>
+                        <select name="sport_type" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                            <option value="tennis">Tennis</option>
+                            <option value="cricket">Cricket</option>
+                            <option value="padel">Padel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Preferred Date</label>
+                        <input type="date" name="trial_date" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Time Slot</label>
+                        <select name="trial_time_slot" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                            <option value="08:00 - 09:00">08:00 - 09:00 AM</option>
+                            <option value="10:00 - 11:00">10:00 - 11:00 AM</option>
+                            <option value="17:00 - 18:00">05:00 - 06:00 PM</option>
+                            <option value="18:30 - 19:30">06:30 - 07:30 PM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm Trial Booking
+                </button>
+            </form>
+        </div>
+
+        <!-- General Visitor Enquiry Form -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-slate-900">Reach Out & Enquire</h3>
+                    <p class="text-xs text-slate-500">Every enquiry is captured instantly into our staff CRM so you get a quote immediately.</p>
+                </div>
+            </div>
+
+            <form id="enquiry-form" onsubmit="submitEnquiry(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
+                        <input type="text" id="enq-name" name="name" required placeholder="Sam Patel" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                        <input type="tel" id="enq-phone" name="phone" required placeholder="+91 91234 56789" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                        <input type="email" id="enq-email" name="email" required placeholder="sam@example.com" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Interested Tier</label>
+                        <select id="enq-tier" name="interested_tier" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700">
+                            <option value="gold">Gold (Premium Full Access)</option>
+                            <option value="silver">Silver (Standard)</option>
+                            <option value="junior">Junior (Under 18)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Questions or Requirements</label>
+                    <textarea name="notes" rows="3" placeholder="Tell us what you are looking for (e.g. corporate booking, weekend games)..." class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-700"></textarea>
+                </div>
+
+                <button type="submit" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i> Submit Enquiry
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function selectTierForEnquiry(tier) {
+        document.getElementById('enq-tier').value = tier;
+        document.getElementById('trial-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    async function submitTrial(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = Object.fromEntries(new FormData(form));
+        try {
+            const res = await fetch('/api/v1/crm/trials', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+            if (res.ok) {
+                showToast(json.message);
+                form.reset();
+            } else {
+                showToast(json.detail || 'Failed to book trial', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        }
+    }
+
+    async function submitEnquiry(e) {
+        e.preventDefault();
+        const form = e.target;
+        const data = Object.fromEntries(new FormData(form));
+        try {
+            const res = await fetch('/api/v1/crm/enquiries', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const json = await res.json();
+            if (res.ok) {
+                showToast(json.message);
+                form.reset();
+            } else {
+                showToast(json.detail || 'Failed to submit enquiry', 'error');
+            }
+        } catch (err) {
+            showToast('Network error', 'error');
+        }
+    }
+</script>
+{% endblock %}

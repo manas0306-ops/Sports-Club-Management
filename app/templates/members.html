@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}Members & Front Desk - The Champions Club{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header bar -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <i data-lucide="users" class="w-6 h-6 text-purple-900"></i> Member Management & Front Desk
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">Instant recognition, tier privileges, expiry alerts, and unified club history.</p>
+        </div>
+        <button onclick="openModal('new-member-modal')" class="px-5 py-2.5 rounded-xl bg-purple-900 hover:bg-purple-800 text-white font-bold text-sm transition flex items-center gap-2 shadow-sm">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> New Member Sign-Up
+        </button>
+    </div>
+
+    <!-- Quick Search & Lookup (Scene 1) -->
+    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Fast Front Desk Member Lookup</label>
+        <div class="relative">
+            <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3"></i>
+            <input type="text" id="member-search-input" oninput="handleMemberSearch(this.value)" placeholder="Search by Member Code (e.g. TC-GOLD-0001), Name, Phone or Email..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-purple-700 bg-slate-50/50">
+        </div>
+        <!-- Live Search Dropdown -->
+        <div id="search-results-dropdown" class="hidden divide-y divide-slate-100 border border-slate-200 rounded-xl bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto"></div>
+    </div>
+
+    <!-- Active Selected Member 360 View Profile -->
+    <div id="member-profile-panel" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+        <!-- Profile Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-6 border-b border-slate-100">
+            <div class="flex items-center gap-4">
+                <img id="prof-photo" src="" class="w-16 h-16 rounded-2xl border-2 border-purple-200 shadow-sm bg-purple-50">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h2 id="prof-name" class="text-2xl font-black text-slate-900"></h2>
+                        <span id="prof-tier-badge" class="px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider"></span>
+                        <span id="prof-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold"></span>
+                    </div>
+                    <div class="text-xs text-slate-500 flex flex-wrap gap-3 mt-1">
+                        <span class="flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5"></i> <strong id="prof-code"></strong></span>
+                        <span class="flex items-center gap-1"><i data-lucide="phone" class="w-3.5 h-3.5"></i> <span id="prof-phone"></span></span>
+                        <span class="flex items-center gap-1"><i data-lucide="mail" class="w-3.5 h-3.5"></i> <span id="prof-email"></span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expiry & Renewal Actions -->
+            <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div>
+                    <span class="block text-xs text-slate-500 font-medium">Membership Expiry</span>
+                    <span id="prof-expiry" class="text-sm font-extrabold text-slate-900"></span>
+                    <span id="prof-days-alert" class="block text-xs font-semibold"></span>
+                </div>
+                <button onclick="renewCurrentMember()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition flex items-center gap-1 shadow-sm">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Renew 1 Year
+                </button>
+            </div>
+        </div>
+
+        <!-- Tier Entitlements Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-purple-50/60 border border-purple-100 p-4 rounded-xl">
+                <span class="text-xs text-purple-700 font-semibold block">Court Access Rate</span>
+                <span id="entitle-court" class="text-lg font-black text-purple-950"></span>
+            </div>
+            <div class="bg-blue-50/60 border border-blue-100 p-4 rounded-xl">
+                <span class="text-xs text-blue-700 font-semibold block">Pro Shop Discount</span>
+                <span id="entitle-shop" class="text-lg font-black text-blue-950"></span>
+            </div>
+            <div class="bg-amber-50/60 border border-amber-100 p-4 rounded-xl">
+                <span class="text-xs text-amber-700 font-semibold block">Bar & Café Discount</span>
+                <span id="entitle-bar" class="text-lg font-black text-amber-950"></span>
+            </div>
+            <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-xl">
+                <span class="text-xs text-emerald-700 font-semibold block">Total Lifetime Spend</span>
+                <span id="prof-total-spend" class="text-lg font-black text-emerald-950"></span>
+            </div>
+        </div>
+
+        <!-- History with the Club -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <!-- Recent Court Bookings -->
+            <div class="border border-slate-200 rounded-xl p-4 space-y-3">
+                <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-4 h-4 text-purple-800"></i> Recent Court Bookings
+                </h3>
+                <div id="prof-bookings-list" class="space-y-2 text-xs divide-y divide-slate-100"></div>
+            </div>
+
+            <!-- Open Tab & Bar Orders -->
+            <div class="border border-slate-200 rounded-xl p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i> Active Bar Tab & Purchases
+                    </h3>
+                    <div id="prof-open-tab-pill"></div>
+                </div>
+                <div id="prof-shop-list" class="space-y-2 text-xs divide-y divide-slate-100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Members Directory Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 class="text-lg font-extrabold text-slate-900">Club Members Directory ({{ members|length }})</h2>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="px-6 py-3">Member</th>
+                        <th class="px-6 py-3">Code</th>
+                        <th class="px-6 py-3">Tier</th>
+                        <th class="px-6 py-3">Phone</th>
+                        <th class="px-6 py-3">Expiry Date</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for m in members %}
+                    <tr class="hover:bg-slate-50 transition cursor-pointer" onclick="loadMemberProfile({{ m.id }})">
+                        <td class="px-6 py-3.5 font-semibold text-slate-900 flex items-center gap-2.5">
+                            <img src="{{ m.photo_url }}" class="w-8 h-8 rounded-lg bg-slate-100">
+                            {{ m.full_name }}
+                        </td>
+                        <td class="px-6 py-3.5 font-mono text-xs">{{ m.member_code }}</td>
+                        <td class="px-6 py-3.5">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase
+                                {% if m.tier == 'gold' %} bg-amber-100 text-amber-800 border border-amber-300
+                                {% elif m.tier == 'silver' %} bg-slate-200 text-slate-800
+                                {% elif m.tier == 'junior' %} bg-blue-100 text-blue-800
+                                {% else %} bg-slate-100 text-slate-600 {% endif %}">
+                                {{ m.tier }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3.5 text-xs">{{ m.phone }}</td>
+                        <td class="px-6 py-3.5 text-xs font-medium">{{ m.expiry_date }}</td>
+                        <td class="px-6 py-3.5">
+                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold
+                                {% if m.status == 'active' %} bg-emerald-50 text-emerald-700 border border-emerald-200
+                                {% else %} bg-rose-50 text-rose-700 border border-rose-200 {% endif %}">
+                                {{ m.status.capitalize() }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-3.5 text-right">
+                            <button onclick="event.stopPropagation(); loadMemberProfile({{ m.id }})" class="text-purple-700 hover:text-purple-900 font-bold text-xs underline">
+                                View Profile
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: New Member Registration -->
+<div id="new-member-modal" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <h3 class="text-lg font-extrabold text-slate-900">New Member Registration</h3>
+            <button onclick="closeModal('new-member-modal')" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <form onsubmit="submitNewMember(event)" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">First Name</label>
+                    <input type="text" name="first_name" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Last Name</label>
+                    <input type="text" name="last_name" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email</label>
+                    <input type="email" name="email" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Phone</label>
+                    <input type="tel" name="phone" required class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Membership Plan</label>
+                    <select name="tier" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 font-bold text-slate-800">
+                        <option value="gold">Gold Tier (₹5,000/mo)</option>
+                        <option value="silver" selected>Silver Tier (₹2,500/mo)</option>
+                        <option value="junior">Junior Tier (₹1,500/mo - Under 18)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Duration (Months)</label>
+                    <select name="duration_months" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                        <option value="1">1 Month</option>
+                        <option value="3">3 Months</option>
+                        <option value="6">6 Months</option>
+                        <option value="12" selected>12 Months (Annual)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Date of Birth (Optional)</label>
+                    <input type="date" name="date_of_birth" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Emergency Phone</label>
+                    <input type="tel" name="emergency_contact_phone" placeholder="Emergency contact" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('new-member-modal')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+                <button type="submit" class="px-5 py-2 text-sm font-bold bg-purple-900 text-white rounded-lg hover:bg-purple-800">Enroll Member</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    let activeSelectedMemberId = null;
+
+    async function handleMemberSearch(val) {
+        const dropdown = document.getElementById('search-results-dropdown');
+        if (!val || val.length < 1) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+        try {
+            const res = await fetch(`/api/v1/members/search?q=${encodeURIComponent(val)}`);
+            const data = await res.json();
+            if (data.length === 0) {
+                dropdown.innerHTML = '<div class="p-3 text-xs text-slate-500 text-center">No member found matching query.</div>';
+                dropdown.classList.remove('hidden');
+                return;
+            }
+            dropdown.innerHTML = data.map(m => `
+                <div onclick="selectMemberFromSearch(${m.id})" class="p-3 hover:bg-purple-50 cursor-pointer flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-sm text-slate-900">${m.name} <span class="text-xs font-mono text-purple-700 font-semibold">(${m.member_code})</span></div>
+                        <div class="text-xs text-slate-500">${m.phone} | ${m.email}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-xs font-bold uppercase ${m.tier === 'gold' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100'}">${m.tier}</span>
+                </div>
+            `).join('');
+            dropdown.classList.remove('hidden');
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function selectMemberFromSearch(id) {
+        document.getElementById('search-results-dropdown').classList.add('hidden');
+        loadMemberProfile(id);
+    }
+
+    async function loadMemberProfile(memberId) {
+        activeSelectedMemberId = memberId;
+        try {
+            const res = await fetch(`/api/v1/members/${memberId}`);
+            const data = await res.json();
+            if (!res.ok) return showToast(data.detail || 'Error loading profile', 'error');
+
+            document.getElementById('member-profile-panel').classList.remove('hidden');
+            document.getElementById('member-profile-panel').scrollIntoView({ behavior: 'smooth' });
+
+            document.getElementById('prof-photo').src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.name)}`;
+            document.getElementById('prof-name').innerText = data.name;
+            document.getElementById('prof-code').innerText = data.member_code;
+            document.getElementById('prof-phone').innerText = data.phone;
+            document.getElementById('prof-email').innerText = data.email;
+            document.getElementById('prof-expiry').innerText = data.expiry_date;
+
+            const daysAlert = document.getElementById('prof-days-alert');
+            if (data.is_expired) {
+                daysAlert.innerText = `EXPIRED (${Math.abs(data.days_to_expiry)} days ago)`;
+                daysAlert.className = 'block text-xs font-bold text-rose-600';
+            } else if (data.days_to_expiry <= 30) {
+                daysAlert.innerText = `Expiring soon: ${data.days_to_expiry} days left`;
+                daysAlert.className = 'block text-xs font-bold text-amber-600';
+            } else {
+                daysAlert.innerText = `Active: ${data.days_to_expiry} days remaining`;
+                daysAlert.className = 'block text-xs font-semibold text-emerald-600';
+            }
+
+            const tierBadge = document.getElementById('prof-tier-badge');
+            tierBadge.innerText = data.tier;
+            tierBadge.className = `px-3 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                data.tier === 'gold' ? 'bg-amber-400 text-slate-950' : data.tier === 'junior' ? 'bg-blue-200 text-blue-900' : 'bg-slate-300 text-slate-900'
+            }`;
+
+            const statusBadge = document.getElementById('prof-status-badge');
+            statusBadge.innerText = data.status.toUpperCase();
+            statusBadge.className = `px-2.5 py-0.5 rounded-full text-xs font-bold ${data.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`;
+
+            document.getElementById('entitle-court').innerText = data.privileges.court_discount === 1.0 ? '100% Free Access' : `${data.privileges.court_discount * 100}% Discount`;
+            document.getElementById('entitle-shop').innerText = `${data.privileges.shop_discount * 100}% Off`;
+            document.getElementById('entitle-bar').innerText = `${data.privileges.bar_discount * 100}% Off`;
+            document.getElementById('prof-total-spend').innerText = formatINR(data.stats.total_spend);
+
+            // Recent bookings
+            const bookingsList = document.getElementById('prof-bookings-list');
+            if (data.recent_bookings.length === 0) {
+                bookingsList.innerHTML = '<div class="py-2 text-slate-400">No bookings on record yet.</div>';
+            } else {
+                bookingsList.innerHTML = data.recent_bookings.map(b => `
+                    <div class="py-1.5 flex justify-between items-center">
+                        <div>
+                            <span class="font-semibold text-slate-800">${b.court}</span>
+                            <span class="text-slate-400 block">${b.date} | ${b.time}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-slate-900">${formatINR(b.amount)}</span>
+                            <span class="block text-xs text-emerald-600 capitalize">${b.status}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Open tab pill
+            const tabPill = document.getElementById('prof-open-tab-pill');
+            if (data.open_tab) {
+                tabPill.innerHTML = `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">Open Tab: ${data.open_tab.tab_number} (${formatINR(data.open_tab.amount)})</span>`;
+            } else {
+                tabPill.innerHTML = `<span class="text-xs text-slate-400">No open tab</span>`;
+            }
+
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function renewCurrentMember() {
+        if (!activeSelectedMemberId) return;
+        try {
+            const res = await fetch(`/api/v1/members/${activeSelectedMemberId}/renew`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ member_id: activeSelectedMemberId, duration_months: 12 })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                showToast(data.message);
+                loadMemberProfile(activeSelectedMemberId);
+            } else {
+                showToast(data.detail || 'Renewal failed', 'error');
+            }
+        } catch (e) {
+            showToast('Renewal error', 'error');
+        }
+    }
+
+    async function submitNewMember(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = Object.fromEntries(new FormData(form));
+        try {
+            const res = await fetch('/api/v1/members/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            const json = await res.json();
+            if (res.ok) {
+                showToast(json.message);
+                closeModal('new-member-modal');
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                showToast(json.detail || 'Failed to create member', 'error');
+            }
+        } catch (e) {
+            showToast('Network error', 'error');
+        }
+    }
+</script>
+{% endblock %}

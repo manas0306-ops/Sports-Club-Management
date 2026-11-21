@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Corporate Invoices Action -->
+    <record id="action_sports_corporate_invoices" model="ir.actions.act_window">
+        <field name="name">Corporate &amp; Membership Invoices</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'out_invoice')]</field>
+    </record>
+
+    <!-- Staff Leaves Approval Action -->
+    <record id="action_sports_leave_approvals" model="ir.actions.act_window">
+        <field name="name">Employee Leave Approvals</field>
+        <field name="res_model">hr.leave</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_sports_corporate_invoices"
+              name="Client &amp; Corporate Invoicing"
+              parent="menu_sports_finance_root"
+              action="action_sports_corporate_invoices"
+              sequence="10"/>
+
+    <menuitem id="menu_sports_leave_approvals"
+              name="Staff Leave Approvals"
+              parent="menu_sports_finance_root"
+              action="action_sports_leave_approvals"
+              sequence="20"/>
+</odoo>

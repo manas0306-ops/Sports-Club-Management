@@ -1,0 +1,66 @@
+/* The Champions Club - Custom Stylesheet */
+:root {
+    --primary-color: #714B67;
+    --primary-hover: #5a3c52;
+    --secondary-color: #017E84;
+}
+
+/* Court grid slot styles */
+.slot-cell {
+    transition: all 0.15s ease-in-out;
+}
+.slot-available {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+.slot-available:hover {
+    background-color: #dcfce7;
+    border-color: #86efac;
+    transform: translateY(-1px);
+}
+.slot-booked {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+    cursor: not-allowed;
+}
+.slot-social {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e40af;
+}
+
+/* KOT Ticket animation */
+.kot-card {
+    border-top: 4px solid #714B67;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kot-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Bar Table Map */
+.table-node {
+    transition: all 0.2s ease;
+}
+.table-available {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+}
+.table-occupied {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Low stock alert pulse */
+.stock-badge-low {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Kitchen Order Display (KOT) - The Champions Club{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header bar -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-900 text-white p-6 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-purple-700 text-white flex items-center justify-center font-bold">
+                <i data-lucide="chef-hat" class="w-7 h-7"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
+                    Live Kitchen Display System (KOT)
+                </h1>
+                <p class="text-xs text-slate-400">Real-Time Order Routing • Table Tagging • Zero Lost Tabs & Kitchen Confusion</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="fetchKitchenTickets()" class="px-4 py-2 rounded-xl bg-purple-800 hover:bg-purple-700 text-white font-bold text-xs transition flex items-center gap-1.5">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Refresh Tickets
+            </button>
+            <span class="px-3 py-1.5 rounded-xl bg-slate-800 text-emerald-400 font-mono text-xs font-bold border border-slate-700 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Auto-polling (5s)
+            </span>
+        </div>
+    </div>
+
+    <!-- Active Tickets Grid -->
+    <div id="kot-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="p-8 text-center text-slate-400 col-span-3">Loading active kitchen tickets...</div>
+    </div>
+
+</div>
+
+<script>
+    async function fetchKitchenTickets() {
+        const container = document.getElementById('kot-grid');
+        try {
+            const res = await fetch('/api/v1/bar/kitchen/tickets');
+            const tickets = await res.json();
+
+            if (tickets.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400 space-y-2">
+                        <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-500 mx-auto"></i>
+                        <h3 class="text-base font-bold text-slate-800">All Kitchen Orders Served!</h3>
+                        <p class="text-xs">No pending or preparing food orders right now.</p>
+                    </div>
+                `;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = tickets.map(t => `
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4 kot-card">
+                    <!-- Ticket Header -->
+                    <div class="flex justify-between items-start pb-3 border-b border-slate-100">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-purple-900 block">${t.kot_ticket_number}</span>
+                            <h3 class="font-black text-lg text-slate-900">${t.table}</h3>
+                            <span class="text-xs text-slate-500">Guest: ${t.customer_name}</span>
+                        </div>
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-700">
+                            ⏱️ ${t.ordered_at}
+                        </span>
+                    </div>
+
+                    <!-- Items list -->
+                    <div class="space-y-2.5 text-xs">
+                        ${t.items.map(item => `
+                            <div class="p-2.5 rounded-xl border border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <div>
+                                    <div class="font-black text-sm text-slate-900">${item.item_name} <span class="text-purple-700">x${item.quantity}</span></div>
+                                    ${item.kitchen_notes ? `<span class="text-amber-800 font-semibold block text-[11px]">Note: "${item.kitchen_notes}"</span>` : ''}
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="advanceStatus(${item.order_item_id}, '${item.kot_status}')" class="px-2.5 py-1 rounded-lg text-[11px] font-black uppercase tracking-tight transition ${
+                                        item.kot_status === 'pending' ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' :
+                                        item.kot_status === 'preparing' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                                        'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                    }">
+                                        ${item.kot_status} ➔
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            if (window.lucide) lucide.createIcons();
+
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function advanceStatus(itemId, currentStatus) {
+        let nextStatus = 'preparing';
+        if (currentStatus === 'pending') nextStatus = 'preparing';
+        else if (currentStatus === 'preparing') nextStatus = 'ready';
+        else if (currentStatus === 'ready') nextStatus = 'served';
+
+        try {
+            const res = await fetch('/api/v1/bar/kitchen/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_item_id: itemId, new_status: nextStatus })
+            });
+            if (res.ok) {
+                fetchKitchenTickets();
+            }
+        } catch (e) {
+            showToast('Error updating status', 'error');
+        }
+    }
+
+    // Auto-polling every 5 seconds
+    fetchKitchenTickets();
+    setInterval(fetchKitchenTickets, 5000);
+</script>
+{% endblock %}
