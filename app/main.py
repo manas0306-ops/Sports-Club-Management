@@ -2,7 +2,7 @@
 The Champions Club Management System - Main FastAPI Application
 """
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -47,6 +47,10 @@ app.include_router(api_finance.router, prefix=settings.API_V1_STR)
 
 # Include Web View Routers
 app.include_router(web_views.router)
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return Response(status_code=204)
 
 if __name__ == "__main__":
     import uvicorn

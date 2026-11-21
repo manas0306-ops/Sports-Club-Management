@@ -23,80 +23,103 @@ router = APIRouter(include_in_schema=False)
 def view_index(request: Request, db: Session = Depends(get_db)):
     courts = db.query(Court).filter(Court.is_active == True).all()
     products = db.query(Product).filter(Product.is_active == True).limit(6).all()
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "tiers": settings.TIERS,
-        "courts": courts,
-        "products": products
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "tiers": settings.TIERS,
+            "courts": courts,
+            "products": products
+        }
+    )
 
 @router.get("/members")
 def view_members(request: Request, db: Session = Depends(get_db)):
     members = db.query(Member).order_by(Member.id.desc()).all()
-    return templates.TemplateResponse("members.html", {
-        "request": request,
-        "members": members,
-        "tiers": settings.TIERS
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="members.html",
+        context={
+            "members": members,
+            "tiers": settings.TIERS
+        }
+    )
 
 @router.get("/courts")
 def view_courts(request: Request, db: Session = Depends(get_db)):
     courts = db.query(Court).filter(Court.is_active == True).all()
     members = db.query(Member).filter(Member.status == "active").all()
-    return templates.TemplateResponse("courts.html", {
-        "request": request,
-        "courts": courts,
-        "members": members,
-        "today": str(date.today())
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="courts.html",
+        context={
+            "courts": courts,
+            "members": members,
+            "today": str(date.today())
+        }
+    )
 
 @router.get("/shop")
 def view_shop(request: Request, db: Session = Depends(get_db)):
     products = db.query(Product).all()
     categories = db.query(ProductCategory).all()
     members = db.query(Member).filter(Member.status == "active").all()
-    return templates.TemplateResponse("shop.html", {
-        "request": request,
-        "products": products,
-        "categories": categories,
-        "members": members
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="shop.html",
+        context={
+            "products": products,
+            "categories": categories,
+            "members": members
+        }
+    )
 
 @router.get("/bar")
 def view_bar(request: Request, db: Session = Depends(get_db)):
     tables = db.query(BarTable).all()
     menu_items = db.query(BarMenuItem).filter(BarMenuItem.is_available == True).all()
     members = db.query(Member).filter(Member.status == "active").all()
-    return templates.TemplateResponse("bar.html", {
-        "request": request,
-        "tables": tables,
-        "menu_items": menu_items,
-        "members": members
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="bar.html",
+        context={
+            "tables": tables,
+            "menu_items": menu_items,
+            "members": members
+        }
+    )
 
 @router.get("/kitchen")
 def view_kitchen(request: Request):
-    return templates.TemplateResponse("kitchen.html", {
-        "request": request
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="kitchen.html",
+        context={}
+    )
 
 @router.get("/crm")
 def view_crm(request: Request, db: Session = Depends(get_db)):
     leads = db.query(LeadEnquiry).order_by(LeadEnquiry.created_at.desc()).all()
-    return templates.TemplateResponse("crm.html", {
-        "request": request,
-        "leads": leads,
-        "tiers": settings.TIERS
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="crm.html",
+        context={
+            "leads": leads,
+            "tiers": settings.TIERS
+        }
+    )
 
 @router.get("/owner")
 def view_owner(request: Request, db: Session = Depends(get_db)):
     invoices = db.query(Invoice).order_by(Invoice.issue_date.desc()).all()
     employees = db.query(Employee).all()
     leaves = db.query(LeaveRequest).order_by(LeaveRequest.created_at.desc()).all()
-    return templates.TemplateResponse("owner.html", {
-        "request": request,
-        "invoices": invoices,
-        "employees": employees,
-        "leaves": leaves
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="owner.html",
+        context={
+            "invoices": invoices,
+            "employees": employees,
+            "leaves": leaves
+        }
+    )
