@@ -658,67 +658,201 @@ if (physioDay) {
   updatePhysio();
 }
 
-// Home Page Gear Catalog Filter & Search
-const gearSearch = one('#gear-search');
-const gearCatButtons = all('[data-gear-cat]');
-const gearItems = all('.gear-item');
+// =========================================================================
+// Home Page Gear Catalog Filter & Search (24 Limit for 'All', All for Specific Category)
+// =========================================================================
+let gearLimit = 24;
 
 function filterGear() {
+  const gearSearch = document.getElementById('gear-search');
+  const inStockCheckbox = document.getElementById('gear-instock');
+  const activeCatBtn = document.querySelector('[data-gear-cat].active');
+  const activeCat = activeCatBtn?.dataset.gearCat || 'All';
   const query = (gearSearch?.value || '').toLowerCase().trim();
-  const activeCat = one('[data-gear-cat].active')?.dataset.gearCat || 'All';
-  const inStockOnly = one('#gear-instock')?.checked || false;
+  const inStockOnly = inStockCheckbox?.checked || false;
+  const hasSearch = query.length > 0;
+
+  const gearItems = Array.from(document.querySelectorAll('.gear-item'));
+  const countSummary = document.getElementById('gear-count-summary');
+  const loadMoreBox = document.getElementById('gear-load-more-container');
+
+  let matchingItems = [];
 
   gearItems.forEach(card => {
     const name = (card.dataset.name || '').toLowerCase();
     const cat = card.dataset.category || '';
     const stock = Number(card.dataset.stock || 0);
 
-    const matchesQuery = !query || name.includes(query);
-    const matchesCat = activeCat === 'All' || cat === activeCat;
     const matchesStock = !inStockOnly || stock > 0;
+    const matchesCat = activeCat === 'All' || cat === activeCat;
+    let matchesQuery = true;
+    if (hasSearch) {
+      matchesQuery = name.includes(query) || cat.toLowerCase().includes(query);
+    }
 
-    card.hidden = !(matchesQuery && matchesCat && matchesStock);
+    if (matchesQuery && matchesCat && matchesStock) {
+      matchingItems.push(card);
+    }
   });
+
+  // If category is 'All' and no search query, cap at gearLimit (24)
+  // If specific category is selected OR searching, show all matching products!
+  let displayCount = matchingItems.length;
+  if (activeCat === 'All' && !hasSearch) {
+    displayCount = Math.min(gearLimit, matchingItems.length);
+  }
+
+  gearItems.forEach(card => card.hidden = true);
+  matchingItems.forEach((card, idx) => {
+    if (idx < displayCount) {
+      card.hidden = false;
+    }
+  });
+
+  // Update summary & load more buttons
+  if (countSummary) {
+    if (hasSearch) {
+      countSummary.textContent = `Found ${matchingItems.length} products matching "${query}"`;
+    } else if (activeCat === 'All') {
+      countSummary.textContent = `Showing ${displayCount} of ${matchingItems.length} products (Select a category above or search to view more)`;
+    } else {
+      countSummary.textContent = `Showing all ${matchingItems.length} products in ${activeCat}`;
+    }
+  }
+
+  if (loadMoreBox) {
+    if (activeCat === 'All' && !hasSearch && displayCount < matchingItems.length) {
+      loadMoreBox.style.display = 'block';
+    } else {
+      loadMoreBox.style.display = 'none';
+    }
+  }
 }
 
-if (gearSearch) gearSearch.addEventListener('input', filterGear);
-const inStockCheckbox = one('#gear-instock');
-if (inStockCheckbox) inStockCheckbox.addEventListener('change', filterGear);
-
-gearCatButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    gearCatButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterGear();
-  });
+const gearSearch = document.getElementById('gear-search');
+if (gearSearch) gearSearch.addEventListener('input', () => {
+  gearLimit = 24;
+  filterGear();
 });
 
-// Member Clubhouse Shop Filter & Search
-const shopSearch = one('[data-shop-search]');
-const shopCatButtons = all('[data-shop-cat]');
-const shopRows = all('.shop-item-row');
+const inStockCheckbox = document.getElementById('gear-instock');
+if (inStockCheckbox) inStockCheckbox.addEventListener('change', filterGear);
+
+document.addEventListener('click', e => {
+  const catBtn = e.target.closest('[data-gear-cat]');
+  if (catBtn) {
+    document.querySelectorAll('[data-gear-cat]').forEach(b => b.classList.remove('active'));
+    catBtn.classList.add('active');
+    gearLimit = 24;
+    filterGear();
+  }
+
+  if (e.target.closest('#gear-load-more')) {
+    gearLimit += 24;
+    filterGear();
+  }
+
+  if (e.target.closest('#gear-show-all')) {
+    gearLimit = 9999;
+    filterGear();
+  }
+});
+
+// Run initial filter on page load
+if (document.getElementById('gear-grid')) {
+  filterGear();
+}
+
+// =========================================================================
+// Member Clubhouse Shop Filter & Search (24 Limit for 'All', All for Specific Category)
+// =========================================================================
+let shopLimit = 24;
 
 function filterShopItems() {
+  const shopSearch = document.querySelector('[data-shop-search]');
+  const activeCatBtn = document.querySelector('[data-shop-cat].active');
+  const activeCat = activeCatBtn?.dataset.shopCat || 'All';
   const query = (shopSearch?.value || '').toLowerCase().trim();
-  const activeCat = one('[data-shop-cat].active')?.dataset.shopCat || 'All';
+  const hasSearch = query.length > 0;
+
+  const shopRows = Array.from(document.querySelectorAll('.shop-item-row'));
+  const countSummary = document.getElementById('shop-count-summary') || document.querySelector('.shop-count-summary');
+  const loadMoreBtn = document.getElementById('shop-load-more') || document.querySelector('.shop-load-more');
+
+  let matchingRows = [];
 
   shopRows.forEach(row => {
     const name = (row.dataset.name || '').toLowerCase();
     const cat = row.dataset.category || '';
-    const matchesQuery = !query || name.includes(query);
+
     const matchesCat = activeCat === 'All' || cat === activeCat;
-    row.hidden = !(matchesQuery && matchesCat);
+    let matchesQuery = true;
+    if (hasSearch) {
+      matchesQuery = name.includes(query) || cat.toLowerCase().includes(query);
+    }
+
+    if (matchesQuery && matchesCat) {
+      matchingRows.push(row);
+    }
   });
+
+  let displayCount = matchingRows.length;
+  if (activeCat === 'All' && !hasSearch) {
+    displayCount = Math.min(shopLimit, matchingRows.length);
+  }
+
+  shopRows.forEach(row => row.hidden = true);
+  matchingRows.forEach((row, idx) => {
+    if (idx < displayCount) {
+      row.hidden = false;
+    }
+  });
+
+  if (countSummary) {
+    if (hasSearch) {
+      countSummary.textContent = `Found ${matchingRows.length} items matching "${query}"`;
+    } else if (activeCat === 'All') {
+      countSummary.textContent = `Showing ${displayCount} of ${matchingRows.length} items (Select category or search)`;
+    } else {
+      countSummary.textContent = `Showing all ${matchingRows.length} items in ${activeCat}`;
+    }
+  }
+
+  if (loadMoreBtn) {
+    if (activeCat === 'All' && !hasSearch && displayCount < matchingRows.length) {
+      loadMoreBtn.style.display = 'inline-block';
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
+  }
 }
 
-if (shopSearch) shopSearch.addEventListener('input', filterShopItems);
-shopCatButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    shopCatButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+document.addEventListener('input', e => {
+  if (e.target.matches('[data-shop-search]')) {
+    shopLimit = 24;
     filterShopItems();
-  });
+  }
 });
+
+document.addEventListener('click', e => {
+  const shopCatBtn = e.target.closest('[data-shop-cat]');
+  if (shopCatBtn) {
+    document.querySelectorAll('[data-shop-cat]').forEach(b => b.classList.remove('active'));
+    shopCatBtn.classList.add('active');
+    shopLimit = 24;
+    filterShopItems();
+  }
+
+  if (e.target.closest('#shop-load-more') || e.target.closest('.shop-load-more')) {
+    shopLimit += 24;
+    filterShopItems();
+  }
+});
+
+// Run initial shop items filter
+if (document.querySelector('.shop-item-row')) {
+  filterShopItems();
+}
 
 // Cart Quantity Stepper Buttons
 document.addEventListener('click', e => {

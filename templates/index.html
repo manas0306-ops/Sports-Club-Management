@@ -524,14 +524,23 @@
     </div>
 
     <!-- Category Filter Pills -->
-    <div class="chips" style="gap: 8px;">
-      <span style="font-size: 12px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Categories:</span>
-      <button type="button" class="cat-pill active" data-gear-cat="All">All Items</button>
-      <button type="button" class="cat-pill" data-gear-cat="Rackets">🏸 Rackets</button>
-      <button type="button" class="cat-pill" data-gear-cat="Balls">🎾 Match Balls</button>
-      <button type="button" class="cat-pill" data-gear-cat="Shoes">👟 Shoes</button>
-      <button type="button" class="cat-pill" data-gear-cat="Apparel">👕 Apparel</button>
-      <button type="button" class="cat-pill" data-gear-cat="Accessories">🩹 Accessories</button>
+    {% set cat_icons = {
+      'Cricket': '🏏', 'Tennis': '🎾', 'Padel': '🎾', 'Badminton': '🏸',
+      'Football': '⚽', 'Basketball': '🏀', 'Volleyball': '🏐', 'Table Tennis': '🏓',
+      'Squash': '🎾', 'Hockey': '🏑', 'Swimming': '🏊', 'Athletics': '🏃',
+      'Gym & Fitness': '🏋️', 'Boxing & MMA': '🥊', 'Cycling': '🚴',
+      'Yoga & Recovery': '🧘', 'Apparel & Kits': '👕', 'Footwear': '👟', 'Accessories': '🩹'
+    } %}
+    <div class="chips" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-height: 140px; overflow-y: auto; padding: 4px;">
+      <span style="font-size: 12px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Sport / Category:</span>
+      <button type="button" class="cat-pill active" data-gear-cat="All">All Items (Top 24)</button>
+      {% for c in gear|map(attribute='category')|unique|sort %}
+        {% if c %}
+          <button type="button" class="cat-pill" data-gear-cat="{{c}}">
+            {{cat_icons.get(c, '🏷️')}} {{c}}
+          </button>
+        {% endif %}
+      {% endfor %}
     </div>
   </div>
 
@@ -564,6 +573,21 @@
         </div>
       </div>
     {% endfor %}
+  </div>
+
+  <!-- Load More & Count Summary Container -->
+  <div id="gear-load-more-container" style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);">
+    <p id="gear-count-summary" style="font-size: 13px; color: var(--slate-600); font-weight: 600; margin-bottom: 14px;">
+      Showing 24 of {{gear|length}} products
+    </p>
+    <div style="display: inline-flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+      <button type="button" id="gear-load-more" class="ghost" style="padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; background: #ffffff;">
+        Load More (+24 Products) ↓
+      </button>
+      <button type="button" id="gear-show-all" class="btn" style="padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        View All in This Category →
+      </button>
+    </div>
   </div>
 </section>
 

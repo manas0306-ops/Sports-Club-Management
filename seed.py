@@ -1,4 +1,5 @@
 from datetime import date,datetime,timedelta
+from pathlib import Path
 from database import Base,engine,Session
 from models import *
 from security import password_hash
@@ -17,6 +18,20 @@ def seed():
             db.add(Court(name=sport+" 01",sport=sport,kind=kind,price=price*100,social=True))
         for name,cat,p,c,n in [("Pro Carbon Racket","Rackets",4500,2900,1),("Match Ball Set","Balls",350,190,20),("Court Shoes · UK 8","Shoes",3200,2000,5),("Club Polo · M","Apparel",1200,650,8),("Grip Tape","Accessories",180,70,12),("Iced Latte","Café",180,70,40),("Grilled Sandwich","Café",220,85,30),("Lime Soda","Café",90,30,50)]:
             db.add(Product(name=name,department="Bar" if cat=="Café" else "Shop",category=cat,price=p*100,cost=c*100,stock_on_hand=n))
+        p_csv = Path(__file__).resolve().parent / "data" / "products.csv"
+        if p_csv.exists():
+            import csv
+            with open(p_csv, 'r', encoding='utf-8') as pf:
+                for r in csv.DictReader(pf):
+                    db.add(Product(
+                        name=r['name'].strip(),
+                        department="Shop",
+                        category=r['category'].strip(),
+                        price=int(float(r['price']) * 100),
+                        cost=int(float(r['wholesale_price']) * 100),
+                        stock_on_hand=int(r['quantity']),
+                        reorder_level=10
+                    ))
         db.add(Shift(staff_id=3,opened=clock()))
         for i in range(12):
             dept=["Courts","Shop","Bar","Physio","Memberships"][i%5]

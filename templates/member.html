@@ -111,18 +111,32 @@
     </p>
 
     <!-- Product Search & Category Filters in Member Shop -->
+    {% set cat_icons = {
+      'Cricket': '🏏', 'Tennis': '🎾', 'Padel': '🎾', 'Badminton': '🏸',
+      'Football': '⚽', 'Basketball': '🏀', 'Volleyball': '🏐', 'Table Tennis': '🏓',
+      'Squash': '🎾', 'Hockey': '🏑', 'Swimming': '🏊', 'Athletics': '🏃',
+      'Gym & Fitness': '🏋️', 'Boxing & MMA': '🥊', 'Cycling': '🚴',
+      'Yoga & Recovery': '🧘', 'Apparel & Kits': '👕', 'Footwear': '👟', 'Accessories': '🩹'
+    } %}
+    {% set shop_products = products|selectattr('department','equalto','Shop')|list %}
     <div style="background: var(--slate-50); padding: 16px 18px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px;">
       <div style="margin-bottom: 12px;">
-        <input data-shop-search type="search" placeholder="🔍 Filter products by name..." style="width: 100%; background: #ffffff;">
+        <input data-shop-search type="search" placeholder="🔍 Search gear by name, category, or brand..." style="width: 100%; background: #ffffff;">
       </div>
-      <div class="chips" style="gap: 8px;">
+      <div class="chips" style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-height: 120px; overflow-y: auto; padding: 2px;">
         <span style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Filter:</span>
-        <button type="button" class="cat-pill active" data-shop-cat="All">All Categories</button>
-        <button type="button" class="cat-pill" data-shop-cat="Rackets">🏸 Rackets</button>
-        <button type="button" class="cat-pill" data-shop-cat="Balls">🎾 Balls</button>
-        <button type="button" class="cat-pill" data-shop-cat="Shoes">👟 Shoes</button>
-        <button type="button" class="cat-pill" data-shop-cat="Apparel">👕 Apparel</button>
-        <button type="button" class="cat-pill" data-shop-cat="Accessories">🩹 Accessories</button>
+        <button type="button" class="cat-pill active" data-shop-cat="All">All Categories (Top 24)</button>
+        {% for c in shop_products|map(attribute='category')|unique|sort %}
+          {% if c %}
+            <button type="button" class="cat-pill" data-shop-cat="{{c}}">
+              {{cat_icons.get(c, '🏷️')}} {{c}}
+            </button>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div style="margin-top: 10px; font-size: 11.5px; color: var(--slate-600); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+        <span id="shop-count-summary">Showing 24 of {{shop_products|length}} products</span>
+        <button type="button" id="shop-load-more" class="ghost" style="padding: 4px 12px; font-size: 11px; font-weight: 700; cursor: pointer; background: #ffffff;">Show More (+24) ↓</button>
       </div>
     </div>
 
