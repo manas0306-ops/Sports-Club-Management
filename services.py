@@ -72,3 +72,22 @@ def products(db,s,m,dept,cart,batch=0):
         require(p.stock_on_hand>=q,p.name+" has insufficient stock.",409)
         p.stock_on_hand-=q
         line(db,s,p.name,p.price,q,rate(m,dept),p,"New" if dept=="Bar" else "",batch)
+
+def inventory_health(db, dept="Shop"):
+    ps = db.query(Product).filter_by(department=dept).all()
+    total_val = sum(p.price * p.stock_on_hand for p in ps)
+    total_cost = sum(p.cost * p.stock_on_hand for p in ps)
+    low_stock = [p for p in ps if 0 < p.stock_on_hand <= p.reorder_level]
+    out_of_stock = [p for p in ps if p.stock_on_hand <= 0]
+    cats = {}
+    for p in ps:
+        cats[p.category] = cats.get(p.category, 0) + p.stock_on_hand
+    return {
+        "total_products": len(ps),
+        "total_valuation": total_val,
+        "total_cost": total_cost,
+        "low_stock_count": len(low_stock),
+        "out_of_stock_count": len(out_of_stock),
+        "categories": cats,
+        "low_stock_items": [{"id": p.id, "name": p.name, "category": p.category, "stock": p.stock_on_hand, "reorder": p.reorder_level} for p in low_stock[:10]]
+    }
