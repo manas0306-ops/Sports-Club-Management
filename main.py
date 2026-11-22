@@ -98,16 +98,23 @@ def dash(req:Request,period:str="today",day:date|None=None,db=Depends(database))
         if role=="physio":q=q.filter_by(staff_id=u.id).filter(Appointment.start>=datetime.combine(day,time()),Appointment.start<datetime.combine(day+timedelta(days=1),time()))
         data["appointments"]=q.order_by(Appointment.start).all()
     if role in ("desk","owner"):
-        raw_leads=db.query(Lead).order_by(Lead.id.desc()).all()
+        raw_leads=db.query(Lead).order_by(Lead.created.desc()).all()
         users_by_email={usr.email.lower(): usr.id for usr in db.query(User).all()}
         members_by_id={mem.id: mem.user_id for mem in db.query(Member).all()}
         bookings_map={bk.id: bk.member_id for bk in db.query(Booking).all()}
+        now_dt = clock()
         for l in raw_leads:
             uid = users_by_email.get(l.email.lower()) if l.email else None
             if not uid and l.booking_id:
                 mid = bookings_map.get(l.booking_id)
                 if mid: uid = members_by_id.get(mid)
             l.user_id = uid
+            diff = now_dt - l.created if l.created else timedelta(0)
+            secs = max(0, int(diff.total_seconds()))
+            if secs < 60: l.time_since = "Just now"
+            elif secs < 3600: l.time_since = f"{secs // 60}m ago"
+            elif secs < 86400: l.time_since = f"{secs // 3600}h {(secs % 3600) // 60}m ago"
+            else: l.time_since = f"{secs // 86400}d ago"
         data["leads"]=raw_leads
     if role in ("bar","shop","member","owner","desk"):
         ps=db.query(Product)

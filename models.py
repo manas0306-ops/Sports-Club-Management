@@ -50,7 +50,9 @@ class Appointment(Base):
 
 class Lead(Base):
     __tablename__="crm_leads"
-    id=key(); name=word(); email=word(); interest=word(); stage=word("New"); trial=Column(Boolean,default=False)
+    id=key(); user_code=word(); name=word(); email=word(); phone=word(); city=word(); state=word()
+    proxy_name=word(); proxy_ip=word(); protocol=word(); status=word("Offline"); total_connections=number(0)
+    data_used_mb=word("0.0"); interest=word(); stage=word("New"); trial=Column(Boolean,default=False)
     booking_id=fk("court_bookings",True); created=stamp()
 
 class Shift(Base):

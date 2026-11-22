@@ -224,59 +224,110 @@
     </div>
   </div>
 
-  <div id="crm-leads-list" style="display: flex; flex-direction: column; gap: 12px;">
+  <div id="crm-leads-list" style="display: flex; flex-direction: column; gap: 10px;">
     {% for l in leads %}
       <details class="crm-lead-card"
         data-lead-id="{{l.id}}"
-        data-user-id="{{l.user_id if l.user_id else ''}}"
+        data-user-id="{{(l.user_code or l.user_id or '')|lower}}"
+        data-user-code="{{(l.user_code or '')|lower}}"
         data-name="{{l.name|lower}}"
         data-email="{{l.email|lower}}"
+        data-phone="{{(l.phone or '')|lower}}"
+        data-city="{{(l.city or '')|lower}}"
+        data-state="{{(l.state or '')|lower}}"
+        data-proxy="{{(l.proxy_name or '')|lower}}"
+        data-ip="{{(l.proxy_ip or '')|lower}}"
+        data-protocol="{{(l.protocol or '')|lower}}"
+        data-status="{{(l.status or 'offline')|lower}}"
         data-interest="{{l.interest|lower}}"
         data-stage="{{l.stage|lower}}"
-        data-created="{{l.created.isoformat()}}"
-        style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-xs);">
+        data-created="{{l.created.isoformat()}}">
         
-        <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; user-select: none;">
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <span class="tag" style="font-size: 11px; background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; font-weight: 700;">
-              Lead #{{l.id}}
-            </span>
-            {% if l.user_id %}
-              <span class="tag" style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #065f46; border-color: rgba(16, 185, 129, 0.3); font-weight: 700;">
-                User ID: #{{l.user_id}}
-              </span>
+        <summary>
+          <div class="crm-lead-summary-left">
+            <span class="tag crm-tag-lead">Lead #{{l.id}}</span>
+            {% if l.user_code %}
+              <span class="tag crm-tag-uid">User ID: {{l.user_code}}</span>
+            {% elif l.user_id %}
+              <span class="tag crm-tag-uid">User ID: #{{l.user_id}}</span>
             {% endif %}
-            <b>{{l.name}}</b> &nbsp;·&nbsp; 
-            <small style="color: var(--slate-500);">{{l.email}}</small> &nbsp;·&nbsp;
-            <span class="tag" style="font-size: 11px;">{{l.stage}}</span>
+
+            {% if l.status == 'Online' %}
+              <span class="tag crm-tag-online">
+                <span class="live-indicator-dot" style="display:inline-block; width:6px; height:6px; margin-right:4px;"></span>Online
+              </span>
+            {% else %}
+              <span class="tag crm-tag-offline">Offline</span>
+            {% endif %}
+
+            <b>{{l.name}}</b>
+            <small style="color: var(--slate-500);">{{l.email}}</small>
+            {% if l.phone %}
+              <small style="color: var(--slate-500); font-family: monospace;">{{l.phone}}</small>
+            {% endif %}
+            {% if l.city %}
+              <span class="crm-tag-loc">📍 {{l.city}}{% if l.state %}, {{l.state}}{% endif %}</span>
+            {% endif %}
+            <span class="tag" style="font-size: 11px; font-weight: 600;">{{l.stage}}</span>
           </div>
 
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
             {% if l.trial %}
               <span class="warn" style="font-size: 11px; padding: 2px 8px;">★ Trial Requested</span>
             {% endif %}
-            <span style="font-size: 11px; color: var(--slate-500); background: var(--slate-50); padding: 2px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-              🕒 {{l.created.strftime('%d %b, %H:%M')}}
+            <span class="crm-connection-time" title="Connected {{l.created.strftime('%Y-%m-%d %H:%M:%S IST')}}">
+              🕒 {{l.time_since if l.time_since else l.created.strftime('%d %b, %H:%M')}}
             </span>
           </div>
         </summary>
 
-        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px; gap: 8px;">
-            <p style="font-size: 13px; color: var(--slate-700); margin: 0;">
-              <b>Prospect Interest:</b> {{l.interest}}
-            </p>
-            <span style="font-size: 11.5px; color: var(--slate-400);">
-              Created Timestamp: {{l.created.strftime('%Y-%m-%d %H:%M:%S IST')}}
-            </span>
+        <div class="crm-lead-body">
+          <div class="crm-telemetry-grid">
+            <div>
+              <span class="crm-grid-label">Contact Information</span>
+              <div class="crm-grid-values">
+                <div>✉️ <b>Email:</b> {{l.email}}</div>
+                {% if l.phone %}<div>📞 <b>Phone:</b> {{l.phone}}</div>{% endif %}
+                {% if l.city %}<div>📍 <b>Location:</b> {{l.city}}, {{l.state}}</div>{% endif %}
+              </div>
+            </div>
+
+            <div>
+              <span class="crm-grid-label">Network & Proxy Routing</span>
+              <div class="crm-grid-values">
+                <div>🌐 <b>Proxy:</b> {{l.proxy_name if l.proxy_name else 'Direct Connection'}} ({{l.protocol if l.protocol else 'HTTPS'}})</div>
+                <div>🔒 <b>Assigned IP:</b> {{l.proxy_ip if l.proxy_ip else '127.0.0.1'}}</div>
+                <div>📊 <b>Bandwidth:</b> {{l.data_used_mb}} MB &nbsp;·&nbsp; ⚡ <b>Total Sessions:</b> {{l.total_connections if l.total_connections else 1}}</div>
+              </div>
+            </div>
+
+            <div>
+              <span class="crm-grid-label">Telemetry & Timing</span>
+              <div class="crm-grid-values">
+                <div>🕒 <b>Last Connected:</b> {{l.created.strftime('%Y-%m-%d %H:%M:%S IST')}}</div>
+                <div>⏳ <b>Elapsed:</b> <span style="font-weight: 700; color: var(--primary);">{{l.time_since}}</span></div>
+                <div>🎯 <b>Pipeline Stage:</b> <span class="tag" style="font-size: 10px; padding: 1px 6px;">{{l.stage}}</span></div>
+              </div>
+            </div>
           </div>
 
-          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px; gap: 8px;">
+            <p style="font-size: 12.5px; color: var(--slate-700); margin: 0;">
+              <b>Inquiry / Interest Details:</b> {{l.interest}}
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
             {% if l.stage!='Converted' %}
-              {% call f.form('lead_stage','Advance Lead Pipeline Stage') %}
+              <form class="fields" data-action="lead_stage" style="display: inline-flex; gap: 8px; align-items: center; margin: 0;">
                 <input type="hidden" name="id" value="{{l.id}}">
-                {{f.select('stage','Advance to Next Stage',[{'New':'Contacted','Contacted':'Quote Sent','Quote Sent':'Converted'}[l.stage]])}}
-              {% endcall %}
+                <input type="hidden" name="stage" value="{{ {'New':'Contacted','Contacted':'Quote Sent','Quote Sent':'Converted'}[l.stage] }}">
+                <button type="submit" style="font-size: 11.5px; padding: 6px 14px; border-radius: var(--radius-sm); font-weight: 700;">
+                  Advance to {{ {'New':'Contacted','Contacted':'Quote Sent','Quote Sent':'Converted'}[l.stage] }} →
+                </button>
+              </form>
+            {% else %}
+              <span class="tag" style="background: rgba(16, 185, 129, 0.12); color: #065f46; font-weight: 700; font-size: 11px;">✓ Lead Converted to Member</span>
             {% endif %}
 
             {% if l.trial and not l.booking_id %}
@@ -305,6 +356,16 @@
     {% else %}
       <p style="color: var(--slate-400); font-size: 13px;">No inquiries in the lead pipeline.</p>
     {% endfor %}
+
+    <!-- Load More Container for All-Time History -->
+    <div id="crm-load-more-container" style="display: none; text-align: center; margin-top: 14px;">
+      <button type="button" id="crm-btn-load-more" style="font-size: 12.5px; font-weight: 700; padding: 10px 22px; border-radius: var(--radius-md); background: #ffffff; color: var(--primary-dark); border: 1px solid var(--border); cursor: pointer; box-shadow: var(--shadow-xs); transition: all 0.2s;">
+        ⬇ Load More Leads (+100)
+      </button>
+      <button type="button" id="crm-btn-load-all" style="font-size: 12px; font-weight: 600; padding: 10px 18px; border-radius: var(--radius-md); background: transparent; color: var(--slate-600); border: 1px solid transparent; cursor: pointer; margin-left: 8px;">
+        Show All Leads
+      </button>
+    </div>
 
     <!-- Zero results placeholder -->
     <div id="crm-zero-results" style="display: none; text-align: center; padding: 36px 20px; background: var(--slate-50); border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--slate-500); font-size: 13px;">

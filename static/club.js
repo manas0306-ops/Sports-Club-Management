@@ -1190,8 +1190,30 @@ function initCrmSearch() {
   const zeroTitle = document.getElementById('crm-zero-title');
   const zeroDesc = document.getElementById('crm-zero-desc');
   const showAllBtn = document.getElementById('crm-btn-show-all');
+  const loadMoreBox = document.getElementById('crm-load-more-container');
+  const loadMoreBtn = document.getElementById('crm-btn-load-more');
+  const loadAllBtn = document.getElementById('crm-btn-load-all');
 
   let activeScope = '6h'; // '6h' or 'all'
+  let allTimeLimit = 100; // Progressive chunk size for 4,000+ all-time items
+
+  // Pre-calculate latest lead timestamp to anchor real-time operational window
+  let latestCardTime = 0;
+  cards.forEach(c => {
+    const t = new Date(c.dataset.created || 0).getTime();
+    if (t > latestCardTime) latestCardTime = t;
+  });
+
+  function formatRelative(dtMs, nowMs) {
+    const diffSec = Math.max(0, Math.floor((nowMs - dtMs) / 1000));
+    if (diffSec < 60) return 'Just now';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h ${diffMin % 60}m ago`;
+    const diffDays = Math.floor(diffHr / 24);
+    return `${diffDays}d ago`;
+  }
 
   function applyFilter() {
     const rawQuery = searchInput.value.trim().toLowerCase();
@@ -1201,18 +1223,28 @@ function initCrmSearch() {
     // Toggle clear button
     if (clearBtn) clearBtn.style.display = hasSearch ? 'inline-flex' : 'none';
 
-    // 6-hour cutoff timestamp
-    const nowMs = Date.now();
+    // 6-hour cutoff timestamp anchored to operational IST clock
+    const nowMs = Math.max(Date.now(), latestCardTime);
     const sixHoursMs = 6 * 60 * 60 * 1000;
     const cutoff = nowMs - sixHoursMs;
 
+    let matchedCount = 0;
     let visibleCount = 0;
+    const cleanDigits = query.replace(/\D/g, '');
 
     cards.forEach(card => {
       const leadId = (card.dataset.leadId || '').toLowerCase();
       const userId = (card.dataset.userId || '').toLowerCase();
+      const userCode = (card.dataset.userCode || '').toLowerCase();
       const name = (card.dataset.name || '').toLowerCase();
       const email = (card.dataset.email || '').toLowerCase();
+      const phone = (card.dataset.phone || '').toLowerCase();
+      const city = (card.dataset.city || '').toLowerCase();
+      const state = (card.dataset.state || '').toLowerCase();
+      const proxy = (card.dataset.proxy || '').toLowerCase();
+      const ip = (card.dataset.ip || '').toLowerCase();
+      const protocol = (card.dataset.protocol || '').toLowerCase();
+      const status = (card.dataset.status || '').toLowerCase();
       const interest = (card.dataset.interest || '').toLowerCase();
       const stage = (card.dataset.stage || '').toLowerCase();
       
@@ -1220,28 +1252,53 @@ function initCrmSearch() {
       const createdTime = createdStr ? new Date(createdStr).getTime() : 0;
       const isWithin6h = createdTime >= cutoff;
 
-      let match = false;
+      let isMatch = false;
 
       if (hasSearch) {
         // PRECISION ALL-TIME SEARCH:
-        // Matches exact Lead ID, exact User ID, or contains query in name/email/interest
-        if (leadId === query || userId === query) {
-          match = true;
-        } else if (name.includes(query) || email.includes(query) || interest.includes(query) || stage.includes(query)) {
-          match = true;
+        // Matches exact User Code (e.g. USR00001, USR04300)
+        // Matches exact Lead ID or User ID (e.g. 1, 3593)
+        // Matches numeric suffix (e.g. '3593' -> 'USR03593')
+        if (userCode === query || userId === query || leadId === query) {
+          isMatch = true;
+        } else if (cleanDigits && (userCode.endsWith(cleanDigits) || userId.endsWith(cleanDigits) || leadId === cleanDigits)) {
+          isMatch = true;
+        } else if (name.includes(query) || 
+                   email.includes(query) || 
+                   phone.includes(query) || 
+                   city.includes(query) || 
+                   state.includes(query) || 
+                   proxy.includes(query) || 
+                   ip.includes(query) || 
+                   protocol.includes(query) || 
+                   status === query || 
+                   interest.includes(query) || 
+                   stage.includes(query)) {
+          isMatch = true;
         }
       } else {
         // NO SEARCH ACTIVE:
         if (activeScope === '6h') {
-          match = isWithin6h;
+          isMatch = isWithin6h;
         } else {
-          match = true; // All-time
+          isMatch = true; // All-time history
         }
       }
 
-      if (match) {
-        card.style.display = '';
-        visibleCount++;
+      if (isMatch) {
+        matchedCount++;
+        // Apply smooth chunking only for unsearched All-Time view
+        if (activeScope === 'all' && !hasSearch) {
+          if (matchedCount <= allTimeLimit) {
+            card.style.display = '';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        } else {
+          card.style.display = '';
+          visibleCount++;
+        }
       } else {
         card.style.display = 'none';
       }
@@ -1249,12 +1306,30 @@ function initCrmSearch() {
 
     // Update status and count badges
     if (countBadge) {
-      countBadge.textContent = `${visibleCount} of ${cards.length} Leads`;
+      if (hasSearch) {
+        countBadge.textContent = `${matchedCount} Matching Leads`;
+      } else if (activeScope === '6h') {
+        countBadge.textContent = `${matchedCount} Active in Last 6h`;
+      } else {
+        countBadge.textContent = `Showing ${visibleCount} of ${cards.length} Leads`;
+      }
+    }
+
+    // Toggle Load More button for All-Time view
+    if (loadMoreBox) {
+      if (activeScope === 'all' && !hasSearch && matchedCount > allTimeLimit) {
+        loadMoreBox.style.display = 'block';
+        if (loadMoreBtn) {
+          loadMoreBtn.textContent = `⬇ Load More Leads (+100) — Showing ${visibleCount} of ${cards.length}`;
+        }
+      } else {
+        loadMoreBox.style.display = 'none';
+      }
     }
 
     if (hasSearch) {
       if (statusLabel) {
-        statusLabel.innerHTML = `🔍 Search query: <b>"${rawQuery}"</b> · <span style="color:var(--primary); font-weight:700;">Searching All-Time Database</span>`;
+        statusLabel.innerHTML = `🔍 Search query: <b>"${rawQuery}"</b> · <span style="color:var(--primary); font-weight:700;">Found ${matchedCount} in All-Time Database</span>`;
       }
       if (btn6h) {
         btn6h.style.background = '#ffffff';
@@ -1269,7 +1344,7 @@ function initCrmSearch() {
     } else {
       if (activeScope === '6h') {
         if (statusLabel) {
-          statusLabel.innerHTML = `<span class="live-indicator-dot" style="width:6px;height:6px;"></span> Showing: <b>Leads connected in last 6 hours</b> (Default)`;
+          statusLabel.innerHTML = `<span class="live-indicator-dot" style="width:6px;height:6px;"></span> Showing: <b>Leads connected in last 6 hours</b> (${matchedCount} active leads)`;
         }
         if (btn6h) {
           btn6h.style.background = 'var(--primary)';
@@ -1283,7 +1358,7 @@ function initCrmSearch() {
         }
       } else {
         if (statusLabel) {
-          statusLabel.innerHTML = `🌐 Showing: <b>All-Time Lead History</b> (${cards.length} Total)`;
+          statusLabel.innerHTML = `🌐 Showing: <b>All-Time Connected Pipeline</b> (${cards.length} Total Users)`;
         }
         if (btn6h) {
           btn6h.style.background = '#ffffff';
@@ -1300,11 +1375,11 @@ function initCrmSearch() {
 
     // Zero-results message handling
     if (zeroBox) {
-      if (visibleCount === 0) {
+      if (matchedCount === 0) {
         zeroBox.style.display = 'block';
         if (hasSearch) {
           zeroTitle.textContent = `No leads found matching "${rawQuery}" in all-time records.`;
-          zeroDesc.textContent = 'Check the Lead ID or User ID for precision, or search by name/email.';
+          zeroDesc.textContent = 'Check the User ID (e.g. USR00001) or Lead ID for precision, or search by name, email, city, or proxy.';
           if (showAllBtn) showAllBtn.textContent = 'Clear Search & Show All';
         } else if (activeScope === '6h') {
           zeroTitle.textContent = 'No prospective leads connected in the last 6 hours.';
@@ -1339,6 +1414,7 @@ function initCrmSearch() {
   if (btnAll) {
     btnAll.addEventListener('click', () => {
       activeScope = 'all';
+      allTimeLimit = 100;
       searchInput.value = '';
       applyFilter();
     });
@@ -1347,7 +1423,22 @@ function initCrmSearch() {
   if (showAllBtn) {
     showAllBtn.addEventListener('click', () => {
       activeScope = 'all';
+      allTimeLimit = 100;
       searchInput.value = '';
+      applyFilter();
+    });
+  }
+
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      allTimeLimit += 150;
+      applyFilter();
+    });
+  }
+
+  if (loadAllBtn) {
+    loadAllBtn.addEventListener('click', () => {
+      allTimeLimit = cards.length;
       applyFilter();
     });
   }

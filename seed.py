@@ -47,6 +47,33 @@ def seed():
             Leave(staff_id=3,start=clock().date()+timedelta(days=2),end=clock().date()+timedelta(days=3),reason="Family visit"),
             Payroll(staff_id=2,period=clock().date().strftime("%Y-%m"),amount=2800000)
         ])
+        crm_csv = Path(__file__).resolve().parent / "data" / "crm_connected_users.csv"
+        if crm_csv.exists():
+            import csv
+            with open(crm_csv, 'r', encoding='utf-8') as cf:
+                crm_leads = []
+                for r in csv.DictReader(cf):
+                    conns = int(r['total_connections'])
+                    stg = "Converted" if conns>=30 else ("Quote Sent" if conns>=15 else ("Contacted" if (r['status']=="Online" or conns>=5) else "New"))
+                    crm_leads.append(Lead(
+                        user_code=r['user_id'].strip(),
+                        name=r['name'].strip(),
+                        email=r['email'].strip(),
+                        phone=r['phone'].strip(),
+                        city=r['city'].strip(),
+                        state=r['state'].strip(),
+                        proxy_name=r['proxy_name'].strip(),
+                        proxy_ip=r['proxy_ip'].strip(),
+                        protocol=r['protocol'].strip(),
+                        status=r['status'].strip(),
+                        total_connections=conns,
+                        data_used_mb=r['data_used_mb'].strip(),
+                        interest=f"Proxy Route: {r['proxy_name'].strip()} ({r['protocol'].strip()}) · {r['city'].strip()}, {r['state'].strip()} · {r['data_used_mb'].strip()} MB",
+                        stage=stg,
+                        trial=False,
+                        created=datetime.strptime(r['last_connected'].strip(), "%Y-%m-%d %H:%M:%S")
+                    ))
+                db.add_all(crm_leads)
 if __name__=="__main__":
     seed()
     print("Club database ready.")
