@@ -624,3 +624,50 @@ def physio_slots(req:Request,staff_id:int,day:date,db=Depends(database)):
     taken={a.start for a in booked}
     times=[datetime.combine(day,time(n//2,30*(n%2))) for n in range(16,38)]
     return [t.isoformat(timespec="minutes") for t in times if t>clock() and t not in taken]
+
+@app.get("/api/crm/stats")
+def crm_stats(req:Request,db=Depends(database)):
+    u=check(req,db,["desk","owner"])
+    return crm_telemetry_metrics(db)
+
+@app.get("/api/crm/leads")
+def crm_leads_api(req:Request,query:str="",scope:str="6h",status:str="",limit:int=50,offset:int=0,db=Depends(database)):
+    u=check(req,db,["desk","owner"])
+    q=db.query(Lead).order_by(Lead.created.desc())
+    now_dt=clock()
+    if scope=="6h" and not query:
+        cutoff=now_dt-timedelta(hours=6)
+        q=q.filter(Lead.created>=cutoff)
+    if status:
+        q=q.filter(Lead.status==status)
+    all_leads=q.all()
+    if query:
+        q_clean=query.strip().lower()
+        all_leads=[l for l in all_leads if q_clean in (l.user_code or "").lower() or q_clean in (l.name or "").lower() or q_clean in (l.email or "").lower() or q_clean in (l.phone or "").lower() or q_clean in (l.city or "").lower() or q_clean in (l.proxy_name or "").lower() or q_clean in (l.proxy_ip or "").lower() or str(l.id)==q_clean]
+    total=len(all_leads)
+    slice_leads=all_leads[offset:offset+limit]
+    results=[]
+    for l in slice_leads:
+        diff=now_dt-l.created if l.created else timedelta(0)
+        secs=max(0,int(diff.total_seconds()))
+        t_since="Just now" if secs<60 else (f"{secs//60}m ago" if secs<3600 else (f"{secs//3600}h ago" if secs<86400 else f"{secs//86400}d ago"))
+        results.append({
+            "id": l.id,
+            "user_code": l.user_code,
+            "name": l.name,
+            "email": l.email,
+            "phone": l.phone,
+            "city": l.city,
+            "state": l.state,
+            "proxy_name": l.proxy_name,
+            "proxy_ip": l.proxy_ip,
+            "protocol": l.protocol,
+            "status": l.status,
+            "stage": l.stage,
+            "data_used_mb": l.data_used_mb,
+            "total_connections": l.total_connections,
+            "lead_score": compute_lead_score(l),
+            "last_connected": l.created.strftime("%Y-%m-%d %H:%M:%S") if l.created else "",
+            "time_since": t_since
+        })
+    return {"total":total,"offset":offset,"limit":limit,"leads":results}
