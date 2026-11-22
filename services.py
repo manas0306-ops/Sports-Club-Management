@@ -91,3 +91,47 @@ def inventory_health(db, dept="Shop"):
         "categories": cats,
         "low_stock_items": [{"id": p.id, "name": p.name, "category": p.category, "stock": p.stock_on_hand, "reorder": p.reorder_level} for p in low_stock[:10]]
     }
+
+def compute_lead_score(lead):
+    score = 10
+    if lead.status == "Online": score += 40
+    score += min(30, (lead.total_connections or 0) * 2)
+    try:
+        mb = float(lead.data_used_mb or 0)
+        score += min(20, int(mb / 100))
+    except (ValueError, TypeError): pass
+    if lead.trial: score += 25
+    return min(100, score)
+
+def crm_telemetry_metrics(db):
+    leads = db.query(Lead).all()
+    now_dt = clock()
+    six_h_cutoff = now_dt - timedelta(hours=6)
+    
+    total = len(leads)
+    online_count = 0
+    recent_6h = 0
+    total_data_mb = 0.0
+    cities = {}
+    protocols = {}
+    stages = {"New": 0, "Contacted": 0, "Quote Sent": 0, "Converted": 0}
+
+    for l in leads:
+        if l.status == "Online": online_count += 1
+        if l.created and l.created >= six_h_cutoff: recent_6h += 1
+        if l.city: cities[l.city] = cities.get(l.city, 0) + 1
+        if l.protocol: protocols[l.protocol] = protocols.get(l.protocol, 0) + 1
+        if l.stage in stages: stages[l.stage] += 1
+        try: total_data_mb += float(l.data_used_mb or 0)
+        except (ValueError, TypeError): pass
+
+    top_cities = sorted(cities.items(), key=lambda x: x[1], reverse=True)[:5]
+    return {
+        "total_inquiries": total,
+        "online_now": online_count,
+        "connected_last_6h": recent_6h,
+        "total_bandwidth_gb": round(total_data_mb / 1024, 2),
+        "top_cities": top_cities,
+        "protocols": protocols,
+        "pipeline_stages": stages
+    }
