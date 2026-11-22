@@ -533,7 +533,7 @@
     } %}
     <div class="chips" style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-height: 140px; overflow-y: auto; padding: 4px;">
       <span style="font-size: 12px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Sport / Category:</span>
-      <button type="button" class="cat-pill active" data-gear-cat="All">All Items (Top 24)</button>
+      <button type="button" class="cat-pill active" data-gear-cat="All">All Items (20 per page)</button>
       {% for c in gear|map(attribute='category')|unique|sort %}
         {% if c %}
           <button type="button" class="cat-pill" data-gear-cat="{{c}}">
@@ -575,18 +575,21 @@
     {% endfor %}
   </div>
 
-  <!-- Load More & Count Summary Container -->
+  <!-- Pagination & Replacement Controls -->
   <div id="gear-load-more-container" style="text-align: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border);">
     <p id="gear-count-summary" style="font-size: 13px; color: var(--slate-600); font-weight: 600; margin-bottom: 14px;">
-      Showing 24 of {{gear|length}} products
+      Showing 1–20 of {{gear|length}} products
     </p>
-    <div style="display: inline-flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-      <button type="button" id="gear-load-more" class="ghost" style="padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer; background: #ffffff;">
-        Load More (+24 Products) ↓
+    <div style="display: inline-flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
+      <button type="button" id="gear-prev" class="ghost" style="padding: 10px 20px; font-size: 13px; font-weight: 700; cursor: pointer; background: #ffffff; display: none;">
+        ← Previous 20
       </button>
-      <button type="button" id="gear-show-all" class="btn" style="padding: 10px 22px; font-size: 13px; font-weight: 700; cursor: pointer;">
-        View All in This Category →
+      <button type="button" id="gear-load-more" class="btn" style="padding: 10px 24px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        Show More (Next 20) →
       </button>
+      <span id="gear-page-indicator" style="font-size: 12px; font-weight: 600; color: var(--slate-600); padding: 7px 14px; background: var(--slate-100); border-radius: var(--radius-full); border: 1px solid var(--border);">
+        Page 1
+      </span>
     </div>
   </div>
 </section>

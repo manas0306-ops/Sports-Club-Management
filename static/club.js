@@ -659,11 +659,14 @@ if (physioDay) {
 }
 
 // =========================================================================
-// Home Page Gear Catalog Filter & Search (24 Limit for 'All', All for Specific Category)
+// Home Page Gear Catalog - 20 Products Per Screen with In-Place Replacement
 // =========================================================================
-let gearLimit = 24;
+const GEAR_PAGE_SIZE = 20;
+let gearPageIndex = 0;
 
-function filterGear() {
+function filterGear(resetPage = true) {
+  if (resetPage) gearPageIndex = 0;
+
   const gearSearch = document.getElementById('gear-search');
   const inStockCheckbox = document.getElementById('gear-instock');
   const activeCatBtn = document.querySelector('[data-gear-cat].active');
@@ -675,6 +678,9 @@ function filterGear() {
   const gearItems = Array.from(document.querySelectorAll('.gear-item'));
   const countSummary = document.getElementById('gear-count-summary');
   const loadMoreBox = document.getElementById('gear-load-more-container');
+  const loadMoreBtn = document.getElementById('gear-load-more');
+  const prevBtn = document.getElementById('gear-prev');
+  const pageIndicator = document.getElementById('gear-page-indicator');
 
   let matchingItems = [];
 
@@ -695,34 +701,55 @@ function filterGear() {
     }
   });
 
-  // If category is 'All' and no search query, cap at gearLimit (24)
-  // If specific category is selected OR searching, show all matching products!
-  let displayCount = matchingItems.length;
-  if (activeCat === 'All' && !hasSearch) {
-    displayCount = Math.min(gearLimit, matchingItems.length);
+  const totalMatches = matchingItems.length;
+  const totalPages = Math.ceil(totalMatches / GEAR_PAGE_SIZE) || 1;
+
+  if (gearPageIndex >= totalPages) gearPageIndex = 0;
+  if (gearPageIndex < 0) gearPageIndex = 0;
+
+  const startIdx = gearPageIndex * GEAR_PAGE_SIZE;
+  const endIdx = Math.min(startIdx + GEAR_PAGE_SIZE, totalMatches);
+
+  // Hide all items first, then show ONLY the current slice of 20 products in place
+  gearItems.forEach(card => card.hidden = true);
+  for (let i = startIdx; i < endIdx; i++) {
+    matchingItems[i].hidden = false;
   }
 
-  gearItems.forEach(card => card.hidden = true);
-  matchingItems.forEach((card, idx) => {
-    if (idx < displayCount) {
-      card.hidden = false;
-    }
-  });
-
-  // Update summary & load more buttons
+  // Update summary & pagination controls
   if (countSummary) {
-    if (hasSearch) {
-      countSummary.textContent = `Found ${matchingItems.length} products matching "${query}"`;
+    if (totalMatches === 0) {
+      countSummary.textContent = hasSearch 
+        ? `No products found matching "${query}".`
+        : `No products available in this category.`;
+    } else if (hasSearch) {
+      countSummary.textContent = `Showing products ${startIdx + 1}–${endIdx} of ${totalMatches} matching "${query}" (Page ${gearPageIndex + 1} of ${totalPages})`;
     } else if (activeCat === 'All') {
-      countSummary.textContent = `Showing ${displayCount} of ${matchingItems.length} products (Select a category above or search to view more)`;
+      countSummary.textContent = `Showing products ${startIdx + 1}–${endIdx} of ${totalMatches} across all categories (Page ${gearPageIndex + 1} of ${totalPages})`;
     } else {
-      countSummary.textContent = `Showing all ${matchingItems.length} products in ${activeCat}`;
+      countSummary.textContent = `Showing products ${startIdx + 1}–${endIdx} of ${totalMatches} in ${activeCat} (Page ${gearPageIndex + 1} of ${totalPages})`;
     }
   }
 
   if (loadMoreBox) {
-    if (activeCat === 'All' && !hasSearch && displayCount < matchingItems.length) {
+    if (totalMatches > GEAR_PAGE_SIZE) {
       loadMoreBox.style.display = 'block';
+
+      if (loadMoreBtn) {
+        if (gearPageIndex < totalPages - 1) {
+          loadMoreBtn.textContent = `Show More (Next 20) →`;
+        } else {
+          loadMoreBtn.textContent = `↺ Return to First 20 (Page 1)`;
+        }
+      }
+
+      if (prevBtn) {
+        prevBtn.style.display = gearPageIndex > 0 ? 'inline-block' : 'none';
+      }
+
+      if (pageIndicator) {
+        pageIndicator.textContent = `Page ${gearPageIndex + 1} of ${totalPages}`;
+      }
     } else {
       loadMoreBox.style.display = 'none';
     }
@@ -731,44 +758,76 @@ function filterGear() {
 
 const gearSearch = document.getElementById('gear-search');
 if (gearSearch) gearSearch.addEventListener('input', () => {
-  gearLimit = 24;
-  filterGear();
+  filterGear(true);
 });
 
 const inStockCheckbox = document.getElementById('gear-instock');
-if (inStockCheckbox) inStockCheckbox.addEventListener('change', filterGear);
+if (inStockCheckbox) inStockCheckbox.addEventListener('change', () => {
+  filterGear(true);
+});
 
 document.addEventListener('click', e => {
   const catBtn = e.target.closest('[data-gear-cat]');
   if (catBtn) {
     document.querySelectorAll('[data-gear-cat]').forEach(b => b.classList.remove('active'));
     catBtn.classList.add('active');
-    gearLimit = 24;
-    filterGear();
+    filterGear(true);
   }
 
   if (e.target.closest('#gear-load-more')) {
-    gearLimit += 24;
-    filterGear();
+    const gearItems = Array.from(document.querySelectorAll('.gear-item'));
+    const inStockCheckbox = document.getElementById('gear-instock');
+    const activeCatBtn = document.querySelector('[data-gear-cat].active');
+    const activeCat = activeCatBtn?.dataset.gearCat || 'All';
+    const gearSearch = document.getElementById('gear-search');
+    const query = (gearSearch?.value || '').toLowerCase().trim();
+    const inStockOnly = inStockCheckbox?.checked || false;
+    const hasSearch = query.length > 0;
+
+    let matchingCount = 0;
+    gearItems.forEach(card => {
+      const name = (card.dataset.name || '').toLowerCase();
+      const cat = card.dataset.category || '';
+      const stock = Number(card.dataset.stock || 0);
+      const matchesStock = !inStockOnly || stock > 0;
+      const matchesCat = activeCat === 'All' || cat === activeCat;
+      const matchesQuery = !hasSearch || (name.includes(query) || cat.toLowerCase().includes(query));
+      if (matchesQuery && matchesCat && matchesStock) matchingCount++;
+    });
+
+    const totalPages = Math.ceil(matchingCount / GEAR_PAGE_SIZE) || 1;
+    if (gearPageIndex < totalPages - 1) {
+      gearPageIndex++;
+    } else {
+      gearPageIndex = 0; // Wrap back to page 1
+    }
+    filterGear(false);
+    document.getElementById('gear-grid')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  if (e.target.closest('#gear-show-all')) {
-    gearLimit = 9999;
-    filterGear();
+  if (e.target.closest('#gear-prev')) {
+    if (gearPageIndex > 0) {
+      gearPageIndex--;
+      filterGear(false);
+      document.getElementById('gear-grid')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 });
 
 // Run initial filter on page load
 if (document.getElementById('gear-grid')) {
-  filterGear();
+  filterGear(true);
 }
 
 // =========================================================================
-// Member Clubhouse Shop Filter & Search (24 Limit for 'All', All for Specific Category)
+// Member Clubhouse Shop Filter & Search - 20 Products Per Screen In-Place
 // =========================================================================
-let shopLimit = 24;
+const SHOP_PAGE_SIZE = 20;
+let shopPageIndex = 0;
 
-function filterShopItems() {
+function filterShopItems(resetPage = true) {
+  if (resetPage) shopPageIndex = 0;
+
   const shopSearch = document.querySelector('[data-shop-search]');
   const activeCatBtn = document.querySelector('[data-shop-cat].active');
   const activeCat = activeCatBtn?.dataset.shopCat || 'All';
@@ -778,6 +837,8 @@ function filterShopItems() {
   const shopRows = Array.from(document.querySelectorAll('.shop-item-row'));
   const countSummary = document.getElementById('shop-count-summary') || document.querySelector('.shop-count-summary');
   const loadMoreBtn = document.getElementById('shop-load-more') || document.querySelector('.shop-load-more');
+  const prevBtn = document.getElementById('shop-prev');
+  const pageIndicator = document.getElementById('shop-page-indicator');
 
   let matchingRows = [];
 
@@ -796,41 +857,53 @@ function filterShopItems() {
     }
   });
 
-  let displayCount = matchingRows.length;
-  if (activeCat === 'All' && !hasSearch) {
-    displayCount = Math.min(shopLimit, matchingRows.length);
-  }
+  const totalMatches = matchingRows.length;
+  const totalPages = Math.ceil(totalMatches / SHOP_PAGE_SIZE) || 1;
+
+  if (shopPageIndex >= totalPages) shopPageIndex = 0;
+  if (shopPageIndex < 0) shopPageIndex = 0;
+
+  const startIdx = shopPageIndex * SHOP_PAGE_SIZE;
+  const endIdx = Math.min(startIdx + SHOP_PAGE_SIZE, totalMatches);
 
   shopRows.forEach(row => row.hidden = true);
-  matchingRows.forEach((row, idx) => {
-    if (idx < displayCount) {
-      row.hidden = false;
-    }
-  });
+  for (let i = startIdx; i < endIdx; i++) {
+    matchingRows[i].hidden = false;
+  }
 
   if (countSummary) {
-    if (hasSearch) {
-      countSummary.textContent = `Found ${matchingRows.length} items matching "${query}"`;
-    } else if (activeCat === 'All') {
-      countSummary.textContent = `Showing ${displayCount} of ${matchingRows.length} items (Select category or search)`;
+    if (totalMatches === 0) {
+      countSummary.textContent = `No items found.`;
     } else {
-      countSummary.textContent = `Showing all ${matchingRows.length} items in ${activeCat}`;
+      countSummary.textContent = `Showing items ${startIdx + 1}–${endIdx} of ${totalMatches} (Page ${shopPageIndex + 1} of ${totalPages})`;
     }
   }
 
   if (loadMoreBtn) {
-    if (activeCat === 'All' && !hasSearch && displayCount < matchingRows.length) {
+    if (totalMatches > SHOP_PAGE_SIZE) {
       loadMoreBtn.style.display = 'inline-block';
+      if (shopPageIndex < totalPages - 1) {
+        loadMoreBtn.textContent = `Show More (Next 20) →`;
+      } else {
+        loadMoreBtn.textContent = `↺ First 20 (Page 1)`;
+      }
+      if (prevBtn) {
+        prevBtn.style.display = shopPageIndex > 0 ? 'inline-block' : 'none';
+      }
+      if (pageIndicator) {
+        pageIndicator.textContent = `Page ${shopPageIndex + 1} of ${totalPages}`;
+      }
     } else {
       loadMoreBtn.style.display = 'none';
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (pageIndicator) pageIndicator.textContent = `Page 1 of 1`;
     }
   }
 }
 
 document.addEventListener('input', e => {
   if (e.target.matches('[data-shop-search]')) {
-    shopLimit = 24;
-    filterShopItems();
+    filterShopItems(true);
   }
 });
 
@@ -839,19 +912,46 @@ document.addEventListener('click', e => {
   if (shopCatBtn) {
     document.querySelectorAll('[data-shop-cat]').forEach(b => b.classList.remove('active'));
     shopCatBtn.classList.add('active');
-    shopLimit = 24;
-    filterShopItems();
+    filterShopItems(true);
   }
 
   if (e.target.closest('#shop-load-more') || e.target.closest('.shop-load-more')) {
-    shopLimit += 24;
-    filterShopItems();
+    const shopRows = Array.from(document.querySelectorAll('.shop-item-row'));
+    const activeCatBtn = document.querySelector('[data-shop-cat].active');
+    const activeCat = activeCatBtn?.dataset.shopCat || 'All';
+    const shopSearch = document.querySelector('[data-shop-search]');
+    const query = (shopSearch?.value || '').toLowerCase().trim();
+    const hasSearch = query.length > 0;
+
+    let matchingCount = 0;
+    shopRows.forEach(row => {
+      const name = (row.dataset.name || '').toLowerCase();
+      const cat = row.dataset.category || '';
+      const matchesCat = activeCat === 'All' || cat === activeCat;
+      const matchesQuery = !hasSearch || (name.includes(query) || cat.toLowerCase().includes(query));
+      if (matchesQuery && matchesCat) matchingCount++;
+    });
+
+    const totalPages = Math.ceil(matchingCount / SHOP_PAGE_SIZE) || 1;
+    if (shopPageIndex < totalPages - 1) {
+      shopPageIndex++;
+    } else {
+      shopPageIndex = 0;
+    }
+    filterShopItems(false);
+  }
+
+  if (e.target.closest('#shop-prev')) {
+    if (shopPageIndex > 0) {
+      shopPageIndex--;
+      filterShopItems(false);
+    }
   }
 });
 
 // Run initial shop items filter
 if (document.querySelector('.shop-item-row')) {
-  filterShopItems();
+  filterShopItems(true);
 }
 
 // Cart Quantity Stepper Buttons
