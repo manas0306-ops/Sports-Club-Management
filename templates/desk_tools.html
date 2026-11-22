@@ -175,27 +175,101 @@
       <p class="eyebrow">Membership Sales</p>
       <h2>Prospective Lead Pipeline</h2>
     </div>
-    <span class="tag">{{leads|length}} Total Inquiries</span>
+    <span class="tag" id="crm-total-tag">{{leads|length}} Total Inquiries</span>
   </div>
 
-  <div style="display: flex; flex-direction: column; gap: 12px;">
+  <!-- CRM Search Tool Bar & Scope Filter -->
+  <div class="crm-toolbar" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 22px; box-shadow: var(--shadow-xs);">
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <!-- Search Box with Icon and Clear Button -->
+      <div style="position: relative; flex: 1; min-width: 280px;">
+        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; color: var(--slate-400); pointer-events: none;">🔍</span>
+        <input 
+          type="text" 
+          id="crm-search-input" 
+          placeholder="Search by User ID (e.g. 1, 2) or Lead ID, Name, Email..." 
+          style="padding-left: 42px; padding-right: 36px; width: 100%; border-radius: var(--radius-md); font-size: 13.5px; border: 1px solid var(--border); background: var(--slate-50); height: 42px;"
+          autocomplete="off"
+        >
+        <button 
+          type="button" 
+          id="crm-search-clear" 
+          style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: #e2e8f0; border: none; font-size: 12px; font-weight: bold; color: var(--slate-600); cursor: pointer; display: none; width: 22px; height: 22px; border-radius: 50%; align-items: center; justify-content: center;"
+          title="Clear search"
+        >✕</button>
+      </div>
+
+      <!-- Scope Filters -->
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button type="button" id="crm-filter-6h" class="crm-filter-btn" style="font-size: 12px; font-weight: 700; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--primary); background: var(--primary); color: #ffffff; transition: all 0.2s;">
+          🕒 Last 6 Hours (Default)
+        </button>
+        <button type="button" id="crm-filter-all" class="crm-filter-btn" style="font-size: 12px; font-weight: 600; padding: 10px 16px; border-radius: var(--radius-md); cursor: pointer; border: 1px solid var(--border); background: #ffffff; color: var(--slate-700); transition: all 0.2s;">
+          🌐 All-Time History
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Status / Context Banner -->
+    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--slate-100); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px;">
+      <div id="crm-status-text" style="color: var(--slate-600); display: flex; align-items: center; gap: 6px;">
+        <span class="live-indicator-dot" style="width: 6px; height: 6px;"></span>
+        Showing: <b>Leads connected in last 6 hours</b> (Real-Time Filter)
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span id="crm-visible-count" class="tag" style="background: rgba(16, 185, 129, 0.1); color: #065f46; border-color: rgba(16, 185, 129, 0.25); font-weight: 700; font-size: 11px;">
+          0 Leads Displayed
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div id="crm-leads-list" style="display: flex; flex-direction: column; gap: 12px;">
     {% for l in leads %}
-      <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-xs);">
-        <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 14px;">
-          <span>
+      <details class="crm-lead-card"
+        data-lead-id="{{l.id}}"
+        data-user-id="{{l.user_id if l.user_id else ''}}"
+        data-name="{{l.name|lower}}"
+        data-email="{{l.email|lower}}"
+        data-interest="{{l.interest|lower}}"
+        data-stage="{{l.stage|lower}}"
+        data-created="{{l.created.isoformat()}}"
+        style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-xs);">
+        
+        <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 14px; cursor: pointer; user-select: none;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="tag" style="font-size: 11px; background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; font-weight: 700;">
+              Lead #{{l.id}}
+            </span>
+            {% if l.user_id %}
+              <span class="tag" style="font-size: 11px; background: rgba(16, 185, 129, 0.15); color: #065f46; border-color: rgba(16, 185, 129, 0.3); font-weight: 700;">
+                User ID: #{{l.user_id}}
+              </span>
+            {% endif %}
             <b>{{l.name}}</b> &nbsp;·&nbsp; 
-            <small>{{l.email}}</small> &nbsp;·&nbsp;
+            <small style="color: var(--slate-500);">{{l.email}}</small> &nbsp;·&nbsp;
             <span class="tag" style="font-size: 11px;">{{l.stage}}</span>
-          </span>
-          {% if l.trial %}
-            <span class="warn" style="font-size: 11px; padding: 2px 8px;">★ Trial Requested</span>
-          {% endif %}
+          </div>
+
+          <div style="display: flex; gap: 8px; align-items: center;">
+            {% if l.trial %}
+              <span class="warn" style="font-size: 11px; padding: 2px 8px;">★ Trial Requested</span>
+            {% endif %}
+            <span style="font-size: 11px; color: var(--slate-500); background: var(--slate-50); padding: 2px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              🕒 {{l.created.strftime('%d %b, %H:%M')}}
+            </span>
+          </div>
         </summary>
 
         <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
-          <p style="font-size: 13px; color: var(--slate-700); margin-bottom: 14px;">
-            <b>Prospect Interest:</b> {{l.interest}}
-          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 12px; gap: 8px;">
+            <p style="font-size: 13px; color: var(--slate-700); margin: 0;">
+              <b>Prospect Interest:</b> {{l.interest}}
+            </p>
+            <span style="font-size: 11.5px; color: var(--slate-400);">
+              Created Timestamp: {{l.created.strftime('%Y-%m-%d %H:%M:%S IST')}}
+            </span>
+          </div>
 
           <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
             {% if l.stage!='Converted' %}
@@ -231,6 +305,19 @@
     {% else %}
       <p style="color: var(--slate-400); font-size: 13px;">No inquiries in the lead pipeline.</p>
     {% endfor %}
+
+    <!-- Zero results placeholder -->
+    <div id="crm-zero-results" style="display: none; text-align: center; padding: 36px 20px; background: var(--slate-50); border: 1px dashed var(--border); border-radius: var(--radius-md); color: var(--slate-500); font-size: 13px;">
+      <p style="margin-bottom: 8px; font-size: 14px; font-weight: 600; color: var(--slate-700);" id="crm-zero-title">
+        No leads match your search criteria.
+      </p>
+      <p style="margin-bottom: 14px;" id="crm-zero-desc">
+        Try searching by a different User ID or Lead ID, or switch to All-Time History.
+      </p>
+      <button type="button" id="crm-btn-show-all" style="font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: var(--radius-md); background: var(--primary); color: #ffffff; border: none; cursor: pointer;">
+        View All-Time Leads
+      </button>
+    </div>
   </div>
 </section>
 </div>

@@ -1040,3 +1040,191 @@ if (document.readyState === 'loading') {
   initOperationalClock();
 }
 
+// CRM Leads Search Tool Bar & Scope Synchronizer
+function initCrmSearch() {
+  const container = document.getElementById('crm-leads-list');
+  const searchInput = document.getElementById('crm-search-input');
+  if (!container || !searchInput) return;
+
+  const cards = Array.from(container.querySelectorAll('.crm-lead-card'));
+  const btn6h = document.getElementById('crm-filter-6h');
+  const btnAll = document.getElementById('crm-filter-all');
+  const clearBtn = document.getElementById('crm-search-clear');
+  const statusLabel = document.getElementById('crm-status-text');
+  const countBadge = document.getElementById('crm-visible-count');
+  const zeroBox = document.getElementById('crm-zero-results');
+  const zeroTitle = document.getElementById('crm-zero-title');
+  const zeroDesc = document.getElementById('crm-zero-desc');
+  const showAllBtn = document.getElementById('crm-btn-show-all');
+
+  let activeScope = '6h'; // '6h' or 'all'
+
+  function applyFilter() {
+    const rawQuery = searchInput.value.trim().toLowerCase();
+    const query = rawQuery.replace(/^#/, ''); // Allow searching "1" or "#1"
+    const hasSearch = query.length > 0;
+    
+    // Toggle clear button
+    if (clearBtn) clearBtn.style.display = hasSearch ? 'inline-flex' : 'none';
+
+    // 6-hour cutoff timestamp
+    const nowMs = Date.now();
+    const sixHoursMs = 6 * 60 * 60 * 1000;
+    const cutoff = nowMs - sixHoursMs;
+
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const leadId = (card.dataset.leadId || '').toLowerCase();
+      const userId = (card.dataset.userId || '').toLowerCase();
+      const name = (card.dataset.name || '').toLowerCase();
+      const email = (card.dataset.email || '').toLowerCase();
+      const interest = (card.dataset.interest || '').toLowerCase();
+      const stage = (card.dataset.stage || '').toLowerCase();
+      
+      const createdStr = card.dataset.created;
+      const createdTime = createdStr ? new Date(createdStr).getTime() : 0;
+      const isWithin6h = createdTime >= cutoff;
+
+      let match = false;
+
+      if (hasSearch) {
+        // PRECISION ALL-TIME SEARCH:
+        // Matches exact Lead ID, exact User ID, or contains query in name/email/interest
+        if (leadId === query || userId === query) {
+          match = true;
+        } else if (name.includes(query) || email.includes(query) || interest.includes(query) || stage.includes(query)) {
+          match = true;
+        }
+      } else {
+        // NO SEARCH ACTIVE:
+        if (activeScope === '6h') {
+          match = isWithin6h;
+        } else {
+          match = true; // All-time
+        }
+      }
+
+      if (match) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    // Update status and count badges
+    if (countBadge) {
+      countBadge.textContent = `${visibleCount} of ${cards.length} Leads`;
+    }
+
+    if (hasSearch) {
+      if (statusLabel) {
+        statusLabel.innerHTML = `🔍 Search query: <b>"${rawQuery}"</b> · <span style="color:var(--primary); font-weight:700;">Searching All-Time Database</span>`;
+      }
+      if (btn6h) {
+        btn6h.style.background = '#ffffff';
+        btn6h.style.color = 'var(--slate-700)';
+        btn6h.style.borderColor = 'var(--border)';
+      }
+      if (btnAll) {
+        btnAll.style.background = '#ffffff';
+        btnAll.style.color = 'var(--slate-700)';
+        btnAll.style.borderColor = 'var(--border)';
+      }
+    } else {
+      if (activeScope === '6h') {
+        if (statusLabel) {
+          statusLabel.innerHTML = `<span class="live-indicator-dot" style="width:6px;height:6px;"></span> Showing: <b>Leads connected in last 6 hours</b> (Default)`;
+        }
+        if (btn6h) {
+          btn6h.style.background = 'var(--primary)';
+          btn6h.style.color = '#ffffff';
+          btn6h.style.borderColor = 'var(--primary)';
+        }
+        if (btnAll) {
+          btnAll.style.background = '#ffffff';
+          btnAll.style.color = 'var(--slate-700)';
+          btnAll.style.borderColor = 'var(--border)';
+        }
+      } else {
+        if (statusLabel) {
+          statusLabel.innerHTML = `🌐 Showing: <b>All-Time Lead History</b> (${cards.length} Total)`;
+        }
+        if (btn6h) {
+          btn6h.style.background = '#ffffff';
+          btn6h.style.color = 'var(--slate-700)';
+          btn6h.style.borderColor = 'var(--border)';
+        }
+        if (btnAll) {
+          btnAll.style.background = 'var(--primary)';
+          btnAll.style.color = '#ffffff';
+          btnAll.style.borderColor = 'var(--primary)';
+        }
+      }
+    }
+
+    // Zero-results message handling
+    if (zeroBox) {
+      if (visibleCount === 0) {
+        zeroBox.style.display = 'block';
+        if (hasSearch) {
+          zeroTitle.textContent = `No leads found matching "${rawQuery}" in all-time records.`;
+          zeroDesc.textContent = 'Check the Lead ID or User ID for precision, or search by name/email.';
+          if (showAllBtn) showAllBtn.textContent = 'Clear Search & Show All';
+        } else if (activeScope === '6h') {
+          zeroTitle.textContent = 'No prospective leads connected in the last 6 hours.';
+          zeroDesc.textContent = 'Click below to inspect all-time historic leads or search by ID above.';
+          if (showAllBtn) showAllBtn.textContent = 'View All-Time Leads History';
+        }
+      } else {
+        zeroBox.style.display = 'none';
+      }
+    }
+  }
+
+  // Event Listeners
+  searchInput.addEventListener('input', applyFilter);
+  
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      applyFilter();
+      searchInput.focus();
+    });
+  }
+
+  if (btn6h) {
+    btn6h.addEventListener('click', () => {
+      activeScope = '6h';
+      searchInput.value = '';
+      applyFilter();
+    });
+  }
+
+  if (btnAll) {
+    btnAll.addEventListener('click', () => {
+      activeScope = 'all';
+      searchInput.value = '';
+      applyFilter();
+    });
+  }
+
+  if (showAllBtn) {
+    showAllBtn.addEventListener('click', () => {
+      activeScope = 'all';
+      searchInput.value = '';
+      applyFilter();
+    });
+  }
+
+  // Initial filter execution
+  applyFilter();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initCrmSearch);
+} else {
+  initCrmSearch();
+}
+

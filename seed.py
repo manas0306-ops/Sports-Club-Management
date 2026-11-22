@@ -24,7 +24,14 @@ def seed():
             moment=clock()-timedelta(days=i//3)
             s=Sale(member_id=1,actor_id=1,department=dept,total=amount,mode=["Cash","Card","UPI"][i%3],created=moment,settled=moment,status="Paid")
             db.add(s); db.flush(); db.add(Item(sale_id=s.id,name={"Courts":"Tennis session","Shop":"Match Ball Set","Bar":"Iced Latte","Physio":"Recovery session","Memberships":"Silver membership"}[dept],price=amount,total=amount))
-        db.add_all([Lead(name="Tara Sethi",email="tara@example.com",interest="Friday padel trial",trial=True),Lead(name="Dev Roy",email="dev@example.com",interest="Corporate membership",stage="Contacted"),Leave(staff_id=3,start=clock().date()+timedelta(days=2),end=clock().date()+timedelta(days=3),reason="Family visit"),Payroll(staff_id=2,period=clock().date().strftime("%Y-%m"),amount=2800000)])
+        db.add_all([
+            Lead(name="Tara Sethi",email="tara@example.com",interest="Friday padel trial",trial=True,created=clock()-timedelta(hours=14)),
+            Lead(name="Dev Roy",email="dev@example.com",interest="Corporate membership",stage="Contacted",created=clock()-timedelta(hours=12)),
+            Lead(name="Aanya Sharma",email="aanya@example.com",interest="Tennis Junior Squad & Coaching",trial=True,created=clock()-timedelta(hours=1,minutes=15)),
+            Lead(name="Vikram Malhotra",email="vikram.m@corporatesports.in",interest="Corporate Executive Membership",stage="New",trial=False,created=clock()-timedelta(hours=3,minutes=20)),
+            Leave(staff_id=3,start=clock().date()+timedelta(days=2),end=clock().date()+timedelta(days=3),reason="Family visit"),
+            Payroll(staff_id=2,period=clock().date().strftime("%Y-%m"),amount=2800000)
+        ])
 if __name__=="__main__":
     seed()
     print("Club database ready.")
