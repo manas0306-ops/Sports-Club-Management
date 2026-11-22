@@ -1,1 +1,172 @@
-<section><h2>Register shift</h2>{% if shifts and not shifts[0].closed %}<p>Open since {{shifts[0].opened.strftime('%H:%M')}}</p>{% call f.form('close_shift','Close and reconcile shift') %}{% endcall %}{% else %}{% call f.form('open_shift','Open register') %}{% endcall %}{% endif %}{% for h in shifts if h.closed %}<details><summary>Shift #{{h.id}} · {{h.closed.strftime('%d %b, %H:%M')}}</summary>{% for k,v in h.summary.items() %}<p>{{k}} {{v|money}}</p>{% endfor %}</details>{% endfor %}</section><section><h2>Table service</h2><div class="tables">{% for n in range(1,9) %}<article><small>Table {{'%02d'|format(n)}}</small><b>{{'Open tab' if n in tabs|map(attribute='details.table')|list else 'Available'}}</b></article>{% endfor %}</div>{% call f.form('tab','Open table tab') %}{{f.select('table','Table',range(1,9))}}{{f.memberpick(members,true)}}{% endcall %}{% for s in tabs %}<details><summary>Table {{s.details.table}} · Tab #{{s.id}} · {{s.total|money}}</summary>{% call f.form('batch','Send kitchen ticket') %}<input type="hidden" name="id" value="{{s.id}}"><input type="hidden" data-tier="{{(members|selectattr('id','equalto',s.member_id)|first).tier if s.member_id else 'Free'}}">{{f.cart(products,'Bar')}}{% endcall %}{% call f.form('settle','Settle tab') %}<input type="hidden" name="id" value="{{s.id}}">{{f.mode()}}{% endcall %}</details>{% endfor %}</section><section id="kitchen"><h2>Kitchen queue</h2>{% for i in tickets %}<div class="line"><span>{{i.qty}} × {{i.name}} <small>{{"Table "+bar_orders[i.sale_id].details.table|string if bar_orders[i.sale_id].details.get("table") else "Member order"}} ? Order #{{i.sale_id}} · Batch {{i.batch}} · {{i.ticket}}</small></span><form data-action="ticket"><input type="hidden" name="id" value="{{i.id}}"><input type="hidden" name="state" value="{{{'New':'Preparing','Preparing':'Ready','Ready':'Served'}[i.ticket]}}"><button class="ghost">{{{'New':'Start preparing','Preparing':'Mark ready','Ready':'Serve'}[i.ticket]}}</button></form></div>{% else %}<p>No tickets waiting.</p>{% endfor %}</section>
+<!-- Bar & Café Register Shift Management -->
+<div class="club-module" data-module="shift" data-title="Register Shift" data-icon="💵">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">POS Terminal & Cash Drawer</p>
+      <h2>Bar Register Shift</h2>
+    </div>
+    {% if shifts and not shifts[0].closed %}
+      <span class="tag">● Register Open (Since {{shifts[0].opened.strftime('%H:%M')}})</span>
+    {% else %}
+      <span class="warn">● Register Closed</span>
+    {% endif %}
+  </div>
+
+  {% if shifts and not shifts[0].closed %}
+    <div style="background: var(--primary-subtle); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <strong style="color: var(--primary); font-size: 15px;">Active Shift In Progress</strong>
+        <p style="margin: 2px 0 0 0; font-size: 13px; color: var(--slate-600);">Shift opened at {{shifts[0].opened.strftime('%H:%M IST')}}. Settle all open tabs before closing.</p>
+      </div>
+      {% call f.form('close_shift','Close & Reconcile Shift') %}{% endcall %}
+    </div>
+  {% else %}
+    <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 16px;">
+      <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 10px;">The register is closed. Open a shift to begin taking orders and starting table tabs.</p>
+      {% call f.form('open_shift','Open Register Shift') %}{% endcall %}
+    </div>
+  {% endif %}
+
+  <!-- Previous Reconciled Shifts -->
+  {% for h in shifts if h.closed %}
+    <details style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 18px; margin-bottom: 8px;">
+      <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 13px;">
+        <span>Shift #{{h.id}} &nbsp;·&nbsp; Closed {{h.closed.strftime('%d %b, %H:%M')}}</span>
+        <span class="tag" style="font-size: 11px;">Reconciled</span>
+      </summary>
+      <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); display: flex; gap: 16px; flex-wrap: wrap;">
+        {% for k,v in h.summary.items() %}
+          <div style="background: #ffffff; padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 12px;">
+            <b>{{k}}:</b> {{v|money}}
+          </div>
+        {% endfor %}
+      </div>
+    </details>
+  {% endfor %}
+</section>
+</div>
+
+<div class="club-module" data-module="tabs" data-title="Floor Plan & Tabs" data-icon="🍽️">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Dine-In Floor Plan</p>
+      <h2>Table Service & Open Tabs</h2>
+    </div>
+    <span class="tag">8 Designated Tables</span>
+  </div>
+
+  <!-- Visual 8-Table Floor Plan -->
+  <div class="tables">
+    {% for n in range(1,9) %}
+      {% set isOpen = n in tabs|map(attribute='details.table')|list %}
+      <article style="{{'background: #ecfdf5; border-color: #10b981;' if isOpen else ''}}">
+        <small>Table {{'%02d'|format(n)}}</small>
+        <b style="{{'color: #065f46;' if isOpen else 'color: var(--slate-400);'}}">
+          {{'● Open Tab' if isOpen else 'Available'}}
+        </b>
+      </article>
+    {% endfor %}
+  </div>
+
+  <!-- Open New Table Tab -->
+  <div style="background: var(--slate-50); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border); margin: 20px 0;">
+    <h3 style="font-size: 14px; margin-bottom: 12px; text-transform: uppercase; color: var(--slate-600);">Open New Table Tab</h3>
+    {% call f.form('tab','Open Table Tab') %}
+      {{f.select('table','Select Table Number',range(1,9))}}
+      {{f.memberpick(members,true)}}
+    {% endcall %}
+  </div>
+
+  <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; margin: 16px 0;">
+    <summary style="font-size: 14px; font-weight: 700; color: var(--primary); cursor: pointer;">
+      ➕ Add New Dish / Beverage to Café Menu
+    </summary>
+    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border);">
+      <form data-action="add_product" class="fields">
+        <input type="hidden" name="department" value="Bar">
+        <input type="hidden" name="category" value="Café">
+        <label>Item Name
+          <input name="name" type="text" placeholder="e.g. Avocado Toast or Protein Shake" required>
+        </label>
+        <label>Selling Price (₹)
+          <input name="price" type="number" step="1" placeholder="e.g. 240" required>
+        </label>
+        <label>Preparation Cost (₹)
+          <input name="cost" type="number" step="1" placeholder="e.g. 80" required>
+        </label>
+        <label>Initial Servings Stock
+          <input name="stock_on_hand" type="number" value="30" required>
+        </label>
+        <button class="btn">Add to Café Menu</button>
+      </form>
+    </div>
+  </details>
+
+  <!-- Active Open Tabs Details -->
+  <h3 style="font-size: 15px; margin: 24px 0 12px 0;">Active Open Tabs</h3>
+  {% for s in tabs %}
+    <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 12px; box-shadow: var(--shadow-xs);">
+      <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 15px;">
+        <span>🍽️ <b>Table {{s.details.table}}</b> &nbsp;·&nbsp; Tab #{{s.id}}</span>
+        <b style="color: var(--primary); font-size: 16px;">{{s.total|money}}</b>
+      </summary>
+
+      <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+        <h4 style="font-size: 13px; text-transform: uppercase; color: var(--slate-500); margin-bottom: 10px;">Add Order Items to Tab</h4>
+        {% call f.form('batch','Send Kitchen Ticket') %}
+          <input type="hidden" name="id" value="{{s.id}}">
+          <input type="hidden" data-tier="{{(members|selectattr('id','equalto',s.member_id)|first).tier if members and s.member_id else 'Free'}}">
+          {{f.cart(products,'Bar')}}
+        {% endcall %}
+
+        <div style="margin-top: 20px; padding-top: 14px; border-top: 1px dashed var(--border); display: flex; justify-content: flex-end;">
+          {% call f.form('settle','Settle & Close Tab') %}
+            <input type="hidden" name="id" value="{{s.id}}">
+            {{f.mode()}}
+          {% endcall %}
+        </div>
+      </div>
+    </details>
+  {% else %}
+    <p style="color: var(--slate-400); font-size: 13px;">No open tabs currently.</p>
+  {% endfor %}
+</section>
+
+<!-- Live Kitchen Queue (KOT) -->
+<section id="kitchen">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Kitchen Display System (KDS)</p>
+      <h2>Kitchen Order Tickets (KOT)</h2>
+    </div>
+    <span class="tag">● Live 10s Sync</span>
+  </div>
+
+  {% for i in tickets %}
+    <div class="line" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; background: #ffffff; padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 10px;">
+      <div>
+        <span style="font-size: 16px; font-weight: 700;">{{i.qty}} × {{i.name}}</span>
+        <small style="margin-top: 4px; display: block;">
+          <b>{{"Table "+bar_orders[i.sale_id].details.table|string if bar_orders[i.sale_id].details.get("table") else "Member Pickup"}}</b> &nbsp;·&nbsp;
+          Order #{{i.sale_id}} &nbsp;·&nbsp; Batch {{i.batch}} &nbsp;·&nbsp; 
+          <span class="{{'tag' if i.ticket=='Ready' else ('warn' if i.ticket=='Preparing' else 'ghost')}}" style="font-size: 11px; padding: 2px 8px;">
+            {{i.ticket}}
+          </span>
+        </small>
+      </div>
+
+      <form data-action="ticket" style="margin: 0;">
+        <input type="hidden" name="id" value="{{i.id}}">
+        <input type="hidden" name="state" value="{{{'New':'Preparing','Preparing':'Ready','Ready':'Served'}[i.ticket]}}">
+        <button class="{{'btn' if i.ticket=='Preparing' else 'ghost'}}" style="font-size: 12px; padding: 8px 14px;">
+          {{{'New':'Start preparing','Preparing':'Mark ready','Ready':'Serve'}[i.ticket]}}
+        </button>
+      </form>
+    </div>
+  {% else %}
+    <p style="color: var(--slate-400); font-size: 13px; text-align: center; padding: 24px;">No tickets waiting in the kitchen queue.</p>
+  {% endfor %}
+</section>
+</div>

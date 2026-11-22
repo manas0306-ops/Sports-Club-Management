@@ -1,1 +1,359 @@
-{% extends 'workspace.html' %}{% block heading %}Member clubhouse{% endblock %}{% block panels %}<section><div class="sectionhead"><div><p class="eyebrow">Member #{{m.id}}</p><h2>{{effective(m)}} membership</h2></div><span class="tag">{{membership_status(m)}}</span></div><p>{{'Valid through '+m.expiry|string if m.expiry else 'Standard walk-in rates'}} · Court discounts apply on the play date.</p><details><summary>Upgrade or renew</summary>{% call f.form('upgrade','Purchase 30-day plan') %}{{f.select('tier','Plan',['Silver','Gold','Junior'])}}<p>Silver ₹1,500 · Gold ₹3,000 · Junior ₹800</p>{{f.mode()}}{% endcall %}</details></section>{{f.board(courts,true)}}{{f.bookings(bookings)}}{% for dept in ['Shop','Bar'] %}<details class="panel"><summary>{{'Buy gear' if dept=='Shop' else 'Order café food'}}</summary>{% call f.form('order','Place order') %}<input type="hidden" name="department" value="{{dept}}"><input type="hidden" data-tier="{{effective(m)}}">{{f.cart(products,dept)}}{{f.select('fulfilment','Receive order',['Pickup','Delivery'] if dept=='Shop' else ['Pickup','Table'])}}{% if dept=='Shop' %}{{f.field('address','Delivery address','text',false)}}{% endif %}{{f.mode()}}{% endcall %}</details>{% endfor %}<section><h2>Physio appointments</h2>{% call f.form('appointment','Book session · ₹500') %}<label>Practitioner<select name="staff_id">{% for p in physios %}<option value="{{p.id}}">{{p.name}}</option>{% endfor %}</select></label>{{f.field('start','30 minutes · 08:00–19:00','datetime-local')}}{{f.mode()}}{% endcall %}{% for a in appointments %}<p>{{a.start}} · {{a.status}} · {{a.summary}}</p>{% endfor %}</section>{% endblock %}
+{% extends 'workspace.html' %}
+{% block heading %}Member Clubhouse Portal{% endblock %}
+
+{% block panels %}
+<!-- Luxury Member Credential Card -->
+<div class="club-module" data-module="membership" data-title="My Membership" data-icon="🏆">
+<section style="background: linear-gradient(135deg, #ffffff 0%, #f7faf8 100%); border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-md); position: relative; overflow: hidden;">
+  <div style="position: absolute; top: -30px; right: -30px; width: 140px; height: 140px; background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%); border-radius: 50%;"></div>
+  
+  <div class="sectionhead" style="margin-bottom: 16px;">
+    <div>
+      <p class="eyebrow">Champions Club Member Credential</p>
+      <h2 style="font-size: 28px; display: flex; align-items: center; gap: 10px;">
+        {{effective(m)}} Membership
+        {% if effective(m) == 'Gold' %}
+          <span style="color: var(--gold); font-size: 20px;">★</span>
+        {% endif %}
+      </h2>
+    </div>
+    <span class="{{'tag' if membership_status(m)=='Active' else 'warn'}}" style="font-size: 13px; padding: 6px 14px;">
+      ● {{membership_status(m)}}
+    </span>
+  </div>
+
+  <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+    <div style="padding: 12px 18px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-xs);">
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate-500); font-weight: 700;">Account Number</small>
+      <strong style="display: block; font-size: 16px; color: var(--primary);">CC-MEM-{{'%04d'|format(m.id)}}</strong>
+    </div>
+
+    <div style="padding: 12px 18px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-xs);">
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate-500); font-weight: 700;">Validity Horizon</small>
+      <strong style="display: block; font-size: 16px; color: var(--slate-800);">
+        {{'Active through ' + m.expiry|string if m.expiry else 'Standard Walk-In Rate'}}
+      </strong>
+    </div>
+
+    <div style="padding: 12px 18px; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-xs);">
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate-500); font-weight: 700;">Privileges</small>
+      <strong style="display: block; font-size: 16px; color: var(--primary);">
+        {% if effective(m)=='Gold' %}100% Courts Included · 15% Off
+        {% elif effective(m)=='Silver' %}50% Off Courts · 10% Off
+        {% elif effective(m)=='Junior' %}30% Off Courts · 5% Off
+        {% else %}Standard Rates{% endif %}
+      </strong>
+    </div>
+  </div>
+
+  <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px;">
+    <summary style="font-size: 14px; font-weight: 700; color: var(--primary);">
+      ⚡ Upgrade or Renew Your 30-Day Tier Plan
+    </summary>
+    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+      <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 14px;">
+        Choose your desired 30-day membership tier plan below. Click <b>Complete & Pay</b> to generate your itemized pro-forma bill with all member subsidies and discounts:
+      </p>
+
+      <form action="/upgrade/bill" method="GET" style="display: flex; flex-direction: column; gap: 14px;">
+        <label style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
+          Choose Plan Tier
+          <select name="tier" style="width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; background: #ffffff;">
+            <option value="Gold" {% if effective(m)=='Gold' %}selected{% endif %}>★ Gold Tier Plan · ₹3,000 / month (100% Free Courts + 15% Off All Shop & Bar)</option>
+            <option value="Silver" {% if effective(m)=='Silver' %}selected{% endif %}>Silver Tier Plan · ₹1,500 / month (50% Court Subsidy + 10% Off All Shop & Bar)</option>
+            <option value="Junior" {% if effective(m)=='Junior' %}selected{% endif %}>Junior Tier Plan · ₹800 / month (Under 18s · 30% Off Courts + 5% Off)</option>
+          </select>
+        </label>
+
+        <label style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
+          Preferred Payment Method
+          <select name="mode" style="width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; background: #ffffff;">
+            <option value="UPI">UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
+            <option value="Card">Credit / Debit Card</option>
+            <option value="Cash">Cash at Concierge Desk</option>
+          </select>
+        </label>
+
+        <div style="font-size: 12px; color: var(--slate-600); background: var(--slate-50); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+          <b>Rates & Horizon:</b> Silver ₹1,500 &nbsp;·&nbsp; Gold ₹3,000 &nbsp;·&nbsp; Junior ₹800 (Under 18 only). Plans are active for 30 consecutive calendar days from activation.
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 6px;">
+          <button type="submit" class="btn" style="background: var(--primary); color: #ffffff; font-size: 14px; font-weight: 700; padding: 12px 24px; border-radius: var(--radius-md); display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: var(--shadow-sm);">
+            Complete & Pay →
+          </button>
+        </div>
+      </form>
+    </div>
+  </details>
+</section>
+</div>
+
+<div class="club-module" data-module="courts" data-title="Reserve Court" data-icon="🎾">
+{{ f.board(courts, true) }}
+</div>
+
+<div class="club-module" data-module="bookings" data-title="My Bookings" data-icon="📅">
+{{ f.bookings(bookings) }}
+</div>
+
+<!-- Pro Shop Gear Ordering -->
+<div class="club-module" data-module="shop" data-title="Pro Shop Orders" data-icon="🛍️">
+<details class="panel" id="shop-order" open>
+  <summary style="font-size: 17px; display: flex; align-items: center; justify-content: space-between;">
+    <span>🛍️ Order Pro Performance Gear & Equipment</span>
+    <span class="tag">Shop Counter & Delivery</span>
+  </summary>
+
+  <div style="margin-top: 20px;">
+    <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 16px;">
+      Browse tour-grade rackets, balls, shoes and apparel. Enjoy automatic <b>{{rate(m, 'Shop')}}% member privilege discount</b> applied on total checkout.
+    </p>
+
+    <!-- Product Search & Category Filters in Member Shop -->
+    <div style="background: var(--slate-50); padding: 16px 18px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 16px;">
+      <div style="margin-bottom: 12px;">
+        <input data-shop-search type="search" placeholder="🔍 Filter products by name..." style="width: 100%; background: #ffffff;">
+      </div>
+      <div class="chips" style="gap: 8px;">
+        <span style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Filter:</span>
+        <button type="button" class="cat-pill active" data-shop-cat="All">All Categories</button>
+        <button type="button" class="cat-pill" data-shop-cat="Rackets">🏸 Rackets</button>
+        <button type="button" class="cat-pill" data-shop-cat="Balls">🎾 Balls</button>
+        <button type="button" class="cat-pill" data-shop-cat="Shoes">👟 Shoes</button>
+        <button type="button" class="cat-pill" data-shop-cat="Apparel">👕 Apparel</button>
+        <button type="button" class="cat-pill" data-shop-cat="Accessories">🩹 Accessories</button>
+      </div>
+    </div>
+
+    {% call f.form('order','Complete & Place Order') %}
+      <input type="hidden" name="department" value="Shop">
+      <input type="hidden" data-tier="{{effective(m)}}">
+      {{f.cart(products,'Shop')}}
+      {{f.select('fulfilment','Fulfilment Mode',['Pickup','Delivery'])}}
+      {{f.field('address','Delivery Address (Required if Delivery selected)','text',false)}}
+      {{f.field('delivery_notes','Delivery Instructions / Notes (Optional)','text',false)}}
+      {{f.mode()}}
+      {{f.field('payment_ref','UPI Transaction ID / 12-Digit UTR (Required after payment)','text',false)}}
+    {% endcall %}
+  </div>
+</details>
+</div>
+
+<div class="club-module" data-module="orders" data-title="My Orders & Tracking" data-icon="📦">
+<!-- Real-Time Gear Orders & Delivery Status Tracking -->
+{% set shop_orders = sales|selectattr('department','equalto','Shop')|list %}
+<section id="gear-orders">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Order Fulfilment</p>
+      <h2>My Gear Orders & Delivery Status</h2>
+    </div>
+    <span class="tag">{{shop_orders|length}} Order Records</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    {% for s in shop_orders %}
+      {% set state = s.details.get('state', 'Received') %}
+      {% set isDispatched = state in ['Dispatched', 'Collected', 'Completed', 'Out for Delivery'] %}
+      {% set isDelivered = state in ['Collected', 'Completed'] %}
+      
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <span style="font-size: 16px; font-weight: 800; color: var(--slate-900);">
+              Order #CC-{{'%05d'|format(s.id)}}
+            </span>
+            <small style="display: block; color: var(--slate-500); margin-top: 2px;">
+              Placed on {{s.created.strftime('%d %B %Y, %H:%M IST')}} &nbsp;·&nbsp; Tender: <b>{{s.mode}}</b>
+              {% if s.details.get('payment_ref') %}
+                (Ref: {{s.details.payment_ref}})
+              {% endif %}
+            </small>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            {% if s.details.get('payment_verified') %}
+              <span class="verified-badge">✓ Payment Verified</span>
+            {% else %}
+              <span class="pending-badge">⏳ Payment Under Review</span>
+            {% endif %}
+            <b style="font-size: 16px; color: var(--primary);">{{s.total|money}}</b>
+          </div>
+        </div>
+
+        <!-- Visual Delivery Stepper -->
+        <div class="stepper">
+          <div class="step-node active completed">
+            <div class="step-circle">1</div>
+            <div class="step-label">Order Received</div>
+          </div>
+          <div class="step-node {{'active completed' if isDispatched else ''}}">
+            <div class="step-circle">2</div>
+            <div class="step-label">
+              {{'Dispatched / Out' if s.details.fulfilment=='Delivery' else 'Ready for Pickup'}}
+            </div>
+          </div>
+          <div class="step-node {{'active completed' if isDelivered else ''}}">
+            <div class="step-circle">3</div>
+            <div class="step-label">
+              {{'Delivered' if s.details.fulfilment=='Delivery' else 'Collected'}}
+            </div>
+          </div>
+        </div>
+
+        <!-- Fulfilment Meta & Item Breakdown -->
+        <div style="background: var(--slate-50); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 12px; color: var(--slate-700); margin-bottom: 8px;">
+            <span><b>Mode:</b> {{s.details.fulfilment}} Mode</span>
+            <span><b>Current Status:</b> <span class="tag" style="font-size: 11px; padding: 1px 8px;">{{state}}</span></span>
+          </div>
+          {% if s.details.get('address') %}
+            <p style="margin: 0 0 8px 0; font-size: 12px; color: var(--slate-600);">
+              <b>Delivery Destination:</b> {{s.details.address}}
+            </p>
+          {% endif %}
+
+          <!-- Purchased Line Items -->
+          <div style="border-top: 1px dashed var(--slate-300); padding-top: 8px; margin-top: 6px;">
+            <small style="text-transform: uppercase; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Items Ordered:</small>
+            {% for it in items_by_sale.get(s.id, []) %}
+              <span style="display: inline-block; background: #ffffff; padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 12px; margin-right: 6px; margin-bottom: 4px;">
+                {{it.qty}} × {{it.name}} ({{it.total|money}})
+              </span>
+            {% else %}
+              <span style="font-size: 12px; color: var(--slate-500);">Pro Shop Merchandise</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+          <a class="ghost" href="/receipt/{{s.id}}" style="font-size: 12px; padding: 6px 14px;">
+            View Official Tax Invoice ↗
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <p style="color: var(--slate-400); font-size: 13px; text-align: center; padding: 24px; background: var(--slate-50); border-radius: var(--radius-md); border: 1px dashed var(--border);">
+        You haven't placed any equipment or gear orders yet. Explore our Pro Shop above!
+      </p>
+    {% endfor %}
+  </div>
+</section>
+</div>
+
+<div class="club-module" data-module="cafe" data-title="Clubhouse Dining" data-icon="☕">
+<details class="panel" open>
+  <summary style="font-size: 17px; display: flex; align-items: center; justify-content: space-between;">
+    <span>☕ Order Clubhouse Café & Dining</span>
+    <span class="tag">Table & Pickup</span>
+  </summary>
+  <div style="margin-top: 20px;">
+    <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 16px;">
+      Order handcrafted espresso drinks or food delivered to your table or for counter collection.
+    </p>
+    {% call f.form('order','Place order') %}
+      <input type="hidden" name="department" value="Bar">
+      <input type="hidden" data-tier="{{effective(m)}}">
+      {{f.cart(products,'Bar')}}
+      {{f.select('fulfilment','Receive order',['Pickup','Table'])}}
+      {{f.mode()}}
+      {{f.field('payment_ref','UPI Transaction ID / 12-Digit UTR (Required after payment)','text',false)}}
+    {% endcall %}
+  </div>
+</details>
+</div>
+
+<div class="club-module" data-module="physio" data-title="Sports Physiotherapy" data-icon="🩺">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Wellness & Recovery</p>
+      <h2>Sports Physiotherapy Sessions</h2>
+    </div>
+    <span class="tag">● 30-Min Clinical Session · ₹500</span>
+  </div>
+  
+  <p style="font-size: 13px; color: var(--slate-600);">
+    Consult with certified sports physiotherapists for injury assessment, rehabilitation, and athletic conditioning.
+  </p>
+
+  {% call f.form('appointment','Book session · ₹500') %}
+    <label>Practitioner
+      <select name="staff_id">
+        {% for p in physios %}
+          <option value="{{p.id}}">{{p.name}} (Sports Physio)</option>
+        {% endfor %}
+      </select>
+    </label>
+    {{f.field('start','Session Time (30 min blocks, 08:00–19:00 IST)','datetime-local')}}
+    {{f.mode()}}
+  {% endcall %}
+
+  <div style="margin-top: 24px;">
+    <h4 style="font-size: 14px; text-transform: uppercase; color: var(--slate-500); margin-bottom: 10px;">My Scheduled Appointments</h4>
+    {% for a in appointments %}
+      <div class="line" style="background: var(--slate-50); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 8px;">
+        <div>
+          <span style="font-weight: 700;">{{a.start.strftime('%a, %d %b · %H:%M')}}</span>
+          <small>Status: {{a.status}} {% if a.summary %}· Notes: {{a.summary}}{% endif %}</small>
+        </div>
+        <span class="{{'tag' if a.status=='Completed' else 'warn'}}">{{a.status}}</span>
+      </div>
+    {% else %}
+      <p style="color: var(--slate-400); font-size: 13px;">No physiotherapy appointments booked.</p>
+    {% endfor %}
+  </div>
+</section>
+</div>
+
+<!-- Member Profile & Account Security -->
+<div class="club-module" data-module="profile" data-title="My Profile & Security" data-icon="👤">
+  <section>
+    <div class="sectionhead">
+      <div>
+        <p class="eyebrow">Personal Account</p>
+        <h2>My Profile & Security Settings</h2>
+      </div>
+      <span class="tag">#MEM-{{'%04d'|format(m.id)}}</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      <!-- Profile Information -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-xs);">
+        <h3 style="font-size: 15px; margin: 0 0 14px 0; color: var(--slate-900);">Account Details</h3>
+        
+        <div style="font-size: 13px; color: var(--slate-600); margin-bottom: 16px;">
+          <p style="margin: 0 0 6px 0;"><b>Registered Email:</b> {{user.email}}</p>
+          <p style="margin: 0 0 6px 0;"><b>Member ID:</b> #MEM-{{'%04d'|format(m.id)}} · #UID-{{user.id}}</p>
+          <p style="margin: 0 0 6px 0;"><b>Date of Birth:</b> {{m.dob}}</p>
+          <p style="margin: 0;"><b>Membership Tier:</b> <span class="tag" style="font-size: 11px;">{{effective(m)}} Tier</span></p>
+        </div>
+
+        <form data-action="update_profile" class="fields">
+          <label>Display Name
+            <input name="name" type="text" value="{{user.name}}" required>
+          </label>
+          <button class="btn" style="font-size: 12px; padding: 8px 16px;">Save Profile Name</button>
+        </form>
+      </div>
+
+      <!-- Security / Change Password -->
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-xs);">
+        <h3 style="font-size: 15px; margin: 0 0 14px 0; color: var(--slate-900);">Update Password</h3>
+        
+        <form data-action="change_password" class="fields">
+          <label>Current Password
+            <input name="current_password" type="password" placeholder="Enter current password" required minlength="8">
+          </label>
+          <label>New Secret Password
+            <input name="new_password" type="password" placeholder="Min 8 characters" required minlength="8">
+          </label>
+          <button class="ghost" style="font-size: 12px; padding: 8px 16px;">Update Password</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+{% endblock %}

@@ -1,1 +1,236 @@
-<section><h2>Member directory</h2><label>Find by name or ID<input data-search placeholder="Search members"></label><div data-directory>{% for x in members %}<p>#{{x.id}} · {{x.name}} · {{x.tier}}</p>{% endfor %}</div><details><summary>Register a walk-in</summary>{% call f.form('walkin','Register Free member') %}{{f.reg()}}{% endcall %}</details></section>{{f.board(courts,true,members)}}{{f.bookings(bookings)}}<section><h2>Lead pipeline</h2>{% for l in leads %}<details><summary>{{l.name}} · {{l.stage}}</summary><p>{{l.email}} · {{l.interest}}</p>{% if l.stage!='Converted' %}{% call f.form('lead_stage','Advance lead') %}<input type="hidden" name="id" value="{{l.id}}">{{f.select('stage','Next stage',[{'New':'Contacted','Contacted':'Quote Sent','Quote Sent':'Converted'}[l.stage]])}}{% endcall %}{% endif %}{% if l.trial and not l.booking_id %}{% call f.form('trial','Confirm trial reservation') %}<input type="hidden" name="lead_id" value="{{l.id}}">{{f.memberpick(members)}}<label>Court<select name="court_id">{% for c in courts %}<option value="{{c.id}}">{{c.name}}</option>{% endfor %}</select></label>{{f.field('start','Trial start','datetime-local')}}{{f.mode()}}{% endcall %}{% elif l.booking_id %}<p>Confirmed reservation #{{l.booking_id}}</p>{% endif %}</details>{% endfor %}</section>
+<!-- Front Desk Member Directory & Walk-in Registration -->
+<div class="club-module" data-module="directory" data-title="Member Directory" data-icon="👥">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Front Desk Operations</p>
+      <h2>Member Directory & Check-In</h2>
+    </div>
+    <span class="tag">{{members|length}} Registered Members</span>
+  </div>
+
+  <div style="background: var(--slate-50); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 20px;">
+    <label style="margin-bottom: 12px;">
+      <span style="font-size: 13px; font-weight: 700; color: var(--slate-700);">Quick Member Search</span>
+      <input data-search placeholder="Type member name, account ID, or tier (e.g. Gold, Aarav)..." style="background: #ffffff;">
+    </label>
+
+    <div data-directory style="max-height: 220px; overflow-y: auto; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 14px;">
+      {% for x in members %}
+        <p style="padding: 8px 0; margin: 0; border-bottom: 1px solid var(--border-light); font-size: 13px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;">
+          <span>
+            <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: var(--primary); background: var(--primary-subtle); padding: 2px 6px; border-radius: var(--radius-full); margin-right: 6px;">
+              #MEM-{{x.id}} · #UID-{{x.user_id}}
+            </span>
+            <b>{{x.name}}</b>
+          </span>
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <span class="{{'tag' if x.tier in ('Gold', 'Silver') else ('warn' if x.tier=='Junior' else 'ghost')}}" style="font-size: 10px; padding: 2px 8px;">
+              {{x.tier}} Subscription
+            </span>
+            <a href="/upgrade/bill?member_id={{x.id}}&tier=Gold" style="font-size: 11px; color: var(--primary); font-weight: 700; text-decoration: underline;">
+              Upgrade Bill →
+            </a>
+          </span>
+        </p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px;">
+    <summary style="font-size: 14px; font-weight: 700; color: var(--primary);">
+      ➕ Register In-Person Walk-In Member
+    </summary>
+    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+      <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 12px;">
+        Enroll a new walk-in guest with a Free base tier account. They can be upgraded to Silver, Gold, or Junior on demand.
+      </p>
+      {% call f.form('walkin','Register Free member') %}
+        {{f.reg()}}
+      {% endcall %}
+    </div>
+  </details>
+</section>
+</div>
+
+{% if user.role != "owner" %}
+<!-- Dedicated Front Desk Payment Verification & Approvals -->
+<div class="club-module" data-module="approvals" data-title="Payment Approvals" data-icon="💳">
+<section style="border: 2px solid var(--primary-light); background: linear-gradient(180deg, #ffffff 0%, #f4fbf7 100%);">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Reception Cash & UPI Verification</p>
+      <h2>Verify Payments & Confirm Bookings</h2>
+    </div>
+    <span class="tag">● Desk Authorization</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+      <span style="font-size: 13px; font-weight: 700; color: var(--slate-700);">Batch Actions:</span>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <form data-action="confirm_all_bookings" style="margin: 0;">
+          <button type="submit" class="btn" style="background: var(--primary); color: #ffffff; font-weight: 700; padding: 9px 16px; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); cursor: pointer;">
+            <span>✓</span> Confirm All Bookings
+          </button>
+        </form>
+
+        <form data-action="reject_all_bookings" style="margin: 0;">
+          <input type="hidden" name="reason" value="Bulk declined at front desk">
+          <button type="submit" class="ghost" style="color: #dc2626; border-color: #fca5a5; background: #fff5f5; font-weight: 700; padding: 9px 16px; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <span>✕</span> Reject All Bookings
+          </button>
+        </form>
+      </div>
+    </div>
+    {% for s in (all_sales if all_sales is defined else sales) if not s.details.get('payment_verified') %}
+      <div class="line" style="background: #ffffff; padding: 16px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-xs);">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <a href="/receipt/{{s.id}}" style="font-weight: 800; font-size: 15px; color: var(--primary);">
+              CC-{{'%05d'|format(s.id)}} ↗
+            </a>
+            <span class="tag" style="font-size: 11px;">{{s.department}}</span>
+            <span class="pending-badge">⏳ Unverified Tender</span>
+          </div>
+          <small style="color: var(--slate-600); display: block;">
+            Issued: {{s.created.strftime('%d %b, %H:%M')}} &nbsp;·&nbsp; 
+            Tender: <b>{{s.mode}}</b> 
+            {% if s.details.get('payment_ref') %} &nbsp;·&nbsp; <b>Ref/UTR:</b> {{s.details.payment_ref}}{% endif %}
+            &nbsp;·&nbsp; Amount: <b style="color: var(--primary);">{{s.total|money}}</b>
+          </small>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <form data-action="verify_payment" style="margin: 0;">
+            <input type="hidden" name="id" value="{{s.id}}">
+            <input type="hidden" name="notes" value="Verified by Front Desk Staff">
+            <button class="btn" style="font-size: 12px; padding: 8px 14px;">
+              ✓ Verify & Approve
+            </button>
+          </form>
+
+          <form data-action="reject_payment" style="margin: 0;">
+            <input type="hidden" name="id" value="{{s.id}}">
+            <input type="hidden" name="reason" value="Payment declined at front desk">
+            <button class="ghost" style="font-size: 12px; padding: 8px 14px; color: #dc2626; border-color: #fca5a5;">
+              ✕ Reject Approval
+            </button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div style="background: #ffffff; padding: 16px; text-align: center; border-radius: var(--radius-md); border: 1px dashed var(--border);">
+        <span style="color: var(--primary); font-weight: 700; font-size: 13px;">✓ All transactions have verified payment records.</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+</div>
+{% endif %}
+
+<div class="club-module" data-module="courts" data-title="Court Schedule" data-icon="🎾">
+{{ f.board(courts, true, members) }}
+
+<!-- Court Slot Maintenance & Block Tool -->
+<details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; margin-top: 20px;">
+  <summary style="font-size: 14px; font-weight: 700; color: #b45309; cursor: pointer;">
+    🛠️ Block Court Slot for Maintenance / Weather / Tournament
+  </summary>
+  <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+    <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 12px;">
+      Temporarily take a court out of service. Blocked slots will show as unavailable on member reservation boards.
+    </p>
+    {% call f.form('block_court','Block Court Slot') %}
+      <label>Select Court
+        <select name="court_id">
+          {% for c in courts %}
+            <option value="{{c.id}}">{{c.name}} ({{c.sport}} · {{c.kind}})</option>
+          {% endfor %}
+        </select>
+      </label>
+      {{f.field('start','Block Start Date & Time (IST)','datetime-local')}}
+      <label>Duration
+        <select name="duration">
+          <option value="1">1 Hour</option>
+          <option value="2">2 Hours</option>
+          <option value="4">Half Day (4 Hours)</option>
+          <option value="8">Full Day (8 Hours)</option>
+        </select>
+      </label>
+    {% endcall %}
+  </div>
+</details>
+</div>
+
+<div class="club-module" data-module="bookings" data-title="Active Bookings" data-icon="📅">
+{{ f.bookings(bookings) }}
+</div>
+
+<!-- CRM Prospective Lead Pipeline -->
+<div class="club-module" data-module="leads" data-title="CRM Leads Pipeline" data-icon="🎯">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Membership Sales</p>
+      <h2>Prospective Lead Pipeline</h2>
+    </div>
+    <span class="tag">{{leads|length}} Total Inquiries</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    {% for l in leads %}
+      <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px 20px; box-shadow: var(--shadow-xs);">
+        <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 14px;">
+          <span>
+            <b>{{l.name}}</b> &nbsp;·&nbsp; 
+            <small>{{l.email}}</small> &nbsp;·&nbsp;
+            <span class="tag" style="font-size: 11px;">{{l.stage}}</span>
+          </span>
+          {% if l.trial %}
+            <span class="warn" style="font-size: 11px; padding: 2px 8px;">★ Trial Requested</span>
+          {% endif %}
+        </summary>
+
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <p style="font-size: 13px; color: var(--slate-700); margin-bottom: 14px;">
+            <b>Prospect Interest:</b> {{l.interest}}
+          </p>
+
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
+            {% if l.stage!='Converted' %}
+              {% call f.form('lead_stage','Advance Lead Pipeline Stage') %}
+                <input type="hidden" name="id" value="{{l.id}}">
+                {{f.select('stage','Advance to Next Stage',[{'New':'Contacted','Contacted':'Quote Sent','Quote Sent':'Converted'}[l.stage]])}}
+              {% endcall %}
+            {% endif %}
+
+            {% if l.trial and not l.booking_id %}
+              <div style="background: var(--slate-50); padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border); width: 100%; margin-top: 10px;">
+                <h4 style="font-size: 13px; margin-bottom: 10px; color: var(--primary);">Confirm Complimentary Court Trial</h4>
+                {% call f.form('trial','Confirm trial reservation') %}
+                  <input type="hidden" name="lead_id" value="{{l.id}}">
+                  {{f.memberpick(members)}}
+                  <label>Assign Court
+                    <select name="court_id">
+                      {% for c in courts %}
+                        <option value="{{c.id}}">{{c.name}} ({{c.sport}})</option>
+                      {% endfor %}
+                    </select>
+                  </label>
+                  {{f.field('start','Trial Start (IST)','datetime-local')}}
+                  {{f.mode()}}
+                {% endcall %}
+              </div>
+            {% elif l.booking_id %}
+              <span class="tag" style="margin-top: 8px;">✓ Trial Confirmed (Reservation #{{l.booking_id}})</span>
+            {% endif %}
+          </div>
+        </div>
+      </details>
+    {% else %}
+      <p style="color: var(--slate-400); font-size: 13px;">No inquiries in the lead pipeline.</p>
+    {% endfor %}
+  </div>
+</section>
+</div>

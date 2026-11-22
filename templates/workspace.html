@@ -1,1 +1,175 @@
-{% extends 'base.html' %}{% import 'macros.html' as f %}{% block body %}<div class="mast"><p class="eyebrow">The Champions Club / {{user.role}}</p><h1>{% block heading %}{% endblock %}</h1><p>{{user.name}} · {{now().strftime('%A, %d %B %Y')}}</p></div><div class="workspace">{% block panels %}{% endblock %}{{f.ledger(sales)}}{% if user.role not in ('member','owner') %}<details class="panel"><summary>My shifts and leave</summary>{% for x in user.shifts %}<p>{{x.start}} — {{x.end}}</p>{% endfor %}{% call f.form('leave','Request leave') %}{{f.field('start','From','date')}}{{f.field('end','Until','date')}}{{f.field('reason','Reason')}}{% endcall %}{% for leave in my_leaves %}<p>{{leave.start}} ? {{leave.end}} ? {{leave.status}}</p>{% endfor %}</details>{% endif %}</div>{% endblock %}
+{% extends 'base.html' %}
+{% import 'macros.html' as f %}
+
+{% block body %}
+<!-- Executive Clubhouse Masthead -->
+<div class="mast">
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <p class="eyebrow">The Champions Club / {{user.role|title}} Workspace</p>
+      <h1>{% block heading %}{% endblock %}</h1>
+      <p>
+        Signed in as <b>{{user.name}}</b> &nbsp;·&nbsp; {{now().strftime('%A, %d %B %Y')}} &nbsp;·&nbsp; 
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: rgba(255, 255, 255, 0.15); padding: 2px 10px; border-radius: var(--radius-full); font-size: 11px;">
+          ● Operational IST: {{now().strftime('%H:%M')}}
+        </span>
+      </p>
+    </div>
+    
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span class="tag" style="background: rgba(254, 240, 138, 0.2); color: #fef08a; border-color: rgba(254, 240, 138, 0.4);">
+        Role: {{user.role|upper}}
+      </span>
+      {% if m is defined and m and m.tier %}
+        <span class="tag" style="background: rgba(16, 185, 129, 0.2); color: #a7f3d0; border-color: rgba(16, 185, 129, 0.4);">
+          Tier: {{effective(m)}}
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="workspace-layout">
+  <!-- Left Side Panel (Sidebar) -->
+  <aside class="workspace-sidebar" id="club-sidebar">
+    <div class="sidebar-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 18px;">🏛️</span>
+        <div>
+          <strong style="font-size: 13px; color: var(--slate-900); display: block;">{{user.role|title}} Modules</strong>
+          <small style="font-size: 11px; color: var(--slate-500);">Module Navigation</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dynamic Modules Navigation List -->
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- Populated dynamically by club.js based on .club-module elements -->
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer" style="margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 11px; color: var(--slate-500);">
+        <span><b>{{user.name}}</b></span>
+        <span class="tag" style="font-size: 9px; padding: 1px 6px;">{{user.role|upper}}</span>
+      </div>
+      <form data-action="logout" style="margin: 0;">
+        <button class="ghost" style="width: 100%; font-size: 11px; padding: 6px 10px; text-align: center;">
+          Sign Out ↪
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Right Main Content Area -->
+  <main class="workspace-main" id="workspace-main">
+    {% block panels %}{% endblock %}
+
+    {% if user.role in ('owner', 'desk') %}
+      <!-- Front Desk & Executive Ledger (Owner & Admin only) -->
+      <div class="club-module" data-module="ledger" data-title="Transaction Ledger" data-icon="📋">
+        {{ f.ledger(sales) }}
+      </div>
+    {% endif %}
+
+    <!-- Staff Shifts & Leave Management (For desk, bar, shop, physio) -->
+    {% if user.role not in ('member','owner') %}
+      <div class="club-module" data-module="roster" data-title="My Duty Roster & Leave" data-icon="📅">
+        <details class="panel" open>
+          <summary style="font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+            <span>📅 My Staff Duty Roster & Leave Requests</span>
+            <span class="tag">HR Portal</span>
+          </summary>
+
+          <div style="margin-top: 20px;">
+            <h3 style="font-size: 15px; margin-bottom: 10px;">Assigned Roster Shifts</h3>
+            {% for x in user.shifts %}
+              <div class="line" style="padding: 10px 0;">
+                <span>Shift #{{loop.index}}</span>
+                <span style="font-weight: 600; color: var(--primary);">{{x.start}} &nbsp;→&nbsp; {{x.end}}</span>
+              </div>
+            {% else %}
+              <p style="color: var(--slate-400); font-size: 13px;">No upcoming scheduled shifts.</p>
+            {% endfor %}
+
+            <h3 style="font-size: 15px; margin: 24px 0 10px 0;">Submit Time-Off Request</h3>
+            {% call f.form('leave','Submit Leave Request') %}
+              {{f.field('start','Leave Start Date','date')}}
+              {{f.field('end','Leave End Date','date')}}
+              {{f.field('reason','Purpose or Reason for Leave')}}
+            {% endcall %}
+
+            <h3 style="font-size: 15px; margin: 24px 0 10px 0;">Previous Leave Applications</h3>
+            {% for leave in my_leaves %}
+              <div class="line" style="padding: 10px 0;">
+                <div>
+                  <span>{{leave.start}} to {{leave.end}}</span>
+                  <small>{{leave.reason}}</small>
+                </div>
+                <span class="{{'tag' if leave.status=='Approved' else ('warn' if leave.status=='Pending' else 'ghost')}}">
+                  {{leave.status}}
+                </span>
+              </div>
+            {% else %}
+              <p style="color: var(--slate-400); font-size: 13px;">No leave requests filed.</p>
+            {% endfor %}
+          </div>
+        </details>
+      </div>
+    {% endif %}
+    <!-- Global User Profile & Security Module (Dedicated View - Hidden on Default Dashboard) -->
+    <div class="club-module club-module-profile" id="module-profile" data-module="profile" data-title="My Profile & Security" data-icon="👤" data-standalone="true" style="display: none;">
+      <section>
+        <div class="sectionhead">
+          <div>
+            <p class="eyebrow">Personal Account Settings</p>
+            <h2>My Profile & Security Settings</h2>
+          </div>
+          <span class="tag">● Active Session</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <!-- Profile Information -->
+          <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-xs);">
+            <h3 style="font-size: 15px; margin: 0 0 14px 0; color: var(--slate-900);">Account Details</h3>
+            
+            <div style="font-size: 13px; color: var(--slate-600); margin-bottom: 18px;">
+              <p style="margin: 0 0 6px 0;"><b>Full Name:</b> {{user.name}}</p>
+              <p style="margin: 0 0 6px 0;"><b>Registered Email:</b> {{user.email}}</p>
+              <p style="margin: 0 0 6px 0;"><b>Account Role:</b> <span class="tag" style="font-size: 10px; padding: 1px 6px;">{{user.role|upper}}</span></p>
+              {% if m is defined and m and m.tier %}
+                <p style="margin: 0 0 6px 0;"><b>Member ID:</b> #MEM-{{'%04d'|format(m.id)}} · #UID-{{user.id}}</p>
+                <p style="margin: 0 0 6px 0;"><b>Date of Birth:</b> {{m.dob}}</p>
+                <p style="margin: 0;"><b>Membership Tier:</b> <span class="tag" style="font-size: 10px; padding: 1px 6px;">{{effective(m)}} Tier</span></p>
+              {% endif %}
+            </div>
+
+            <form data-action="update_profile" class="fields">
+              <label>Update Display Name
+                <input name="name" type="text" value="{{user.name}}" required>
+              </label>
+              <button class="btn" style="font-size: 12px; padding: 8px 16px;">Save Profile Name</button>
+            </form>
+          </div>
+
+          <!-- Security / Change Password -->
+          <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 22px; box-shadow: var(--shadow-xs);">
+            <h3 style="font-size: 15px; margin: 0 0 14px 0; color: var(--slate-900);">Update Password</h3>
+            <p style="font-size: 12px; color: var(--slate-500); margin-bottom: 14px;">Ensure your account is protected with a secure password (min 8 characters).</p>
+            
+            <form data-action="change_password" class="fields">
+              <label>Current Password
+                <input name="current_password" type="password" placeholder="Enter current password" required minlength="8">
+              </label>
+              <label>New Secret Password
+                <input name="new_password" type="password" placeholder="Min 8 characters" required minlength="8">
+              </label>
+              <button class="ghost" style="font-size: 12px; padding: 8px 16px;">Update Password</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+{% endblock %}

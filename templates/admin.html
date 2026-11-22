@@ -1,1 +1,470 @@
-{% extends 'workspace.html' %}{% block heading %}Owner overview{% endblock %}{% block panels %}<section><div class="sectionhead"><h2>Financial overview</h2><div class="chips">{% for v,label in [('today','Today'),('week','This week'),('month','This month')] %}<a class="{{'btn' if v==period else 'ghost'}}" href="?period={{v}}">{{label}}</a>{% endfor %}</div></div><div class="cards">{% for label,v in [('Net revenue',stats.revenue),('Gross margin',stats.margin),('Tax recorded',stats.tax)] %}<article><small>{{label}}</small><h3>{{v|money}}</h3></article>{% endfor %}</div><div class="chart"><canvas id="revenue" data-values='{{stats.departments|tojson}}'></canvas></div><div class="catalog">{% for k,v in stats.departments.items() %}<div class="line"><span>{{k}}</span><b>{{v|money}}</b></div>{% endfor %}</div><div class="chips">{% for k,v in stats.modes.items() %}<span class="tag">{{k}} · {{v|money}}</span>{% endfor %}</div><a href="/report.csv?period={{period}}">Download sales CSV ↓</a></section><script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script><details class="panel"><summary>Members and staff</summary>{% call f.form('add_user','Create account') %}{{f.select('role','Role',['member','desk','bar','shop','physio'])}}{{f.field('name','Name')}}{{f.field('email','Email','email')}}{{f.field('password','Password','password')}}{{f.field('dob','DOB for member','date',false)}}{% endcall %}{% for x in users if x.role!='owner' %}<details><summary>{{x.name}} · {{x.role}} · {{'Active' if x.active else 'Archived'}}</summary>{% call f.form('edit_user','Save changes') %}<input type="hidden" name="id" value="{{x.id}}">{{f.field('name','Name','text',true,x.name)}}{{f.field('email','Email','email',true,x.email)}}{% if x.role=='member' %}{{f.field('dob','Date of birth','date',true,profiles[x.id].dob)}}{% endif %}{% if x.role!='member' %}{{f.select('role','Staff role',[x.role]+['desk','bar','shop','physio']|reject('equalto',x.role)|list)}}{% endif %}{{f.select('active','Active',['Yes','No'] if x.active else ['No','Yes'])}}{% endcall %}{% call f.form('archive','Archive account') %}<input type="hidden" name="id" value="{{x.id}}">{% endcall %}</details>{% endfor %}</details><details class="panel"><summary>HR and payroll</summary>{% macro staff() %}<label>Staff<select name="staff_id">{% for x in users if x.role!='member' and x.active %}<option value="{{x.id}}">{{x.name}} · {{x.role}}</option>{% endfor %}</select></label>{% endmacro %}{% call f.form('schedule','Schedule shift') %}{{staff()}}{{f.field('start','Start','datetime-local')}}{{f.field('end','End','datetime-local')}}{% endcall %}{% for x in users %}{% for h in x.shifts %}<p>{{x.name}} · {{h.start}} to {{h.end}}</p>{% endfor %}{% endfor %}<h3>Leave requests</h3>{% for l in leaves %}<p>Staff #{{l.staff_id}} · {{l.start}} to {{l.end}} · {{l.reason}} · {{l.status}}</p>{% if l.status=='Pending' %}{% call f.form('decide','Save decision') %}<input type="hidden" name="id" value="{{l.id}}">{{f.select('status','Decision',['Approved','Declined'])}}{% endcall %}{% endif %}{% endfor %}<h3>Payroll register</h3>{% call f.form('payroll','Record payroll') %}{{staff()}}{{f.field('period','Period','month')}}{{f.field('amount','Net pay ₹','number')}}{% endcall %}{% for p in payroll %}<p>{{p.period}} · Staff #{{p.staff_id}} · {{p.amount|money}}</p>{% endfor %}</details><details class="panel"><summary>Issue paid B2B invoice</summary>{% call f.form('invoice','Issue invoice') %}{{f.field('client','Business name')}}{{f.field('description','Service')}}{{f.field('amount','Subtotal ₹','number')}}{{f.field('tax','Tax ₹','number',true,'0')}}{{f.mode()}}{% endcall %}</details>{% for name,label in [('desk','Front desk'),('shop','Shop operations'),('bar','Café operations'),('physio','Physio operations')] %}<details class="panel"><summary>{{label}}</summary>{% include name+'_tools.html' %}</details>{% endfor %}{% endblock %}
+{% extends 'workspace.html' %}
+{% block heading %}Executive General Management{% endblock %}
+
+{% block panels %}
+<!-- Financial Analytics & Performance Section -->
+<div class="club-module" data-module="analytics" data-title="Financial Analytics" data-icon="📊">
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Financial Analytics</p>
+      <h2>Club Revenue & Yield Overview</h2>
+    </div>
+    <div class="chips">
+      {% for v,label in [('today','Today'),('week','This week'),('month','This month')] %}
+        <a class="{{'btn' if v==period else 'ghost'}}" href="?period={{v}}" style="font-size: 12px; padding: 6px 14px;">{{label}}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="cards">
+    {% for label,v,sub,clr in [
+      ('Net Revenue', stats.revenue, 'Excluding sales tax', 'var(--primary)'),
+      ('Gross Margin', stats.margin, 'Net revenue minus COGS', '#0284c7'),
+      ('Tax Recorded', stats.tax, 'GST / Local service levy', '#d97706')
+    ] %}
+      <article style="border-top: 4px solid {{clr}};">
+        <small>{{label}}</small>
+        <h3 style="color: {{clr}};">{{v|money}}</h3>
+        <p style="margin: 0; font-size: 12px; color: var(--slate-500);">{{sub}}</p>
+      </article>
+    {% endfor %}
+  </div>
+
+  <!-- Chart & Department Performance -->
+  <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin: 24px 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <strong style="font-size: 15px; color: var(--slate-900);">Departmental Revenue Breakdown</strong>
+      <span class="tag">Net Sales INR</span>
+    </div>
+    
+    <div class="chart">
+      <canvas id="revenue" data-values='{{stats.departments|tojson}}'></canvas>
+    </div>
+
+    <div class="catalog" style="margin-top: 20px;">
+      {% for k,v in stats.departments.items() %}
+        <div class="line" style="background: #ffffff; padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin: 0;">
+          <span style="font-weight: 600;">{{k}}</span>
+          <b style="color: var(--primary);">{{v|money}}</b>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 12px;">
+    <div class="chips">
+      <span style="font-size: 12px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Collections by Tender:</span>
+      {% for k,v in stats.modes.items() %}
+        <span class="tag" style="background: #ffffff; border-color: var(--border);">
+          <b>{{k}}</b>: {{v|money}}
+        </span>
+      {% endfor %}
+    </div>
+
+    <a class="ghost" href="/report.csv?period={{period}}" style="font-size: 13px;">
+      <span>Download Sales Audit CSV ↓</span>
+    </a>
+  </div>
+</section>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<!-- Dedicated Admin Payment Verification & Court Booking Approvals -->
+<div class="club-module" data-module="approvals" data-title="Payment Approvals" data-icon="💳">
+<section style="border: 2px solid var(--primary-light); background: linear-gradient(180deg, #ffffff 0%, #f4fbf7 100%);">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Financial Verification & Approvals</p>
+      <h2>Verify Payments & Confirm Court Bookings</h2>
+    </div>
+    <span class="tag">● Admin Authorization</span>
+  </div>
+
+  <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 20px;">
+    Review transactions, verify UPI/Card/Cash tenders against payment slips, and confirm court bookings and orders with an official admin audit record.
+  </p>
+
+  <!-- Pending Payment Verification Feed -->
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+      <h3 style="font-size: 15px; margin: 0; color: var(--slate-900);">
+        Transactions & Bookings Requiring Verification:
+      </h3>
+
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <form data-action="confirm_all_bookings" style="margin: 0;">
+          <button type="submit" class="btn" style="background: var(--primary); color: #ffffff; font-weight: 700; padding: 9px 16px; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: var(--shadow-sm); cursor: pointer;">
+            <span>✓</span> Confirm All Bookings
+          </button>
+        </form>
+
+        <form data-action="reject_all_bookings" style="margin: 0;">
+          <input type="hidden" name="reason" value="Bulk declined by administrator">
+          <button type="submit" class="ghost" style="color: #dc2626; border-color: #fca5a5; background: #fff5f5; font-weight: 700; padding: 9px 16px; font-size: 12px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+            <span>✕</span> Reject All Bookings
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% for s in all_sales if not s.details.get('payment_verified') %}
+      <div class="line" style="background: #ffffff; padding: 16px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-xs);">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <a href="/receipt/{{s.id}}" style="font-weight: 800; font-size: 15px; color: var(--primary);">
+              Receipt CC-{{'%05d'|format(s.id)}} ↗
+            </a>
+            <span class="tag" style="font-size: 11px;">{{s.department}}</span>
+            <span class="pending-badge">⏳ Unverified Payment</span>
+          </div>
+          <small style="color: var(--slate-600); display: block;">
+            Issued: {{s.created.strftime('%d %b, %H:%M IST')}} &nbsp;·&nbsp; 
+            Tender: <b>{{s.mode}}</b> 
+            {% if s.details.get('payment_ref') %} &nbsp;·&nbsp; <b>Reference/UTR:</b> <span style="color: var(--primary);">{{s.details.payment_ref}}</span>{% endif %}
+            &nbsp;·&nbsp; Total: <b style="color: var(--primary); font-size: 14px;">{{s.total|money}}</b>
+          </small>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <form data-action="verify_payment" style="margin: 0;">
+            <input type="hidden" name="id" value="{{s.id}}">
+            <input type="hidden" name="notes" value="Verified by Club General Manager">
+            <button class="btn" style="font-size: 12px; padding: 8px 14px;">
+              ✓ Verify & Approve
+            </button>
+          </form>
+
+          <form data-action="reject_payment" style="margin: 0;">
+            <input type="hidden" name="id" value="{{s.id}}">
+            <input type="hidden" name="reason" value="Payment verification declined by administrator">
+            <button class="ghost" style="font-size: 12px; padding: 8px 14px; color: #dc2626; border-color: #fca5a5;">
+              ✕ Reject Approval
+            </button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div style="background: #ffffff; padding: 20px; text-align: center; border-radius: var(--radius-md); border: 1px dashed var(--border);">
+        <span style="color: var(--primary); font-weight: 700;">✓ All recorded transactions currently have verified payment statuses.</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Direct Court Booking with Upfront Payment Verification by Admin -->
+  <details style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px 20px;">
+    <summary style="font-size: 15px; font-weight: 700; color: var(--primary);">
+      ⚡ Admin Direct Court Booking (With Upfront Payment Verification)
+    </summary>
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+      <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 12px;">
+        Book a court on behalf of any member after verifying cash, card, or UPI payment received at the desk:
+      </p>
+      {% call f.form('book','Verify Payment & Book Court') %}
+        {{f.memberpick(members)}}
+        <label>Select Court
+          <select name="court_id">
+            {% for c in courts %}
+              <option value="{{c.id}}">{{c.name}} ({{c.sport}} · {{c.kind}})</option>
+            {% endfor %}
+          </select>
+        </label>
+        {{f.field('start','Play Start Time (IST)','datetime-local')}}
+        <label>Payment Mode Verified
+          <select name="mode">
+            <option>Cash</option>
+            <option>UPI</option>
+            <option>Card</option>
+          </select>
+        </label>
+        {{f.field('payment_ref','Cash Receipt Slip / UPI Reference #','text',false)}}
+        <input type="hidden" name="verified" value="1">
+      {% endcall %}
+    </div>
+  </details>
+</section>
+</div>
+
+<!-- Account & Member Administration -->
+<div class="club-module" data-module="accounts" data-title="Accounts Directory" data-icon="👥">
+<details class="panel" open>
+  <summary style="font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+    <span>👥 Club Accounts Directory ({{users|length}} accounts)</span>
+    <span class="tag">Members & Staff Directory</span>
+  </summary>
+
+  <div style="margin-top: 20px;">
+    <!-- Universal Account Search Bar -->
+    <div style="background: var(--slate-50); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 20px;">
+      <input id="admin-user-search" type="search" placeholder="🔍 Search accounts by Name, Email, Unique ID (#MEM-X, #UID-X, #STF-X), or Subscription Tier..." style="width: 100%; background: #ffffff;">
+    </div>
+
+    <!-- Segment 1: All Club Members with Subscription Tiers & Unique IDs -->
+    <div style="margin-bottom: 32px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+        <div>
+          <h3 style="font-size: 16px; margin: 0; color: var(--slate-900);">Club Members List (With Subscription Tier)</h3>
+          <small style="color: var(--slate-500);">All registered members with unique Member IDs, User IDs, and active plan types.</small>
+        </div>
+        <div class="chips" style="gap: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Tier Filter:</span>
+          <button type="button" class="cat-pill active" data-member-tier="All">All Tiers</button>
+          <button type="button" class="cat-pill" data-member-tier="Gold">★ Gold</button>
+          <button type="button" class="cat-pill" data-member-tier="Silver">Silver</button>
+          <button type="button" class="cat-pill" data-member-tier="Junior">Junior</button>
+          <button type="button" class="cat-pill" data-member-tier="Free">Free</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;" id="admin-members-list">
+        {% for x in users if x.role=='member' %}
+          {% set prof = profiles.get(x.id) %}
+          {% set tier = effective(prof) if prof else 'Free' %}
+          <details class="admin-member-row" data-tier="{{tier}}" data-name="{{x.name}}" data-email="{{x.email}}" data-id="{{x.id}}" data-mem-id="{{prof.id if prof else ''}}" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; box-shadow: var(--shadow-xs);">
+            <summary style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px;">
+              <div>
+                <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: var(--primary); background: var(--primary-subtle); padding: 2px 8px; border-radius: var(--radius-full); margin-right: 6px;">
+                  #MEM-{{prof.id if prof else 'N/A'}} · #UID-{{x.id}}
+                </span>
+                <b>{{x.name}}</b> &nbsp;·&nbsp;
+                <small>{{x.email}}</small>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="{{'tag' if tier=='Gold' else ('tag' if tier=='Silver' else ('warn' if tier=='Junior' else 'ghost'))}}" style="font-size: 11px; font-weight: 700;">
+                  {{tier}} Subscription
+                </span>
+                <span class="{{'tag' if x.active else 'warn'}}" style="font-size: 10px; padding: 2px 8px;">
+                  {{'Active' if x.active else 'Archived'}}
+                </span>
+              </div>
+            </summary>
+
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+              <div style="display: flex; gap: 16px; font-size: 12px; color: var(--slate-600); margin-bottom: 12px; flex-wrap: wrap;">
+                <span><b>Unique Member ID:</b> #MEM-{{prof.id if prof else 'N/A'}}</span>
+                <span><b>Unique User ID:</b> #UID-{{x.id}}</span>
+                <span><b>DOB:</b> {{prof.dob if prof else 'N/A'}}</span>
+                <span><b>Subscription Horizon:</b> {{prof.expiry if prof and prof.expiry else 'Lifetime Free'}}</span>
+              </div>
+
+              {% call f.form('edit_user','Save Account Changes') %}
+                <input type="hidden" name="id" value="{{x.id}}">
+                {{f.field('name','Full Name','text',true,x.name)}}
+                {{f.field('email','Email Address','email',true,x.email)}}
+                {% if prof %}
+                  {{f.field('dob','Date of Birth','date',true,prof.dob)}}
+                {% endif %}
+                {{f.select('active','Account Active Status',['Yes','No'] if x.active else ['No','Yes'])}}
+              {% endcall %}
+
+              <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                {% if prof %}
+                  <a href="/upgrade/bill?member_id={{prof.id}}&tier=Gold" class="btn" style="font-size: 11px; padding: 6px 14px; background: var(--primary);">
+                    ★ Upgrade Plan & Bill →
+                  </a>
+                {% else %}
+                  <div></div>
+                {% endif %}
+                {% call f.form('archive','Archive / Suspend Account') %}
+                  <input type="hidden" name="id" value="{{x.id}}">
+                {% endcall %}
+              </div>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Segment 2: Staff Member Directory with Department Role Filtering -->
+    <div>
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+        <div>
+          <h3 style="font-size: 16px; margin: 0; color: var(--slate-900);">Club Staff Directory</h3>
+          <small style="color: var(--slate-500);">All operational club employees filtered by department role.</small>
+        </div>
+        <div class="chips" style="gap: 6px;">
+          <span style="font-size: 11px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Role Filter:</span>
+          <button type="button" class="cat-pill active" data-staff-role="All">All Staff</button>
+          <button type="button" class="cat-pill" data-staff-role="desk">Front Desk</button>
+          <button type="button" class="cat-pill" data-staff-role="shop">Pro Shop</button>
+          <button type="button" class="cat-pill" data-staff-role="bar">Café & Bar</button>
+          <button type="button" class="cat-pill" data-staff-role="physio">Physiotherapy</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;" id="admin-staff-list">
+        {% for x in users if x.role!='member' and x.role!='owner' %}
+          <details class="admin-staff-row" data-role="{{x.role}}" data-name="{{x.name}}" data-email="{{x.email}}" data-id="{{x.id}}" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px 18px; box-shadow: var(--shadow-xs);">
+            <summary style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px;">
+              <div>
+                <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #1e40af; background: #dbeafe; padding: 2px 8px; border-radius: var(--radius-full); margin-right: 6px;">
+                  #STF-{{x.id}}
+                </span>
+                <b>{{x.name}}</b> &nbsp;·&nbsp;
+                <small>{{x.email}}</small>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="tag" style="font-size: 11px; font-weight: 700;">
+                  {{x.role|title}} Department
+                </span>
+                <span class="{{'tag' if x.active else 'warn'}}" style="font-size: 10px; padding: 2px 8px;">
+                  {{'Active' if x.active else 'Archived'}}
+                </span>
+              </div>
+            </summary>
+
+            <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+              <div style="display: flex; gap: 16px; font-size: 12px; color: var(--slate-600); margin-bottom: 12px; flex-wrap: wrap;">
+                <span><b>Unique Staff ID:</b> #STF-{{x.id}}</span>
+                <span><b>Assigned Department:</b> {{x.role|title}}</span>
+                <span><b>Rostered Shifts:</b> {{x.shifts|length}} shifts</span>
+              </div>
+
+              {% call f.form('edit_user','Save Staff Role Changes') %}
+                <input type="hidden" name="id" value="{{x.id}}">
+                {{f.field('name','Full Name','text',true,x.name)}}
+                {{f.field('email','Email Address','email',true,x.email)}}
+                {{f.select('role','Reassign Staff Role',[x.role]+['desk','bar','shop','physio']|reject('equalto',x.role)|list)}}
+                {{f.select('active','Account Active Status',['Yes','No'] if x.active else ['No','Yes'])}}
+              {% endcall %}
+
+              <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                {% call f.form('archive','Archive / Suspend Staff') %}
+                  <input type="hidden" name="id" value="{{x.id}}">
+                {% endcall %}
+              </div>
+            </div>
+          </details>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Create New Account Form -->
+    <details style="margin-top: 24px; background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px 20px;">
+      <summary style="font-size: 15px; font-weight: 700; color: var(--primary);">
+        ➕ Provision New Member or Staff Account
+      </summary>
+      <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+        {% call f.form('add_user','Provision Account') %}
+          {{f.select('role','Account Role',['member','desk','bar','shop','physio'])}}
+          {{f.field('name','Full Name')}}
+          {{f.field('email','Email Address','email')}}
+          {{f.field('password','Default Password','password')}}
+          {{f.field('dob','Date of Birth (Required if Member)','date',false)}}
+        {% endcall %}
+      </div>
+    </details>
+  </div>
+</details>
+</div>
+
+<!-- HR, Scheduling & Payroll -->
+<div class="club-module" data-module="hr" data-title="Staff HR & Payroll" data-icon="👔">
+<details class="panel" open>
+  <summary style="font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+    <span>📋 Human Resources, Staff Roster & Payroll</span>
+    <span class="tag">Operations</span>
+  </summary>
+
+  <div style="margin-top: 20px;">
+    {% macro staff() %}
+      <label>Staff Member
+        <select name="staff_id">
+          {% for x in users if x.role!='member' and x.active %}
+            <option value="{{x.id}}">{{x.name}} · {{x.role|title}}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endmacro %}
+
+    <h3 style="font-size: 15px; margin-bottom: 12px;">Assign Staff Roster Shift</h3>
+    {% call f.form('schedule','Schedule Shift') %}
+      {{staff()}}
+      {{f.field('start','Shift Start (IST)','datetime-local')}}
+      {{f.field('end','Shift End (IST)','datetime-local')}}
+    {% endcall %}
+
+    <div style="margin: 20px 0;">
+      <h4 style="font-size: 13px; color: var(--slate-500); text-transform: uppercase;">Active Rostered Shifts:</h4>
+      {% for x in users %}
+        {% for h in x.shifts %}
+          <div class="line" style="padding: 8px 0;">
+            <span><b>{{x.name}}</b> ({{x.role|title}})</span>
+            <small>{{h.start}} to {{h.end}}</small>
+          </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <h3 style="font-size: 15px; margin: 28px 0 12px 0;">Staff Leave Requests</h3>
+    {% for l in leaves %}
+      <div class="line" style="background: var(--slate-50); padding: 12px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 8px;">
+        <div>
+          <span>Staff #{{l.staff_id}} &nbsp;·&nbsp; {{l.start}} to {{l.end}}</span>
+          <small>Reason: {{l.reason}}</small>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="{{'tag' if l.status=='Approved' else ('warn' if l.status=='Pending' else 'ghost')}}">
+            {{l.status}}
+          </span>
+          {% if l.status=='Pending' %}
+            {% call f.form('decide','Save Decision') %}
+              <input type="hidden" name="id" value="{{l.id}}">
+              {{f.select('status','Decision',['Approved','Declined'])}}
+            {% endcall %}
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <p style="color: var(--slate-400); font-size: 13px;">No leave requests pending.</p>
+    {% endfor %}
+
+    <h3 style="font-size: 15px; margin: 28px 0 12px 0;">Payroll Compensation Register</h3>
+    {% call f.form('payroll','Record Staff Payroll') %}
+      {{staff()}}
+      {{f.field('period','Billing Period (YYYY-MM)','month')}}
+      {{f.field('amount','Net Disbursed Amount (₹)','number')}}
+    {% endcall %}
+
+    <div style="margin-top: 16px;">
+      {% for p in payroll %}
+        <div class="line" style="padding: 10px 0;">
+          <span>Period: <b>{{p.period}}</b> &nbsp;·&nbsp; Staff #{{p.staff_id}}</span>
+          <b style="color: var(--primary);">{{p.amount|money}}</b>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</details>
+</div>
+
+<!-- Corporate B2B Invoicing -->
+<div class="club-module" data-module="b2b" data-title="Corporate Invoicing" data-icon="🏢">
+<details class="panel" open>
+  <summary style="font-size: 16px; display: flex; align-items: center; justify-content: space-between;">
+    <span>🏢 Issue Corporate B2B Service Invoice</span>
+    <span class="tag">Billing</span>
+  </summary>
+
+  <div style="margin-top: 20px;">
+    <p style="font-size: 13px; color: var(--slate-600);">Generate an official paid B2B invoice for corporate court hires, brand sponsorships, or bulk partner services.</p>
+    {% call f.form('invoice','Issue & Settle B2B Invoice') %}
+      {{f.field('client','Corporate Client / Entity Name')}}
+      {{f.field('description','Detailed Service Description')}}
+      {{f.field('amount','Subtotal Amount (₹)','number')}}
+      {{f.field('tax','Tax / GST Amount (₹)','number',true,'0')}}
+      {{f.mode()}}
+    {% endcall %}
+  </div>
+</details>
+</div>
+
+<!-- Subsystem Operations Tools (Direct Un-nested Modules) -->
+{% include 'desk_tools.html' %}
+{% include 'shop_tools.html' %}
+{% include 'bar_tools.html' %}
+{% include 'physio_tools.html' %}
+{% endblock %}

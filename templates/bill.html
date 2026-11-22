@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}Pro-Forma Membership Bill · The Champions Club{% endblock %}
+
+{% block body %}
+<section class="invoice" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); padding: 44px; max-width: 720px; margin: 32px auto; position: relative;">
+  
+  <!-- Back Link -->
+  <div style="margin-bottom: 24px;" class="no-print">
+    <a class="ghost" href="/dashboard" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+      <span>←</span> Return to Dashboard
+    </a>
+  </div>
+
+  <!-- Official Crest & Club Header -->
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid var(--slate-900); padding-bottom: 24px; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <span class="crest" style="width: 36px; height: 36px; font-size: 18px;">C<span>C</span></span>
+        <div>
+          <strong style="font-size: 20px; color: var(--slate-900); letter-spacing: -0.02em; display: block;">The Champions Club</strong>
+          <small style="color: var(--slate-500); font-size: 11px;">Athletic Sanctuary & Private Sports Clubhouse · New Delhi</small>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: right;">
+      <p class="eyebrow" style="margin: 0; justify-content: flex-end;">Official Pro-Forma Invoice</p>
+      <h1 style="font-size: 24px; margin: 2px 0 0 0; color: var(--primary);">Membership Bill</h1>
+      <span style="font-family: monospace; font-size: 12px; font-weight: 700; color: var(--slate-600);">
+        Ref: {{bill_ref}}
+      </span>
+    </div>
+  </div>
+
+  <!-- Customer Account & Horizon Summary -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; background: var(--slate-50); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 28px;">
+    <div>
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Billed Member</small>
+      <strong style="font-size: 15px; color: var(--slate-900);">{{target_user.name}}</strong>
+      <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-600);">
+        Member ID: <b style="color: var(--primary);">#MEM-{{'%04d'|format(m.id)}}</b> &nbsp;·&nbsp; User: <b>#UID-{{target_user.id}}</b>
+      </p>
+      <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-500);">Email: {{target_user.email}}</p>
+    </div>
+
+    <div>
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Billing Horizon & Plan</small>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="{{'tag' if tier=='Gold' else ('tag' if tier=='Silver' else 'warn')}}" style="font-size: 12px; font-weight: 800;">
+          {{tier}} Tier Pass
+        </span>
+        <span style="font-size: 12px; color: var(--slate-600);">30 Days Validity</span>
+      </div>
+      <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--slate-600);">
+        Coverage: <b>{{today.strftime('%d %b %Y')}}</b> to <b>{{end.strftime('%d %b %Y')}}</b>
+      </p>
+      <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-500);">Date of Issue: {{today.strftime('%d %B %Y')}}</p>
+    </div>
+  </div>
+
+  <!-- Plan Privileges Breakdown -->
+  <div style="background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 24px;">
+    <strong style="font-size: 14px; color: var(--primary); display: block; margin-bottom: 8px;">
+      ★ Included Privileges with {{tier}} Membership:
+    </strong>
+    <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: var(--slate-700); line-height: 1.6;">
+      {% if tier == 'Gold' %}
+        <li><b>100% Complimentary Court Bookings:</b> Free access to Tennis, Padel, Badminton, and Cricket Nets.</li>
+        <li><b>15% Member Discount:</b> Applies automatically on all Pro Shop equipment & Club Café orders.</li>
+        <li><b>Priority Match Scheduling:</b> Advance reservation window up to 90 days ahead.</li>
+      {% elif tier == 'Silver' %}
+        <li><b>50% Court Subsidy:</b> Half-price court sessions on all surfaces.</li>
+        <li><b>10% Member Discount:</b> Applies on all Pro Shop equipment & Club Café orders.</li>
+        <li><b>Standard Advance Window:</b> Booking privileges across all courts.</li>
+      {% else %}
+        <li><b>30% Court Subsidy:</b> Junior development subsidy for rising athletes under 18.</li>
+        <li><b>5% Member Discount:</b> Applies on all Pro Shop equipment & Club Café orders.</li>
+        <li><b>Youth Coaching & Programs:</b> Access to junior clinical workshops.</li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <!-- Itemized Charges Table -->
+  <div style="margin-bottom: 24px;">
+    <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate-500); margin-bottom: 12px;">Itemized Charges</h3>
+    
+    <div class="line" style="padding: 14px 0; border-bottom: 1px solid var(--border);">
+      <div>
+        <strong style="font-size: 15px; color: var(--slate-900);">
+          {{tier}} Membership Privilege Plan (30-Day Pass)
+        </strong>
+        <small style="display: block; color: var(--slate-500); margin-top: 2px;">
+          Valid: {{today.strftime('%d %b %Y')}} – {{end.strftime('%d %b %Y')}} &nbsp;·&nbsp; Recipient: {{target_user.name}} (#MEM-{{m.id}})
+        </small>
+      </div>
+      <b style="font-size: 16px; color: var(--slate-900);">{{price|money}}</b>
+    </div>
+  </div>
+
+  <!-- Tax & Total Settlement -->
+  <div style="border-top: 1px dashed var(--slate-300); padding-top: 16px; margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--slate-600); margin-bottom: 6px;">
+      <span>Subtotal:</span>
+      <span>{{price|money}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--slate-600); margin-bottom: 6px;">
+      <span>GST / Levies (Included):</span>
+      <span style="color: var(--primary);">₹0.00</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--slate-900); padding-top: 14px; margin-top: 12px;">
+      <span style="font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;">Total Amount Due:</span>
+      <h2 style="font-size: 30px; color: var(--primary); margin: 0; font-weight: 800;">{{price|money}}</h2>
+    </div>
+  </div>
+
+  <!-- Payment Authorization & Confirmation Form -->
+  <div style="background: var(--slate-50); border: 2px solid var(--primary-light); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+      <h3 style="font-size: 16px; margin: 0; color: var(--slate-900);">Confirm Payment & Activate Tier</h3>
+      <span class="tag">Secure Authorization</span>
+    </div>
+
+    <form data-action="upgrade" style="display: flex; flex-direction: column; gap: 16px; margin: 0;">
+      <input type="hidden" name="tier" value="{{tier}}">
+      <input type="hidden" name="member_id" value="{{m.id}}">
+
+      <label style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
+        Payment Method
+        <select name="mode" style="width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; background: #ffffff;">
+          <option value="UPI" {% if mode=='UPI' %}selected{% endif %}>UPI (Google Pay, PhonePe, Paytm, BHIM)</option>
+          <option value="Card" {% if mode=='Card' %}selected{% endif %}>Credit / Debit Card</option>
+          <option value="Cash" {% if mode=='Cash' %}selected{% endif %}>Cash at Concierge Desk</option>
+        </select>
+      </label>
+
+      <div id="upi-pay-box" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div style="background: #ffffff; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&margin=4&data=upi%3A%2F%2Fpay%3Fpa%3Dchampionsclub%40icici%26pn%3DThe%2520Champions%2520Club%26am%3D{{'%.2f'|format(price/100)}}%26cu%3DINR%26tn%3D{{tier}}%2520Plan%2520Upgrade" alt="Scan to Pay UPI QR Code" width="130" height="130" style="display: block; border-radius: 4px;">
+          <small style="font-size: 10px; color: var(--slate-500); display: block; margin-top: 4px; font-weight: 700;">Scan with any UPI App</small>
+        </div>
+
+        <div style="flex: 1; min-width: 200px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 700; color: var(--slate-600); text-transform: uppercase;">Official Club UPI VPA</span>
+            <span class="tag" style="font-size: 10px; padding: 2px 6px;">Instant Authorization</span>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; background: var(--slate-50); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 8px;">
+            <code style="font-size: 13px; font-weight: 800; color: var(--primary);" id="vpa-text">championsclub@icici</code>
+            <button type="button" class="ghost" onclick="navigator.clipboard.writeText('championsclub@icici'); this.textContent='✓ Copied!'; setTimeout(()=>this.textContent='Copy', 2000)" style="font-size: 11px; padding: 2px 8px; margin-left: auto;">
+              Copy
+            </button>
+          </div>
+
+          <p style="font-size: 12px; color: var(--slate-500); margin: 0 0 10px 0;">
+            Payee: <b>The Champions Club Ltd.</b> &nbsp;·&nbsp; Amount: <b style="color: var(--primary);">{{price|money}}</b>
+          </p>
+
+          <a href="upi://pay?pa=championsclub@icici&pn=The%20Champions%20Club&am={{'%.2f'|format(price/100)}}&cu=INR&tn={{tier}}%20Membership" class="btn" style="font-size: 12px; padding: 6px 14px; background: #0284c7; display: inline-flex; align-items: center; gap: 6px;">
+            📱 Pay Directly via UPI App
+          </a>
+        </div>
+      </div>
+
+      <label style="font-size: 13px; font-weight: 700; color: var(--slate-700);">
+        Payment Reference / UTR Number (Optional)
+        <input name="payment_ref" type="text" placeholder="e.g. UPI Ref #419201928301 or Card Auth #8821" style="width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 14px; background: #ffffff;">
+      </label>
+
+      <div style="margin-top: 8px;">
+        <button type="submit" class="btn" style="width: 100%; padding: 14px 24px; font-size: 16px; font-weight: 800; background: var(--primary); color: #ffffff; border-radius: var(--radius-md); box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;">
+          <span>✓</span> Confirm & Complete Payment ({{price|money}})
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div style="text-align: center;" class="no-print">
+    <a href="/dashboard" style="font-size: 13px; color: var(--slate-500); text-decoration: underline;">
+      Cancel upgrade and return to clubhouse
+    </a>
+  </div>
+
+</section>
+{% endblock %}

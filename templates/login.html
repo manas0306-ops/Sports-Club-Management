@@ -1,23 +1,130 @@
-{% extends 'base.html' %}{% import 'macros.html' as f %}{% block body %}
+{% extends 'base.html' %}
+{% import 'macros.html' as f %}
+
+{% block body %}
 <div class="auth">
-    <div>
-        <p class="eyebrow">Club access</p>
-        <h1>Welcome <em>back.</em></h1>
-        <p>Sign in to your club workspace.</p>
+  <div style="text-align: center; margin-bottom: 28px;">
+    <div style="display: inline-flex; margin-bottom: 12px;">
+      <span class="crest" style="width: 48px; height: 48px; font-size: 26px;">C<span>C</span></span>
+    </div>
+    <p class="eyebrow" style="justify-content: center;">Club Sanctuary Access</p>
+    <h1>Welcome <em>to The Champions Club.</em></h1>
+    <p>Sign in to your member clubhouse or register your new athletic account.</p>
+  </div>
+
+  <section style="background: #ffffff; border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); padding: 36px;">
+    <!-- Tab Switcher -->
+    <div class="auth-tabs" id="auth-tab-bar">
+      <button type="button" class="auth-tab-btn active" id="tab-btn-login" onclick="setAuthTab('login')">
+        🔑 Member Sign In
+      </button>
+      <button type="button" class="auth-tab-btn" id="tab-btn-register" onclick="setAuthTab('register')">
+        ✨ Join The Club (Sign Up)
+      </button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div id="auth-panel-login">
+      <div class="sectionhead" style="margin-bottom: 20px;">
+        <div>
+          <h2 style="font-size: 20px; margin: 0;">Member & Staff Sign In</h2>
+          <small style="color: var(--slate-500);">Direct access to your personalized portal</small>
+        </div>
+        <span class="tag">● Secure Session</span>
+      </div>
+
+      <!-- Sign In Form -->
+      {% call f.form('login','Enter Workspace →') %}
+        {{f.field('email','Email Address','email')}}
+        {{f.field('password','Account Password','password')}}
+      {% endcall %}
+
+      <!-- Demo Persona Fast Login -->
+      <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--primary);">
+            ⚡ Instant Demo Credentials
+          </span>
+          <small style="color: var(--slate-500);">Password: <b>password123</b></small>
+        </div>
+
+        <div class="chips" style="gap: 8px;">
+          {% for role,label,color in [
+            ('owner','Owner / General Manager','#064e3b'),
+            ('desk','Front Desk Reception','#0284c7'),
+            ('bar','Café & Bar POS','#d97706'),
+            ('shop','Pro Shop Manager','#7c3aed'),
+            ('physio','Lead Sports Physio','#059669'),
+            ('gold','Gold Member (VIP)','#b48c26'),
+            ('silver','Silver Member','#475569'),
+            ('free','Free Member','#64748b')
+          ] %}
+            <button type="button" class="ghost" data-login="{{role}}@club.com" title="Sign in as {{label}}" style="font-size: 11px; padding: 6px 12px; border-radius: var(--radius-full);">
+              <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {{color}};"></span>
+              {{role}}@club.com
+            </button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div id="auth-panel-register" style="display: none;">
+      <div class="sectionhead" style="margin-bottom: 20px;">
+        <div>
+          <h2 style="font-size: 20px; margin: 0;">Create Member Account</h2>
+          <small style="color: var(--slate-500);">Instant setup with lifetime Free membership tier</small>
+        </div>
+        <span class="tag">● Free Registration</span>
+      </div>
+
+      <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 18px;">
+        Begin your journey today. Once registered, you will be taken directly into your member dashboard where you can book court slots, order tour gear, and upgrade your membership tier anytime.
+      </p>
+
+      {% call f.form('register','Create Account & Enter Dashboard →') %}
+        {{f.reg()}}
+      {% endcall %}
+
+      <div style="margin-top: 20px; padding: 14px 16px; background: var(--primary-subtle); border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.25);">
+        <small style="color: var(--primary-dark); font-weight: 600; display: block;">
+          ★ Want Gold, Silver, or Junior privileges?
+        </small>
+        <span style="font-size: 12px; color: var(--slate-600);">
+          Your account is activated instantly with standard privileges. You can complete upgrade & bill payment with 1-click inside your dashboard.
+        </span>
+      </div>
+    </div>
+  </section>
 </div>
-    <section>
-        <h2>Sign in</h2>
-        <a class="btn" href="/login">Member sign in ↗</a>
-        {% call f.form('login','Sign in →') %}{{f.field('email','Email','email')}}{{f.field('password','Password','password')}}{% endcall %}<details>
-        <summary>Demo credentials</summary>
-        <p>Password for every demo account: <b>password123</b></p>
-        <div class="chips">{% for role in ['owner','desk','bar','shop','physio','silver','gold','free'] %}
-    <button class="ghost" data-login="{{role}}@club.com">{{role}}@club.com</button>{% endfor %}
-</div>
-</details>
-</section>
-    <details class="panel" {% if request.query_params.get('signup') %}open{% endif %}>
-    <summary>Create a Free membership</summary>
-    {% call f.form('register','Create account') %}{{f.reg()}}{% endcall %}
-</details>
-</div>{% endblock %}
+
+<script>
+  function setAuthTab(tab) {
+    const loginPanel = document.getElementById('auth-panel-login');
+    const regPanel = document.getElementById('auth-panel-register');
+    const loginBtn = document.getElementById('tab-btn-login');
+    const regBtn = document.getElementById('tab-btn-register');
+
+    if (tab === 'register') {
+      loginPanel.style.display = 'none';
+      regPanel.style.display = 'block';
+      loginBtn.classList.remove('active');
+      regBtn.classList.add('active');
+      if (history.replaceState) history.replaceState(null, null, '?signup=true');
+    } else {
+      loginPanel.style.display = 'block';
+      regPanel.style.display = 'none';
+      loginBtn.classList.add('active');
+      regBtn.classList.remove('active');
+      if (history.replaceState) history.replaceState(null, null, '/login');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signup') || window.location.hash === '#signup' || window.location.hash === '#register') {
+      setAuthTab('register');
+    }
+  });
+</script>
+{% endblock %}

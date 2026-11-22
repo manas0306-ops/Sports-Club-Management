@@ -1,19 +1,70 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{% block title %}The Champions Club{% endblock %}</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
-    <script defer src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
-    <link rel="stylesheet" href="/static/club.css"><script defer src="/static/club.js"></script>
-</head><body data-expiry="{{m.expiry if m is defined and m and m.expiry else ''}}" data-tier="{{effective(m) if m is defined and m else 'Free'}}">
-        <header><div class="wrap nav">
-        <a class="brand" href="/"><span class="crest" aria-hidden="true">C<span>C</span>
-    </span>The Champions Club</a><button class="mobile" type="button" onclick="document.querySelector('nav').classList.toggle('show')">Menu</button>
-    <nav><a href="/#availability">Courts</a><a href="/#membership">Membership</a>
-        <a href="/#gear">Pro shop</a>{% if user %}<a href="/dashboard">Workspace</a>
-        <form data-action="logout"><button class="ghost">Sign out</button></form>{% else %}<a class="btn" href="/login">Member sign in ↗</a>{% endif %}</nav>
-    </div></header><main class="wrap">{% block body %}{% endblock %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}The Champions Club{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+  <script defer src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="/static/club.css">
+  <script defer src="/static/club.js"></script>
+</head>
+<body data-role="{{user.role if user is defined and user else ''}}" data-expiry="{{m.expiry if m is defined and m and m.expiry else ''}}" data-tier="{{effective(m) if m is defined and m else 'Free'}}">
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="/">
+        <span class="crest" aria-hidden="true">C<span>C</span></span>
+        The Champions Club
+      </a>
+      
+      <button class="mobile" type="button" onclick="document.querySelector('nav').classList.toggle('show')">
+        Menu ☰
+      </button>
 
-        </main><footer class="wrap">The Champions Club <span>Member services · Club time IST</span>
-</footer><div id="status" role="status" aria-live="polite" hidden></div>
+      <nav>
+        <a href="/#about">About</a>
+        <a href="/#glory">Glory & Honors</a>
+        <a href="/#facilities">Facilities</a>
+        <a href="/#availability">Courts & Slots</a>
+        <a href="/#membership">Membership</a>
+        <a href="/#gear">Pro Shop</a>
+        <a href="/#concierge">Concierge</a>
+        {% if user %}
+          <a class="btn" href="/dashboard" style="background: var(--primary); color: #ffffff; font-weight: 700; font-size: 13px; padding: 7px 14px;">
+            {% if m is defined and m and m.tier != 'Free' %}
+              ★ {{ effective(m) }} Dashboard ↗
+            {% else %}
+              Dashboard ({{ user.role }}) ↗
+            {% endif %}
+          </a>
+          <form data-action="logout" style="margin: 0; display: inline-flex;">
+            <button class="ghost" style="padding: 7px 12px; font-size: 12px;">Sign out</button>
+          </form>
+        {% else %}
+          <a class="ghost" href="/login" style="font-size: 13px; padding: 7px 14px;">Sign In ↗</a>
+          <a class="btn" href="/login?signup=true" style="font-size: 13px; padding: 7px 16px;">Join The Club (Sign Up) →</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% block body %}{% endblock %}
+  </main>
+
+  <footer class="wrap">
+    <div>
+      <strong>The Champions Club</strong>
+      <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--slate-400);">Private Athletic Sanctuary & Sports Lounge</p>
+    </div>
+    <div>
+      <span>Member Services · Operating Hours: 06:00 – 22:00 IST</span>
+    </div>
+  </footer>
+
+  <div id="status" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
-

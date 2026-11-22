@@ -1,1 +1,61 @@
-<section><h2>Appointment list</h2><form><label>Schedule date<input type="date" name="day" value="{{day}}"></label><button class="ghost">View day</button></form>{% for a in appointments if a.start.date()==day %}<details open><summary>{{a.start.strftime('%H:%M')}} · Member #{{a.member_id}} · {{a.status}}</summary>{% if a.status=='Booked' %}{% call f.form('complete','Complete session') %}<input type="hidden" name="id" value="{{a.id}}">{{f.field('summary','Summary shared with member','text',false)}}{% endcall %}{% else %}<p>{{a.summary}}</p>{% endif %}</details>{% else %}<p>No appointments scheduled for this day.</p>{% endfor %}</section>
+<div class="club-module" data-module="physio_schedule" data-title="Patient Schedule" data-icon="🩺">
+<!-- Sports Physiotherapy Consultation Schedule -->
+<section>
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Clinical Appointments</p>
+      <h2>Physiotherapy Patient Schedule</h2>
+    </div>
+    <span class="tag">● 30-Minute Blocks</span>
+  </div>
+
+  <!-- Day Picker Filter -->
+  <form style="display: flex; align-items: flex-end; gap: 12px; margin-bottom: 24px; background: var(--slate-50); padding: 14px 18px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+    <label style="margin: 0; flex: 1; max-width: 240px;">
+      <span style="font-size: 12px; font-weight: 700; color: var(--slate-600); text-transform: uppercase;">Select Consultation Date</span>
+      <input type="date" name="day" value="{{day}}" style="background: #ffffff;">
+    </label>
+    <button class="ghost" style="padding: 9px 18px;">View day</button>
+  </form>
+
+  <!-- Consultation List for Selected Day -->
+  <div style="display: flex; flex-direction: column; gap: 12px;">
+    {% for a in appointments if a.start.date()==day %}
+      <details open style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px 20px; box-shadow: var(--shadow-xs);">
+        <summary style="display: flex; align-items: center; justify-content: space-between; font-size: 15px;">
+          <span>
+            ⏰ <b>{{a.start.strftime('%H:%M IST')}}</b> &nbsp;·&nbsp; 
+            Patient Account #{{a.member_id}}
+          </span>
+          <span class="{{'tag' if a.status=='Completed' else 'warn'}}" style="font-size: 11px;">
+            {{a.status}}
+          </span>
+        </summary>
+
+        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+          {% if a.status=='Booked' %}
+            <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 12px;">
+              Session in progress or scheduled. Enter clinical rehabilitation notes upon session completion:
+            </p>
+            {% call f.form('complete','Complete session') %}
+              <input type="hidden" name="id" value="{{a.id}}">
+              {{f.field('summary','Clinical Assessment & Rehabilitation Notes','text',false)}}
+            {% endcall %}
+          {% else %}
+            <div style="background: var(--slate-50); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              <small style="text-transform: uppercase; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">
+                Recorded Clinical Summary:
+              </small>
+              <p style="margin: 0; color: var(--slate-800); font-size: 14px;">{{a.summary}}</p>
+            </div>
+          {% endif %}
+        </div>
+      </details>
+    {% else %}
+      <p style="color: var(--slate-400); font-size: 13px; text-align: center; padding: 32px; background: var(--slate-50); border-radius: var(--radius-md); border: 1px dashed var(--border);">
+        No appointments scheduled for this day.
+      </p>
+    {% endfor %}
+  </div>
+</section>
+</div>

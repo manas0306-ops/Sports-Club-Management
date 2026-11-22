@@ -1,1 +1,96 @@
-{% extends 'base.html' %}{% block body %}<section class="invoice"><p class="eyebrow">The Champions Club / Billing</p><h1>{{'Invoice' if s.department in ['Memberships','B2B'] else 'Receipt'}}</h1><p>CC-{{'%05d'|format(s.id)}} · {{s.created.strftime('%d %B %Y, %H:%M')}}</p><div class="line"><div><small>Billed to</small><b>{{buyer}}</b></div><span class="tag">{{s.status}}</span></div>{% for i in items %}<div class="line"><span>{{i.qty}} × {{i.name}}<small>{{i.price|money}} each</small></span><b>{{i.total|money}}</b></div>{% endfor %}<p>Discount applied · {{s.discount|money}}</p><p>Tax included · {{s.tax|money}}</p><h2>{{s.total|money}}</h2><p>{{s.department}} · {{s.mode}} · {{s.details.get('state','')}}</p><button onclick="window.print()">Print / Save PDF</button></section>{% endblock %}
+{% extends 'base.html' %}
+{% block body %}
+<section class="invoice" style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); padding: 48px; max-width: 680px; margin: 40px auto; position: relative;">
+  
+  <!-- Official Crest & Club Header -->
+  <div style="display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 2px solid var(--slate-900); padding-bottom: 24px; margin-bottom: 28px;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+        <span class="crest" style="width: 32px; height: 32px; font-size: 16px;">C<span>C</span></span>
+        <strong style="font-size: 18px; color: var(--slate-900); letter-spacing: -0.02em;">The Champions Club</strong>
+      </div>
+      <p style="margin: 0; font-size: 12px; color: var(--slate-500);">Athletic Club & Private Clubhouse · New Delhi · IST UTC+5:30</p>
+    </div>
+
+    <div style="text-align: right;">
+      <p class="eyebrow" style="margin: 0; justify-content: flex-end;">Official Tax Document</p>
+      <h1 style="font-size: 26px; margin: 2px 0 0 0;">{{'Invoice' if s.department in ['Memberships','B2B'] else 'Receipt'}}</h1>
+      <span style="font-family: monospace; font-size: 13px; font-weight: 700; color: var(--primary);">
+        CC-{{'%05d'|format(s.id)}}
+      </span>
+    </div>
+  </div>
+
+  <!-- Meta Information -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: var(--slate-50); padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 28px;">
+    <div>
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Billed To / Account</small>
+      <strong style="font-size: 15px; color: var(--slate-900);">{{buyer}}</strong>
+      <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-500);">Department: {{s.department}}</p>
+    </div>
+
+    <div style="text-align: right;">
+      <small style="text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--slate-500); display: block; margin-bottom: 4px;">Issued Timestamp</small>
+      <strong style="font-size: 14px; color: var(--slate-800);">{{s.created.strftime('%d %B %Y, %H:%M IST')}}</strong>
+      <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-500);">Payment Tender: <b>{{s.mode}}</b></p>
+    </div>
+  </div>
+
+  <!-- Line Items Table -->
+  <div style="margin-bottom: 24px;">
+    <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--slate-500); margin-bottom: 12px;">Transaction Items</h3>
+    
+    {% for i in items %}
+      <div class="line" style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+        <div>
+          <span style="font-size: 15px; font-weight: 600;">{{i.qty}} × {{i.name}}</span>
+          <small style="color: var(--slate-500);">Unit Price: {{i.price|money}}</small>
+        </div>
+        <b style="font-size: 15px; color: var(--slate-900);">{{i.total|money}}</b>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Financial Accounting Breakdown -->
+  <div style="border-top: 1px dashed var(--slate-300); padding-top: 16px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--slate-600); margin-bottom: 6px;">
+      <span>Member Privilege Discount:</span>
+      <span style="color: var(--primary); font-weight: 600;">-{{s.discount|money}}</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--slate-600); margin-bottom: 6px;">
+      <span>Taxes Included (GST):</span>
+      <span>{{s.tax|money}}</span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--slate-900); padding-top: 12px; margin-top: 12px;">
+      <span style="font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em;">Total Settlement:</span>
+      <h2 style="font-size: 32px; color: var(--primary); margin: 0; font-weight: 800;">{{s.total|money}}</h2>
+    </div>
+  </div>
+
+  <!-- Status & Fulfilment Meta -->
+  <div style="display: flex; align-items: center; justify-content: space-between; background: var(--primary-subtle); padding: 12px 18px; border-radius: var(--radius-md); border: 1px solid rgba(16, 185, 129, 0.3); margin-bottom: 28px;">
+    <div>
+      <span style="font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase;">
+        Status: {{s.status}}
+      </span>
+      {% if s.details.get('state') %}
+        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--slate-600);">Fulfilment State: <b>{{s.details.state}}</b></p>
+      {% endif %}
+    </div>
+
+    <span class="tag" style="background: #ffffff; border-color: rgba(16, 185, 129, 0.5); font-weight: 700;">
+      ✓ Settled & Recorded
+    </span>
+  </div>
+
+  <!-- Actions -->
+  <div style="display: flex; justify-content: space-between; align-items: center;" class="no-print">
+    <a class="ghost" href="/dashboard" style="font-size: 13px;">← Return to Clubhouse</a>
+    <button onclick="window.print()" class="btn" style="font-size: 13px; padding: 10px 22px;">
+      🖨️ Print / Save Official PDF
+    </button>
+  </div>
+</section>
+{% endblock %}

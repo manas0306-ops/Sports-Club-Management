@@ -1,1 +1,612 @@
-{% extends 'base.html' %}{% import 'macros.html' as f %}{% block body %}<div class="hero"><div><p class="eyebrow">The club / Member services</p><h1>Your time<br><em>on court.</em></h1><p>Reserve a court, find your next racket, or join us for Friday social play.</p><a class="btn" href="#availability">Explore availability ↓</a></div><div class="court-art" aria-label="Illustrated overhead tennis court"><div class="paint"><i></i><b></b></div><div class="ball"></div><span>FRIDAY SOCIAL &nbsp; / &nbsp; 18:00–20:00</span></div></div>{{f.board(courts)}}<section id="membership"><p class="eyebrow">Club membership</p><h2>Choose your plan</h2><div class="cards">{% for name,price,desc in [('Free','0','Standard court and retail rates'),('Junior','800','Under 18 · 30% off courts · 5% off gear and café'),('Silver','1,500','50% off courts · 10% off gear and café'),('Gold','3,000','Courts included · 15% off gear and café')] %}<article><small>{{name}}</small><h3>₹{{price}}</h3><p>{{desc}}</p><a href="/login">Join the club ↗</a></article>{% endfor %}</div><small>Paid plans cover 30 days. Junior eligibility ends on the 18th birthday.</small></section><section id="gear"><p class="eyebrow">Equipment counter</p><h2>Pro shop</h2><div class="catalog">{% for p in gear %}<div class="line"><span>{{p.name}}<small>{{p.category}} · {{p.stock_on_hand}} available</small></span><b>{{p.price|money}}</b></div>{% endfor %}</div></section><section><h2>Visit the club</h2>{% call f.form('lead','Send request') %}{{f.field('name','Name')}}{{f.field('email','Email','email')}}{{f.select('type','Request',['Trial','Enquiry'])}}{{f.field('interest','Sport, preferred time or question')}}{% endcall %}</section>{% endblock %}
+{% extends 'base.html' %}
+{% import 'macros.html' as f %}
+
+{% block body %}
+<!-- Hero Section -->
+<div class="hero">
+  <div>
+    <p class="eyebrow">🏛️ Established 1999 · Private Athletic Sanctuary · New Delhi</p>
+    <h1>The Sanctuary<br>of <em>Champions.</em></h1>
+    <p>
+      Where heritage meets high performance. Home to 18 national championship shields, Grand Slam alumni, US Open tournament hard courts, European glass padel, and an enduring clubhouse tradition.
+    </p>
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      {% if user %}
+        <a class="btn" href="/dashboard" style="font-size: 14px; padding: 12px 24px;">
+          Go to My Dashboard ↗
+        </a>
+        <a class="ghost" href="#availability" style="font-size: 14px; padding: 12px 20px;">
+          Reserve a Court Slot ↓
+        </a>
+      {% else %}
+        <a class="btn" href="/login?signup=true" style="font-size: 14px; padding: 12px 24px;">
+          Join The Club (Sign Up) →
+        </a>
+        <a class="ghost" href="/login" style="font-size: 14px; padding: 12px 20px;">
+          Member Sign In ↗
+        </a>
+      {% endif %}
+      <a class="ghost" href="#glory" style="font-size: 14px; padding: 12px 20px;">
+        Explore Club Glory 🏆
+      </a>
+    </div>
+  </div>
+
+  <div class="court-art" aria-label="Illustrated overhead tennis court">
+    <div class="paint">
+      <i></i>
+      <b></b>
+    </div>
+    <div class="ball"></div>
+    <span>FRIDAY SOCIAL &nbsp;/&nbsp; 18:00–20:00 IST</span>
+  </div>
+</div>
+
+<!-- Key Stats Quick-Ticker Bar -->
+<div class="hero-stats-bar">
+  <div class="hero-stat-item">
+    <div class="hero-stat-icon">🏆</div>
+    <div>
+      <div class="hero-stat-value">18+</div>
+      <div class="hero-stat-label">National Shields Won</div>
+    </div>
+  </div>
+  <div class="hero-stat-item">
+    <div class="hero-stat-icon">🎾</div>
+    <div>
+      <div class="hero-stat-value">4</div>
+      <div class="hero-stat-label">Grand Slam Alumni</div>
+    </div>
+  </div>
+  <div class="hero-stat-item">
+    <div class="hero-stat-icon">👥</div>
+    <div>
+      <div class="hero-stat-value">450+</div>
+      <div class="hero-stat-label">Active Athletes & Members</div>
+    </div>
+  </div>
+  <div class="hero-stat-item">
+    <div class="hero-stat-icon">🌟</div>
+    <div>
+      <div class="hero-stat-value">25</div>
+      <div class="hero-stat-label">Years of Heritage (1999)</div>
+    </div>
+  </div>
+  <div class="hero-stat-item">
+    <div class="hero-stat-icon">⚡</div>
+    <div>
+      <div class="hero-stat-value">100%</div>
+      <div class="hero-stat-label">Tour Match-Ready Grounds</div>
+    </div>
+  </div>
+</div>
+
+<!-- Club Feature Pillars -->
+<div class="pillars">
+  <div class="pillar">
+    <div class="pillar-icon">🎾</div>
+    <div>
+      <strong>Championship Courts</strong>
+      <span>US Open hard courts, glass padel, oak badminton</span>
+    </div>
+  </div>
+  <div class="pillar">
+    <div class="pillar-icon">🤝</div>
+    <div>
+      <strong>Friday Social Nights</strong>
+      <span>Free 8-seat community sessions every Friday</span>
+    </div>
+  </div>
+  <div class="pillar">
+    <div class="pillar-icon">🛍️</div>
+    <div>
+      <strong>Tour Pro Shop</strong>
+      <span>Curated carbon rackets, match balls & club apparel</span>
+    </div>
+  </div>
+  <div class="pillar">
+    <div class="pillar-icon">☕</div>
+    <div>
+      <strong>Clubhouse Lounge</strong>
+      <span>Artisanal café, recovery lattes & court-side service</span>
+    </div>
+  </div>
+</div>
+
+<!-- Section 1: About The Club -->
+<section id="about">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">About The Club · Heritage & Ethos</p>
+      <h2>Crafted for Those Who Pursue Athletic Mastery</h2>
+    </div>
+    <span class="tag">● Est. 1999 · New Delhi</span>
+  </div>
+
+  <div class="about-grid">
+    <div>
+      <p style="font-size: 15px; line-height: 1.7; color: var(--slate-700); margin-bottom: 16px;">
+        Conceived in 1999 as an exclusive athletic sanctuary, <strong>The Champions Club</strong> bridges historical country-club elegance with cutting-edge athletic performance. Nestled on 12 manicured acres in New Delhi, our grounds were engineered with an uncompromising philosophy: that true athletic greatness requires pristine surfaces, elite sports medicine, and an inspiring sporting fraternity.
+      </p>
+      <p style="font-size: 14px; line-height: 1.7; color: var(--slate-600); margin-bottom: 20px;">
+        Whether you are a junior prospect training for international ITF circuits, a corporate leader preparing for competitive league ties, or an enthusiast unwinding on our glass padel courts, The Champions Club offers an environment where discipline is cultivated, rivalries are honored, and championships are forged.
+      </p>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        {% if user %}
+          <a class="btn" href="/dashboard">Enter Clubhouse Dashboard ↗</a>
+        {% else %}
+          <a class="btn" href="/login?signup=true">Join Our Community (Sign Up) →</a>
+          <a class="ghost" href="/login">Member Sign In ↗</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-xl); padding: 28px; box-shadow: var(--shadow-sm);">
+      <h3 style="color: var(--primary-dark); margin-bottom: 14px; font-size: 17px;">
+        The Three Pillars of The Champions Club
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; background: #ffffff; width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-content: center; border: 1px solid var(--border); flex-shrink: 0;">🏛️</span>
+          <div>
+            <strong style="color: var(--slate-900); font-size: 13px;">Sanctuary & Tradition</strong>
+            <p style="font-size: 12px; color: var(--slate-600); margin: 2px 0 0 0;">A private fellowship where sportsmanship, integrity, and mutual respect come first.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; background: #ffffff; width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-content: center; border: 1px solid var(--border); flex-shrink: 0;">⚡</span>
+          <div>
+            <strong style="color: var(--slate-900); font-size: 13px;">Tour-Level Calibration</strong>
+            <p style="font-size: 12px; color: var(--slate-600); margin: 2px 0 0 0;">Precision surfaces, calibrated floodlighting, and tour-spec equipment across all sports.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; background: #ffffff; width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-content: center; border: 1px solid var(--border); flex-shrink: 0;">🌿</span>
+          <div>
+            <strong style="color: var(--slate-900); font-size: 13px;">Holistic Recovery & Social Life</strong>
+            <p style="font-size: 12px; color: var(--slate-600); margin: 2px 0 0 0;">On-site sports physiotherapy, recovery nutrition, and signature community gatherings.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 2: Achievements & Glory -->
+<section id="glory">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Trophy Cabinet & Hall of Fame</p>
+      <h2>A Quarter-Century of Athletic Glory</h2>
+    </div>
+    <span class="tag" style="background: #fef3c7; color: #854d0e; border-color: #fde68a;">
+      🏆 18 National Titles
+    </span>
+  </div>
+  <p>Our courts have forged national champions, Davis Cup representatives, and international tournament laureates across multiple disciplines.</p>
+
+  <div class="trophy-grid">
+    <!-- Achievement 1 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🏆</div>
+          <span class="trophy-year-pill">Champions 2021–2025</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">All-India Inter-Club Tennis Shield</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Four-time consecutive champions in Northern India's most prestigious inter-club championship, holding an unbroken 16-fixture home court winning streak.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        🎾 Tennis · Senior & Open Division
+      </div>
+    </div>
+
+    <!-- Achievement 2 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🥇</div>
+          <span class="trophy-year-pill">Gold Medal 2024</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">National Padel Masters Championship</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Champions of the inaugural National Invitational Padel Masters. Our club's elite doubles pairing swept the finals without dropping a single set.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        🎾 Padel · Men's & Mixed Doubles
+      </div>
+    </div>
+
+    <!-- Achievement 3 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🏸</div>
+          <span class="trophy-year-pill">Gold 2023 & 2024</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">Premier Inter-State Badminton Trophy</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Champions in Men's Doubles and Mixed Doubles. Athletes trained exclusively on our BWF-certified European sprung oak hardwood courts.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        🏸 Badminton · National Championship Circuit
+      </div>
+    </div>
+
+    <!-- Achievement 4 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🏏</div>
+          <span class="trophy-year-pill">Undefeated 2022–2024</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">NCR Corporate Premier T20 Cup</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Three-time defending champions fielding national club players and former Ranji Trophy veterans on our precision turf cricket nets.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        🏏 Cricket · High-Performance Division
+      </div>
+    </div>
+
+    <!-- Achievement 5 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🎖️</div>
+          <span class="trophy-year-pill">4 Elite Alumni</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">Grand Slam & Davis Cup Honors</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Proud home training facility for four club athletes who reached Junior Wimbledon, US Open qualifiers, and represented India in national ties.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        ⭐ International Pro Tour Laureates
+      </div>
+    </div>
+
+    <!-- Achievement 6 -->
+    <div class="trophy-card">
+      <div>
+        <div class="trophy-card-header">
+          <div class="trophy-icon-badge">🌟</div>
+          <span class="trophy-year-pill">60+ Scholarships</span>
+        </div>
+        <h4 style="margin-bottom: 6px; color: var(--slate-900);">Junior Development Fellowship</h4>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.6; margin-bottom: 12px;">
+          Over sixty junior athletes nurtured through our academy and successfully placed into top NCAA Division I athletic programs and international scholarships.
+        </p>
+      </div>
+      <div style="border-top: 1px solid var(--border); padding-top: 10px; font-size: 11px; font-weight: 700; color: var(--primary);">
+        🎓 Youth Development & Global Pathways
+      </div>
+    </div>
+  </div>
+
+  <!-- Glory Quote Banner -->
+  <div class="glory-quote-banner">
+    <div style="font-size: 40px; color: #facc15; flex-shrink: 0; line-height: 1;">“</div>
+    <div>
+      <div class="glory-quote-text">
+        At The Champions Club, victory is not merely a scoreline—it is the natural outcome of relentless discipline, pristine preparation, and an unshakeable community spirit.
+      </div>
+      <div class="glory-quote-author">
+        — Director of High Performance & Athletics · The Champions Club
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: World-Class Facilities Showcase -->
+<section id="facilities">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Tour-Specification Grounds</p>
+      <h2>Engineered for Speed, Precision & Safety</h2>
+    </div>
+    <span class="tag">● 6 Premier Venues</span>
+  </div>
+  <p>Every court, surface, and equipment standard at The Champions Club adheres to international tournament guidelines.</p>
+
+  <div class="facility-grid">
+    <!-- Facility 1: Tennis -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">🎾 Centre Court Tennis</span>
+        <h4 style="margin-bottom: 8px;">US Open Specification Hard Courts</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          Four precision tournament hard courts surfaced with genuine multi-layered Decoturf cushioned acrylic for authentic true bounce.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> 9-layer cushioned sub-base absorbing joint impact</li>
+          <li><span>✓</span> 1000-lux anti-glare tournament LED floodlights</li>
+          <li><span>✓</span> High-speed ball sensor line call integration</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        <a class="ghost" href="#availability" style="font-size: 12px; width: 100%; justify-content: center;">View Tennis Slots ↓</a>
+      </div>
+    </div>
+
+    <!-- Facility 2: Padel -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">🎾 Spanish Padel Arenas</span>
+        <h4 style="margin-bottom: 8px;">Panoramic Glass-Walled Padel</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          Two custom-imported European padel arenas with structural glass walls, anti-abrasion monofilament turf, and spectator viewing zones.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> 12mm tempered safety glass with flush seams</li>
+          <li><span>✓</span> Texturized monofilament turf dressed with silica</li>
+          <li><span>✓</span> Official World Padel Tour tournament dimensions</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        <a class="ghost" href="#availability" style="font-size: 12px; width: 100%; justify-content: center;">View Padel Slots ↓</a>
+      </div>
+    </div>
+
+    <!-- Facility 3: Badminton -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">🏸 Badminton Hall of Champions</span>
+        <h4 style="margin-bottom: 8px;">BWF European Sprung Oak</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          Four indoor courts featuring shock-absorbing European oak hardwood floors, high-contrast visual backdrops, and draft-free airflow.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> Double-sprung oak hardwood to protect knees & ankles</li>
+          <li><span>✓</span> 9-meter clear headroom with anti-shuttle reflection</li>
+          <li><span>✓</span> Climate-controlled driftless airflow system</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        <a class="ghost" href="#availability" style="font-size: 12px; width: 100%; justify-content: center;">View Badminton Slots ↓</a>
+      </div>
+    </div>
+
+    <!-- Facility 4: Cricket Nets -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">🏏 Turf Cricket Practice Nets</span>
+        <h4 style="margin-bottom: 8px;">Automated Delivery & Match Turf</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          Two dedicated cricket practice lanes with tournament-grade natural and synthetic turf, dual-speed automated bowling machines, and radar.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> Programmable swing, seam, and spin delivery speeds up to 145 km/h</li>
+          <li><span>✓</span> Dual-angle high-speed video capture for stroke analysis</li>
+          <li><span>✓</span> Heavy-duty safety netting and professional side-screens</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        <a class="ghost" href="#availability" style="font-size: 12px; width: 100%; justify-content: center;">View Cricket Slots ↓</a>
+      </div>
+    </div>
+
+    <!-- Facility 5: Physio -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">🩺 Sports Medicine & Recovery</span>
+        <h4 style="margin-bottom: 8px;">Lead Physiotherapist Suite</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          On-site lead sports physiotherapist offering diagnostic injury screening, active sports rehabilitation, and post-match recovery sessions.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> Percussive therapy, dry needling & kinesio taping</li>
+          <li><span>✓</span> Customized functional mobility & agility programs</li>
+          <li><span>✓</span> Dedicated consultation and treatment recovery rooms</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        {% if user %}
+          <a class="ghost" href="/dashboard#physio-booking" style="font-size: 12px; width: 100%; justify-content: center;">Book Physio Session ↗</a>
+        {% else %}
+          <a class="ghost" href="/login" style="font-size: 12px; width: 100%; justify-content: center;">Sign In to Book Physio ↗</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Facility 6: Café & Lounge -->
+    <div class="facility-card">
+      <div>
+        <span class="facility-badge">☕ Clubhouse Café & Lounge</span>
+        <h4 style="margin-bottom: 8px;">Artisanal Roastery & Bar</h4>
+        <p style="font-size: 13px; color: var(--slate-600);">
+          The social epicenter of the club. Enjoy specialty single-origin espresso, cold-pressed electrolyte elixirs, and court-side hospitality.
+        </p>
+        <ul class="facility-specs">
+          <li><span>✓</span> Specialty single-origin coffees & organic recovery shakes</li>
+          <li><span>✓</span> High-protein post-workout bowls & gourmet sandwiches</li>
+          <li><span>✓</span> Member tab billing and court-side refreshments</li>
+        </ul>
+      </div>
+      <div style="margin-top: 18px; pt: 12px; border-top: 1px solid var(--border);">
+        <a class="ghost" href="#gear" style="font-size: 12px; width: 100%; justify-content: center;">Explore Clubhouse Amenities ↓</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Live Court Availability & Interactive Reservation Board -->
+<div id="availability">
+  <div style="margin-top: 36px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <p class="eyebrow">Real-Time Schedule</p>
+      <h2 style="margin: 0;">Live Court Availability</h2>
+      <small style="color: var(--slate-500);">
+        Click any green slot to reserve. Active members receive instant booking confirmation.
+      </small>
+    </div>
+    {% if not user %}
+      <div style="display: flex; gap: 8px;">
+        <a class="btn" href="/login?signup=true" style="font-size: 12px; padding: 7px 14px;">Sign Up to Book →</a>
+        <a class="ghost" href="/login" style="font-size: 12px; padding: 7px 14px;">Member Sign In ↗</a>
+      </div>
+    {% endif %}
+  </div>
+  {{ f.board(courts) }}
+</div>
+
+<!-- Section 5: Membership Tiers & Privileges -->
+<section id="membership">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Tiered Privileges</p>
+      <h2>Choose Your Club Plan</h2>
+    </div>
+    <span class="tag">● 30-Day Renewable Cycles</span>
+  </div>
+  <p>Select the plan that matches your training frequency. Upgrade, downgrade, or pause anytime directly within your clubhouse portal.</p>
+
+  <div class="cards">
+    {% for name,price,desc,perks in [
+      ('Free','0','Standard court and retail rates',['Pay-as-you-play court rates','Access to clubhouse café','Pro shop access']),
+      ('Junior','800','Under 18 · 30% off courts · 5% off gear & café',['30% discount on all courts','5% discount on shop & café','Valid until 18th birthday']),
+      ('Silver','1,500','50% off courts · 10% off gear & café',['50% discount on all court bookings','10% off pro shop gear & drinks','Priority peak-hour access']),
+      ('Gold','3,000','Courts included · 15% off gear & café',['100% complimentary court sessions','15% off pro shop & clubhouse café','Exclusive invitation to club tourneys'])
+    ] %}
+      <article>
+        <small>{{name}} Membership</small>
+        <h3>₹{{price}}</h3>
+        <p>{{desc}}</p>
+        <ul style="list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 13px; color: var(--slate-600); line-height: 1.8;">
+          {% for perk in perks %}
+            <li style="display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--primary-light); font-weight: bold;">✓</span> {{perk}}
+            </li>
+          {% endfor %}
+        </ul>
+        {% if user %}
+          <a class="{{'btn' if name=='Gold' else 'ghost'}}" href="/upgrade/bill?tier={{name}}">
+            {{'Upgrade to Gold ★' if name=='Gold' else 'Select ' + name + ' Tier ↗'}}
+          </a>
+        {% else %}
+          <a class="{{'btn' if name=='Gold' else 'ghost'}}" href="/login?signup=true&tier={{name}}">
+            {{'Join Gold Tier ★' if name=='Gold' else 'Join ' + name + ' Tier ↗'}}
+          </a>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+  <p style="font-size: 12px; color: var(--slate-500); margin-top: 14px;">
+    * All paid plans cover a 30-day active billing cycle. Junior eligibility automatically concludes on the member's 18th birthday.
+  </p>
+</section>
+
+<!-- Section 6: Pro Shop Gear & Equipment Section with Full Search & Filters -->
+<section id="gear">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Official Equipment & Tour Gear</p>
+      <h2>Pro Shop Equipment Counter</h2>
+    </div>
+    <span class="tag">● Counter Pickup & Local Delivery</span>
+  </div>
+
+  <!-- Search & Category Filters -->
+  <div style="background: var(--slate-50); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 24px;">
+    <div style="display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px;">
+      <div style="flex: 1; min-width: 240px; position: relative;">
+        <input id="gear-search" type="search" placeholder="🔍 Search gear by name (e.g. Carbon Racket, Balls, Shoes)..." style="width: 100%; background: #ffffff;">
+      </div>
+      <label style="display: inline-flex; flex-direction: row; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; margin: 0;">
+        <input type="checkbox" id="gear-instock" style="width: auto; min-height: auto; cursor: pointer;">
+        <span>In-Stock Items Only</span>
+      </label>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="chips" style="gap: 8px;">
+      <span style="font-size: 12px; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Categories:</span>
+      <button type="button" class="cat-pill active" data-gear-cat="All">All Items</button>
+      <button type="button" class="cat-pill" data-gear-cat="Rackets">🏸 Rackets</button>
+      <button type="button" class="cat-pill" data-gear-cat="Balls">🎾 Match Balls</button>
+      <button type="button" class="cat-pill" data-gear-cat="Shoes">👟 Shoes</button>
+      <button type="button" class="cat-pill" data-gear-cat="Apparel">👕 Apparel</button>
+      <button type="button" class="cat-pill" data-gear-cat="Accessories">🩹 Accessories</button>
+    </div>
+  </div>
+
+  <!-- Interactive Product Grid -->
+  <div class="product-grid" id="gear-grid">
+    {% for p in gear %}
+      <div class="product-card gear-item" data-name="{{p.name}}" data-category="{{p.category}}" data-stock="{{p.stock_on_hand}}">
+        <div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span class="cat-tag">{{p.category}}</span>
+            {% if p.stock_on_hand <= 0 %}
+              <span class="warn" style="font-size: 10px; padding: 2px 8px; background: #fee2e2; color: #991b1b; border-color: #fca5a5;">Sold out</span>
+            {% elif p.stock_on_hand <= p.reorder_level %}
+              <span class="warn" style="font-size: 10px; padding: 2px 8px;">Only {{p.stock_on_hand}} left!</span>
+            {% else %}
+              <span class="tag" style="font-size: 10px; padding: 2px 8px;">{{p.stock_on_hand}} in stock</span>
+            {% endif %}
+          </div>
+          <h4>{{p.name}}</h4>
+          <p style="font-size: 12px; color: var(--slate-500); margin-bottom: 16px;">Tour-specification equipment. Available for member order and immediate counter pickup.</p>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 10px;">
+          <span class="price">{{p.price|money}}</span>
+          {% if user %}
+            <a class="btn" href="/dashboard#shop-order" style="font-size: 12px; padding: 7px 14px;">Order Now ↗</a>
+          {% else %}
+            <a class="ghost" href="/login?redirect=/dashboard" style="font-size: 12px; padding: 7px 14px;">Sign in to Buy ↗</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Section 7: Concierge & Complimentary Trial Request -->
+<section id="concierge">
+  <div class="sectionhead">
+    <div>
+      <p class="eyebrow">Concierge & Enquiries</p>
+      <h2>Visit The Champions Club</h2>
+    </div>
+    <span class="tag">● Fast Response</span>
+  </div>
+  <p>Interested in a court trial session, private coaching evaluation, or corporate sporting day? Leave your details and our reception desk will connect with you.</p>
+  {% call f.form('lead','Submit Request to Front Desk') %}
+    {{f.field('name','Your Full Name')}}
+    {{f.field('email','Email Address','email')}}
+    {{f.select('type','Request Type',['Trial','Enquiry'])}}
+    {{f.field('interest','Sport of interest, preferred trial time, or custom query')}}
+  {% endcall %}
+</section>
+
+<!-- Grand Bottom Call-To-Action Banner -->
+<div class="grand-cta-banner">
+  <h2>Ready to Walk Among Champions?</h2>
+  <p>
+    Whether you are competing for national trophies, mastering your technique with tour-certified coaches, or unwinding on our courts, your game begins here.
+  </p>
+  <div style="display: flex; gap: 14px; justify-content: center; align-items: center; flex-wrap: wrap;">
+    {% if user %}
+      <a class="btn" href="/dashboard" style="font-size: 15px; padding: 13px 28px; background: #ffffff; color: var(--primary-dark); border-color: #ffffff;">
+        Go to Your Dashboard ↗
+      </a>
+      <a class="ghost" href="#availability" style="font-size: 15px; padding: 13px 26px; background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.4);">
+        Check Court Schedule ↓
+      </a>
+    {% else %}
+      <a class="btn" href="/login?signup=true" style="font-size: 15px; padding: 13px 28px; background: #ffffff; color: var(--primary-dark); border-color: #ffffff;">
+        Join The Club (Sign Up) →
+      </a>
+      <a class="ghost" href="/login" style="font-size: 15px; padding: 13px 26px; background: transparent; color: #ffffff; border-color: rgba(255, 255, 255, 0.4);">
+        Member Sign In ↗
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
