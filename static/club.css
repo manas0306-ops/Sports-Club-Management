@@ -1838,3 +1838,21 @@ footer span {
   border-color: var(--border);
   box-shadow: var(--shadow-xs);
 }
+
+/* Live Operational IST Clock Indicator */
+@keyframes livePulse {
+  0% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); opacity: 0.8; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.live-indicator-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: livePulse 2s infinite ease-in-out;
+  vertical-align: middle;
+}
+

@@ -989,3 +989,54 @@ if (document.body.dataset.role === 'owner' || document.body.dataset.role === 'de
     } catch (e) {}
   }, 45000);
 }
+
+// Real-Time Operational IST Clock & Date Synchronizer
+function initOperationalClock() {
+  function updateClock() {
+    const clockEl = document.getElementById('operational-clock');
+    const dateEl = document.getElementById('operational-date');
+    if (!clockEl && !dateEl) return;
+
+    const now = new Date();
+    if (clockEl) {
+      try {
+        const timeStr = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Kolkata',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).format(now);
+        clockEl.textContent = timeStr;
+      } catch (err) {
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        clockEl.textContent = `${hours}:${mins}`;
+      }
+    }
+
+    if (dateEl) {
+      try {
+        const dateStr = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Asia/Kolkata',
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }).format(now);
+        dateEl.textContent = dateStr;
+      } catch (err) {}
+    }
+  }
+
+  // Synchronize immediately
+  updateClock();
+  // Keep ticking live every 1 second
+  setInterval(updateClock, 1000);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initOperationalClock);
+} else {
+  initOperationalClock();
+}
+
