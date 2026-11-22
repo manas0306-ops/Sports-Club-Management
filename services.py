@@ -1,4 +1,4 @@
-﻿import re
+import re
 from datetime import date,datetime,time,timedelta,timezone
 from fastapi import HTTPException
 from models import *
@@ -19,6 +19,7 @@ def adult_on(dob):
     try: return dob.replace(year=dob.year+18)
     except ValueError: return dob.replace(year=dob.year+18,day=28)
 def effective(m,day=None):
+    if isinstance(m,dict): return m.get("tier","Free")
     day=day or clock().date()
     if not m or not m.expiry or m.expiry<day or (m.tier=="Junior" and adult_on(m.dob)<=day): return "Free"
     return m.tier
@@ -46,11 +47,11 @@ def slot(c,start):
     if c.social and start.weekday()==4 and start.time()<time(20) and end.time()>time(18):
         return "Social" if start.hour in (18,19) and start.minute==0 else "Closed"
     return "Private"
-def book(db,u,m,c,start,mode):
+def book(db,u,m,c,start,mode,status="Booked"):
     require(clock()<start<clock()+timedelta(days=91),"Select a future slot within 90 days.")
     kind=slot(c,start); require(kind!="Closed","Outside playable hours or overlaps Friday social.")
     end=start+timedelta(hours=1)
-    active=db.query(Booking).filter(Booking.status=="Booked")
+    active=db.query(Booking).filter(Booking.status.in_(["Booked","Pending"]))
     midnight=datetime.combine(start.date(),time())
     require(active.filter(Booking.member_id==m.id,Booking.start>=midnight,Booking.start<midnight+timedelta(days=1)).count()<2,"Daily limit of two sessions reached.",409)
     overlaps=active.filter(Booking.start<end,Booking.end>start)
@@ -58,9 +59,9 @@ def book(db,u,m,c,start,mode):
     taken=overlaps.filter_by(court_id=c.id).all()
     require(not taken or (kind=="Social" and len(taken)<8 and all(b.is_social and b.start==start for b in taken)),"Court or social session is full.",409)
     pct=100 if kind=="Social" else rate(m,"Courts",start.date())
-    s=sale(db,u,m,"Courts","Included" if pct==100 else mode)
+    s=sale(db,u,m,"Courts","Included" if pct==100 else mode,status="Paid" if status=="Booked" else "Pending")
     line(db,s,c.name+" · "+kind,c.price,pct=pct)
-    b=Booking(court_id=c.id,member_id=m.id,start=start,end=end,is_social=kind=="Social",sale_id=s.id)
+    b=Booking(court_id=c.id,member_id=m.id,start=start,end=end,is_social=kind=="Social",sale_id=s.id,status=status)
     db.add(b); db.flush()
     return b
 def products(db,s,m,dept,cart,batch=0):
